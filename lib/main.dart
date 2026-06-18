@@ -270,6 +270,13 @@ class FirebaseService {
   // Stream utilisateurs (admin)
   static Stream<QuerySnapshot> streamUtilisateurs() =>
       _db.collection('utilisateurs').orderBy('nom').snapshots();
+
+  // Stream des élèves d'une école (pour la saisie de notes)
+  static Stream<QuerySnapshot> streamEleves(String ecoleId) =>
+      _db.collection('utilisateurs')
+          .where('role', isEqualTo: 'eleve')
+          .where('ecoleId', isEqualTo: ecoleId)
+          .snapshots();
 }
 
 // ══════════════════════════════════════════
@@ -771,12 +778,15 @@ class _NotesPageState extends State<NotesPage> {
   final _noteCtrl  = TextEditingController();
   final _appreCtrl = TextEditingController();
   String _selMat   = 'Mathematiques';
-  String _selEleve = 'konan_amani';
+  String? _selEleve;
   String _selType  = 'Devoir surveille';
 
   final _matieres = ['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo','EPS'];
 
   Future<void> _saisir() async {
+    if (_selEleve == null) {
+      showSnack(context, 'Choisissez un eleve', error:true); return;
+    }
     final n = double.tryParse(_noteCtrl.text);
     if (n == null || n < 0 || n > 20) {
       showSnack(context, 'Note invalide (0-20)', error:true); return;
@@ -804,12 +814,35 @@ class _NotesPageState extends State<NotesPage> {
         if (isProf) ...[
           SectionTitle('Saisir une note'),
           SCCard(child: Column(children:[
-            DropdownButtonFormField<String>(
-                value: _selEleve,
-                decoration: const InputDecoration(labelText: 'Eleve'),
-                items: ['konan_amani','bamba_fatoumata','koffi_jb','coulibaly_m']
-                    .map((e) => DropdownMenuItem(value:e, child:Text(e))).toList(),
-                onChanged: (v) => setState(() => _selEleve = v!)),
+            StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamEleves(widget.user.school),
+                builder: (ctx, snap) {
+                  if (!snap.hasData) {
+                    return const Padding(
+                        padding: EdgeInsets.symmetric(vertical:8),
+                        child: Text('Chargement des eleves...',
+                            style: TextStyle(color:AppColors.textMuted)));
+                  }
+                  final eleves = snap.data!.docs;
+                  if (eleves.isEmpty) {
+                    return const Padding(
+                        padding: EdgeInsets.symmetric(vertical:8),
+                        child: Text('Aucun eleve dans cette ecole.',
+                            style: TextStyle(color:AppColors.textMuted)));
+                  }
+                  return DropdownButtonFormField<String>(
+                      value: _selEleve,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Eleve'),
+                      hint: const Text('Choisir un eleve'),
+                      items: eleves.map((doc) {
+                        final data = doc.data() as Map<String,dynamic>;
+                        return DropdownMenuItem(
+                            value: doc.id,
+                            child: Text(data['nom'] ?? 'Sans nom'));
+                      }).toList(),
+                      onChanged: (v) => setState(() => _selEleve = v));
+                }),
             const SizedBox(height:10),
             DropdownButtonFormField<String>(
                 value: _selMat,
@@ -838,9 +871,13 @@ class _NotesPageState extends State<NotesPage> {
         ],
 
         SectionTitle('Notes en temps reel'),
+        if (isProf && _selEleve == null)
+          SCCard(child:const Text('Choisissez un eleve pour voir ses notes.',
+              style:TextStyle(color:AppColors.textMuted)))
+        else
         StreamBuilder<QuerySnapshot>(
             stream: FirebaseService.streamNotes(
-                isProf ? _selEleve : widget.user.uid),
+                isProf ? _selEleve! : widget.user.uid),
             builder: (ctx, snap) {
               if (snap.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());

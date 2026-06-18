@@ -107,15 +107,20 @@ class FirebaseService {
   static final _db   = FirebaseFirestore.instance;
 
   // Connexion
-  static Future<UserCredential?> signIn(String email, String password) async {
-    try {
-      return await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-    } catch (e) {
-      print('ERREUR AUTH: $e');
-      return null;
+    static Future<UserCredential?> signIn(String email, String password) async {
+      try {
+        final result = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.trim(),
+          password: password.trim(),
+        );
+        return result;
+      } on FirebaseAuthException catch (e) {
+        print('CODE ERREUR: ${e.code}');
+        print('MESSAGE: ${e.message}');
+        return null;
+      }
     }
-  }
+
 
   // Déconnexion
   static Future<void> signOut() async => await _auth.signOut();

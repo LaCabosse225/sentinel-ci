@@ -307,7 +307,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     setState(() { _loading = true; _error = null; });
     final cred = await FirebaseService.signIn(
-        _emailCtrl.text.trim(), _pwCtrl.text.trim());
+        _emailCtrl.text.trim(), _pwCtrl.text.trim())
+        .timeout(const Duration(seconds: 15), onTimeout: () => null);
     if (!mounted) return;
     if (cred == null) {
       setState(() { _loading = false; _error = 'Connexion échouée. Vérifiez vos identifiants.'; });

@@ -9,15 +9,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(const SentinelCIApp());
-}
 
-// ══════════════════════════════════════════
-//  THÈME & COULEURS
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      print('Erreur Firebase: $e');
+    }
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    runApp(const SentinelCIApp());
+  }
 // ══════════════════════════════════════════
 class AppColors {
   static const green     = Color(0xFF0A7C43);

@@ -112,6 +112,7 @@ class FirebaseService {
       return await _auth.signInWithEmailAndPassword(
           email: email, password: password);
     } catch (e) {
+      print('ERREUR AUTH: $e');
       return null;
     }
   }

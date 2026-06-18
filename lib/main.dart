@@ -3,6 +3,7 @@
 //  Connexion réelle + Firestore + Notifications Push
 // ============================================================
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -115,8 +116,11 @@ class FirebaseService {
         );
         return result;
       } on FirebaseAuthException catch (e) {
-        print('CODE ERREUR: ${e.code}');
+        print('CODE ERREUR AUTH: ${e.code}');
         print('MESSAGE: ${e.message}');
+        return null;
+      } catch (e) {
+        print('ERREUR GENERALE CONNEXION: $e');
         return null;
       }
     }
@@ -306,12 +310,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     setState(() { _loading = true; _error = null; });
-    final cred = await FirebaseService.signIn(
-        _emailCtrl.text.trim(), _pwCtrl.text.trim())
-        .timeout(const Duration(seconds: 15), onTimeout: () => null);
+
+    UserCredential? cred;
+    try {
+      cred = await FirebaseService.signIn(
+          _emailCtrl.text.trim(), _pwCtrl.text.trim())
+          .timeout(const Duration(seconds: 15), onTimeout: () {
+        throw TimeoutException('Délai dépassé — vérifiez votre connexion réseau');
+      });
+    } on TimeoutException catch (e) {
+      if (!mounted) return;
+      setState(() { _loading = false; _error = '⏱ ${e.message}'; });
+      return;
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _loading = false; _error = 'Erreur inattendue: $e'; });
+      return;
+    }
+
     if (!mounted) return;
     if (cred == null) {
-      setState(() { _loading = false; _error = 'Connexion échouée. Vérifiez vos identifiants.'; });
+      setState(() { _loading = false; _error = 'Email ou mot de passe incorrect.'; });
       return;
     }
     // Récupérer le profil

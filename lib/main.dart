@@ -304,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailCtrl.text.trim(), _pwCtrl.text.trim());
     if (!mounted) return;
     if (cred == null) {
-      setState(() { _loading = false; _error = 'Email ou mot de passe incorrect.'; });
+      setState(() { _loading = false; _error = e.toString(); });
       return;
     }
     // Récupérer le profil

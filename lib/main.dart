@@ -132,6 +132,20 @@ class FirebaseService {
   // Récupérer profil utilisateur
   static String? lastProfileError;
 
+  // SONDE DIAGNOSTIC : combien de fiches l'app voit-elle dans 'utilisateurs' ?
+  static Future<String> sondeUtilisateurs() async {
+    try {
+      final snap = await _db.collection('utilisateurs')
+          .get(const GetOptions(source: Source.server))
+          .timeout(const Duration(seconds: 10));
+      final ids = snap.docs.map((d) => d.id).take(3).join('\n   ');
+      return 'SONDE: ${snap.docs.length} fiche(s) vue(s)'
+          '${snap.docs.isEmpty ? '' : '\n   $ids'}';
+    } catch (e) {
+      return 'SONDE: echec ($e)';
+    }
+  }
+
   static Future<Map<String,dynamic>?> getUserProfile(String uid, String email) async {
     lastProfileError = null;
     for (int essai = 1; essai <= 3; essai++) {
@@ -372,9 +386,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final profile = await FirebaseService.getUserProfile(cred.user!.uid, cred.user!.email ?? '');
     if (!mounted) return;
     if (profile == null) {
+      final sonde = await FirebaseService.sondeUtilisateurs();
+      if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'Profil non charge.\nUID: ${cred!.user!.uid}\nRaison: ${FirebaseService.lastProfileError ?? "inconnue"}';
+        _error = 'Profil non charge.\nUID: ${cred!.user!.uid}\n'
+            'Raison: ${FirebaseService.lastProfileError ?? "inconnue"}\n$sonde';
       });
       return;
     }

@@ -131,10 +131,22 @@ class FirebaseService {
 
   // Récupérer profil utilisateur
   static Future<Map<String,dynamic>?> getUserProfile(String uid) async {
-    try {
-      final doc = await _db.collection('utilisateurs').doc(uid).get();
-      return doc.data();
-    } catch (e) { return null; }
+    // On réessaie plusieurs fois : la toute première lecture juste après
+    // la connexion peut échouer tant que le lien avec Firebase n'est pas prêt.
+    for (int essai = 1; essai <= 4; essai++) {
+      try {
+        final doc = await _db.collection('utilisateurs').doc(uid).get()
+            .timeout(const Duration(seconds: 8));
+        if (doc.exists && doc.data() != null) {
+          return doc.data();
+        }
+        print('getUserProfile essai $essai : document introuvable');
+      } catch (e) {
+        print('getUserProfile essai $essai : echec ($e)');
+      }
+      await Future.delayed(const Duration(milliseconds: 900));
+    }
+    return null;
   }
 
   // Stream notes élève en temps réel

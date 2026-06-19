@@ -132,6 +132,35 @@ class FirebaseService {
   // Récupérer profil utilisateur
   static String? lastProfileError;
 
+  // REPARATION : recree les 3 fiches dans la collection 'utilisateurs' PROPRE
+  // (celle que l'app lit). Ecrit avec le meme nom exact que les requetes.
+  static Future<void> reparerComptes() async {
+    final col = _db.collection('utilisateurs');
+    final batch = _db.batch();
+    batch.set(col.doc('Htegji2tk9QZ1HgmzvnjX728hXE2'), {
+      'nom': 'Patrick Akre',
+      'email': 'yvanakre@gmail.com',
+      'role': 'admin',
+      'ecoleId': 'ecole_demo',
+    });
+    batch.set(col.doc('qmTh9rSc56OUtoUorpKLSAM3Ce93'), {
+      'nom': 'Konan Amani',
+      'email': 'eleve.demo@sentinel.ci',
+      'role': 'eleve',
+      'ecoleId': 'ecole_demo',
+      'classeId': 'classe_terminaleC',
+      'matricule': 'EL001',
+    });
+    batch.set(col.doc('xppSCCZgudbf8Y34rnEJc5mEGdC3'), {
+      'nom': 'Akre Patrick (parent)',
+      'email': 'parent.demo@sentinel.ci',
+      'role': 'parent',
+      'ecoleId': 'ecole_demo',
+      'enfants': ['qmTh9rSc56OUtoUorpKLSAM3Ce93'],
+    });
+    await batch.commit().timeout(const Duration(seconds: 15));
+  }
+
   // SONDE DIAGNOSTIC : l'app ecrit un temoin, puis compte 'utilisateurs'
   static Future<String> sondeUtilisateurs() async {
     String ecriture;
@@ -394,7 +423,17 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     // Récupérer le profil
-    final profile = await FirebaseService.getUserProfile(cred.user!.uid, cred.user!.email ?? '');
+    var profile = await FirebaseService.getUserProfile(cred.user!.uid, cred.user!.email ?? '');
+    if (!mounted) return;
+    if (profile == null) {
+      // Reparation automatique : recreer les fiches dans la collection propre
+      try {
+        await FirebaseService.reparerComptes();
+        profile = await FirebaseService.getUserProfile(cred.user!.uid, cred.user!.email ?? '');
+      } catch (e) {
+        FirebaseService.lastProfileError = 'Reparation echouee: $e';
+      }
+    }
     if (!mounted) return;
     if (profile == null) {
       final sonde = await FirebaseService.sondeUtilisateurs();

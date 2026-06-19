@@ -130,7 +130,10 @@ class FirebaseService {
   static Future<void> signOut() async => await _auth.signOut();
 
   // Récupérer profil utilisateur
+  static String? lastProfileError;
+
   static Future<Map<String,dynamic>?> getUserProfile(String uid) async {
+    lastProfileError = null;
     // On réessaie plusieurs fois : la toute première lecture juste après
     // la connexion peut échouer tant que le lien avec Firebase n'est pas prêt.
     for (int essai = 1; essai <= 4; essai++) {
@@ -140,8 +143,10 @@ class FirebaseService {
         if (doc.exists && doc.data() != null) {
           return doc.data();
         }
+        lastProfileError = 'Document introuvable pour UID: $uid';
         print('getUserProfile essai $essai : document introuvable');
       } catch (e) {
+        lastProfileError = e.toString();
         print('getUserProfile essai $essai : echec ($e)');
       }
       await Future.delayed(const Duration(milliseconds: 900));
@@ -355,11 +360,18 @@ class _LoginScreenState extends State<LoginScreen> {
     // Récupérer le profil
     final profile = await FirebaseService.getUserProfile(cred.user!.uid);
     if (!mounted) return;
+    if (profile == null) {
+      setState(() {
+        _loading = false;
+        _error = 'Profil non charge.\nUID: ${cred!.user!.uid}\nRaison: ${FirebaseService.lastProfileError ?? "inconnue"}';
+      });
+      return;
+    }
     final user = AppUser(
-      name: profile?['nom'] ?? 'Utilisateur',
-      initials: (profile?['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
+      name: profile['nom'] ?? 'Utilisateur',
+      initials: (profile['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
       email: cred.user!.email ?? '',
-      school: profile?['ecoleId'] ?? 'sentinel_ci',
+      school: profile['ecoleId'] ?? 'sentinel_ci',
       role: _role,
       uid: cred.user!.uid,
     );

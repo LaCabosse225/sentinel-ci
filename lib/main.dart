@@ -132,18 +132,29 @@ class FirebaseService {
   // Récupérer profil utilisateur
   static String? lastProfileError;
 
-  // SONDE DIAGNOSTIC : combien de fiches l'app voit-elle dans 'utilisateurs' ?
+  // SONDE DIAGNOSTIC : l'app ecrit un temoin, puis compte 'utilisateurs'
   static Future<String> sondeUtilisateurs() async {
+    String ecriture;
+    try {
+      await _db.collection('_sonde_app_').doc('ping').set({
+        'quand': DateTime.now().toIso8601String(),
+      }).timeout(const Duration(seconds: 10));
+      ecriture = 'ECRITURE temoin _sonde_app_ : OK';
+    } catch (e) {
+      ecriture = 'ECRITURE temoin : echec ($e)';
+    }
+    String lecture;
     try {
       final snap = await _db.collection('utilisateurs')
           .get(const GetOptions(source: Source.server))
           .timeout(const Duration(seconds: 10));
       final ids = snap.docs.map((d) => d.id).take(3).join('\n   ');
-      return 'SONDE: ${snap.docs.length} fiche(s) vue(s)'
+      lecture = 'LECTURE utilisateurs : ${snap.docs.length} fiche(s)'
           '${snap.docs.isEmpty ? '' : '\n   $ids'}';
     } catch (e) {
-      return 'SONDE: echec ($e)';
+      lecture = 'LECTURE utilisateurs : echec ($e)';
     }
+    return '$ecriture\n$lecture';
   }
 
   static Future<Map<String,dynamic>?> getUserProfile(String uid, String email) async {

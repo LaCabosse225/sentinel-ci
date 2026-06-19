@@ -132,25 +132,35 @@ class FirebaseService {
   // Récupérer profil utilisateur
   static String? lastProfileError;
 
-  static Future<Map<String,dynamic>?> getUserProfile(String uid) async {
+  static Future<Map<String,dynamic>?> getUserProfile(String uid, String email) async {
     lastProfileError = null;
-    // On réessaie plusieurs fois : la toute première lecture juste après
-    // la connexion peut échouer tant que le lien avec Firebase n'est pas prêt.
-    for (int essai = 1; essai <= 4; essai++) {
+    for (int essai = 1; essai <= 3; essai++) {
       try {
+        // 1) Recherche par identifiant de document
         final doc = await _db.collection('utilisateurs').doc(uid)
             .get(const GetOptions(source: Source.server))
-            .timeout(const Duration(seconds: 8));
+            .timeout(const Duration(seconds: 10));
         if (doc.exists && doc.data() != null) {
           return doc.data();
         }
-        lastProfileError = 'Document introuvable pour UID: $uid';
-        print('getUserProfile essai $essai : document introuvable');
+        // 2) Repli robuste : recherche par email (champ interne, sans piège)
+        if (email.isNotEmpty) {
+          final q = await _db.collection('utilisateurs')
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get(const GetOptions(source: Source.server))
+              .timeout(const Duration(seconds: 10));
+          if (q.docs.isNotEmpty) {
+            return q.docs.first.data();
+          }
+        }
+        lastProfileError = 'Aucun document trouve (UID: $uid / email: $email)';
+        print('getUserProfile essai $essai : aucun document');
       } catch (e) {
         lastProfileError = e.toString();
         print('getUserProfile essai $essai : echec ($e)');
       }
-      await Future.delayed(const Duration(milliseconds: 900));
+      await Future.delayed(const Duration(milliseconds: 800));
     }
     return null;
   }
@@ -359,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     // Récupérer le profil
-    final profile = await FirebaseService.getUserProfile(cred.user!.uid);
+    final profile = await FirebaseService.getUserProfile(cred.user!.uid, cred.user!.email ?? '');
     if (!mounted) return;
     if (profile == null) {
       setState(() {

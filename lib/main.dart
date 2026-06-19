@@ -138,7 +138,8 @@ class FirebaseService {
     // la connexion peut échouer tant que le lien avec Firebase n'est pas prêt.
     for (int essai = 1; essai <= 4; essai++) {
       try {
-        final doc = await _db.collection('utilisateurs').doc(uid).get()
+        final doc = await _db.collection('utilisateurs').doc(uid)
+            .get(const GetOptions(source: Source.server))
             .timeout(const Duration(seconds: 8));
         if (doc.exists && doc.data() != null) {
           return doc.data();

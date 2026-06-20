@@ -95,9 +95,10 @@ enum UserRole { admin, prof, eleve, parent }
 class AppUser {
   final String name, initials, email, school, uid;
   final UserRole role;
+  final String? childId; // pour un parent : UID de son enfant (1er enfant)
   const AppUser({required this.name, required this.initials,
     required this.email, required this.school,
-    required this.role, required this.uid});
+    required this.role, required this.uid, this.childId});
 }
 
 // ══════════════════════════════════════════
@@ -423,6 +424,12 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       return;
     }
+    // Pour un parent : récupérer l'UID de son enfant (1er de la liste)
+    String? childId;
+    final enfants = profile['enfants'];
+    if (enfants is List && enfants.isNotEmpty) {
+      childId = enfants.first.toString();
+    }
     final user = AppUser(
       name: profile['nom'] ?? 'Utilisateur',
       initials: (profile['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
@@ -430,6 +437,7 @@ class _LoginScreenState extends State<LoginScreen> {
       school: profile['ecoleId'] ?? 'sentinel_ci',
       role: _role,
       uid: cred.user!.uid,
+      childId: childId,
     );
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (_) => MainShell(user: user)));
@@ -954,10 +962,17 @@ class _NotesPageState extends State<NotesPage> {
         if (isProf && _selEleve == null)
           SCCard(child:const Text('Choisissez un eleve pour voir ses notes.',
               style:TextStyle(color:AppColors.textMuted)))
+        else if (widget.user.role == UserRole.parent && widget.user.childId == null)
+          SCCard(child:const Text('Aucun enfant rattache a ce compte.',
+              style:TextStyle(color:AppColors.textMuted)))
         else
         StreamBuilder<QuerySnapshot>(
             stream: FirebaseService.streamNotes(
-                isProf ? _selEleve! : widget.user.uid),
+                isProf
+                    ? _selEleve!
+                    : (widget.user.role == UserRole.parent
+                        ? widget.user.childId!
+                        : widget.user.uid)),
             builder: (ctx, snap) {
               if (snap.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());

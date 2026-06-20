@@ -313,6 +313,16 @@ class FirebaseService {
   static Stream<QuerySnapshot> streamUtilisateurs() =>
       _db.collection('utilisateurs').orderBy('nom').snapshots();
 
+  // Toutes les écoles, sans tri (robuste : inclut meme les fiches sans 'nom')
+  static Stream<QuerySnapshot> streamToutesEcoles() =>
+      _db.collection('ecoles').snapshots();
+
+  // Utilisateurs d'une école précise (pour le directeur) — pas de tri => pas d'index requis
+  static Stream<QuerySnapshot> streamUtilisateursParEcole(String ecoleId) =>
+      _db.collection('utilisateurs')
+          .where('ecoleId', isEqualTo: ecoleId)
+          .snapshots();
+
   // Stream des élèves d'une école (pour la saisie de notes)
   static Stream<QuerySnapshot> streamEleves(String ecoleId) =>
       _db.collection('utilisateurs')
@@ -1532,18 +1542,24 @@ class UtilisateursPage extends StatelessWidget {
       ),
       Expanded(
         child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseService.streamUtilisateurs(),
+            stream: user.role == UserRole.directeur
+                ? FirebaseService.streamUtilisateursParEcole(user.school)
+                : FirebaseService.streamUtilisateurs(),
             builder:(ctx, snap){
               if (snap.connectionState==ConnectionState.waiting)
                 return const Center(child:CircularProgressIndicator());
               if (!snap.hasData||snap.data!.docs.isEmpty)
                 return const Center(child:Text('Aucun utilisateur.'));
+              final docs = snap.data!.docs.toList()
+                ..sort((a,b)=>((a.data() as Map)['nom']??'').toString()
+                    .toLowerCase()
+                    .compareTo(((b.data() as Map)['nom']??'').toString().toLowerCase()));
               return ListView.separated(
                   padding:const EdgeInsets.all(16),
-                  itemCount:snap.data!.docs.length,
+                  itemCount:docs.length,
                   separatorBuilder:(_,__)=>const SizedBox(height:10),
                   itemBuilder:(_,i){
-                    final data = snap.data!.docs[i].data() as Map<String,dynamic>;
+                    final data = docs[i].data() as Map<String,dynamic>;
                     final role = data['role']??'eleve';
                     final rc = roleColors[role]??(AppColors.green,AppColors.greenBg);
                     return SCCard(child:Row(children:[
@@ -1688,7 +1704,17 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
   final _matiere = TextEditingController();
   String? _classeId;   // pour un élève
   String? _enfantId;   // pour un parent
+  String? _ecoleId;    // école cible
   bool _loading = false;
+
+  bool get _estSuperAdmin => widget.user.role == UserRole.admin;
+
+  @override
+  void initState() {
+    super.initState();
+    // Le directeur est verrouillé sur SON école ; le super admin choisit.
+    if (!_estSuperAdmin) _ecoleId = widget.user.school;
+  }
 
   @override
   void dispose() {
@@ -1701,11 +1727,12 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
     if (_nom.text.trim().isEmpty) { showSnack(context, 'Renseignez le nom', error:true); return; }
     if (_email.text.trim().isEmpty) { showSnack(context, 'Renseignez l email', error:true); return; }
     if (_pw.text.trim().length < 6) { showSnack(context, 'Mot de passe : 6 caracteres min', error:true); return; }
+    if (_ecoleId == null) { showSnack(context, 'Choisissez une ecole', error:true); return; }
 
     // Champs propres à chaque rôle
     final Map<String, dynamic> champs = {
       'role': _role,
-      'ecoleId': widget.user.school,
+      'ecoleId': _ecoleId,
     };
     if (_role == 'eleve') {
       if (_classeId == null) { showSnack(context, 'Choisissez une classe', error:true); return; }
@@ -1757,6 +1784,36 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
           )),
           const SizedBox(height: 16),
 
+          // ---- Choix de l'école : visible uniquement pour le Super Admin ----
+          if (_estSuperAdmin) ...[
+            SCCard(child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseService.streamToutesEcoles(),
+              builder: (ctx, snap) {
+                if (!snap.hasData) {
+                  return const Text('Chargement des ecoles...',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                final ecoles = snap.data!.docs;
+                if (ecoles.isEmpty) {
+                  return const Text('Aucune ecole. Creez d abord une ecole.',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                return DropdownButtonFormField<String>(
+                    value: _ecoleId, isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Ecole'),
+                    hint: const Text('Choisir l ecole'),
+                    items: ecoles.map((doc) {
+                      final d = doc.data() as Map<String, dynamic>;
+                      return DropdownMenuItem(value: doc.id,
+                          child: Text(d['nom'] ?? doc.id));
+                    }).toList(),
+                    onChanged: (v) => setState(() {
+                      _ecoleId = v; _classeId = null; _enfantId = null;
+                    }));
+              })),
+            const SizedBox(height: 16),
+          ],
+
           SectionTitle('Informations'),
           SCCard(child: Column(children: [
             TextField(controller: _nom, textCapitalization: TextCapitalization.words,
@@ -1765,8 +1822,13 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
             // ---- Champs spécifiques ÉLÈVE ----
             if (_role == 'eleve') ...[
               const SizedBox(height: 10),
+              if (_ecoleId == null)
+                const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                    child: Text('Choisissez d abord une ecole.',
+                        style: TextStyle(color: AppColors.textMuted)))
+              else
               StreamBuilder<QuerySnapshot>(
-                stream: FirebaseService.streamClasses(widget.user.school),
+                stream: FirebaseService.streamClasses(_ecoleId!),
                 builder: (ctx, snap) {
                   if (!snap.hasData) {
                     return const Padding(padding: EdgeInsets.symmetric(vertical:8),
@@ -1797,8 +1859,13 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
             // ---- Champ spécifique PARENT (choix de l'enfant) ----
             if (_role == 'parent') ...[
               const SizedBox(height: 10),
+              if (_ecoleId == null)
+                const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                    child: Text('Choisissez d abord une ecole.',
+                        style: TextStyle(color: AppColors.textMuted)))
+              else
               StreamBuilder<QuerySnapshot>(
-                stream: FirebaseService.streamEleves(widget.user.school),
+                stream: FirebaseService.streamEleves(_ecoleId!),
                 builder: (ctx, snap) {
                   if (!snap.hasData) {
                     return const Padding(padding: EdgeInsets.symmetric(vertical:8),

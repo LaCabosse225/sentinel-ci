@@ -807,7 +807,20 @@ class DashboardPage extends StatelessWidget {
 
         Text('Bonjour, ${user.name.split(' ').first} 👋',
             style: const TextStyle(fontSize:20, fontWeight:FontWeight.w800)),
-        Text(user.school, style: const TextStyle(fontSize:13, color:AppColors.textMuted)),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseService.streamToutesEcoles(),
+          builder: (ctx, snap) {
+            String nom = user.school;
+            if (snap.hasData) {
+              for (final d in snap.data!.docs) {
+                if (d.id == user.school) {
+                  nom = ((d.data() as Map)['nom'] ?? user.school).toString();
+                  break;
+                }
+              }
+            }
+            return Text(nom, style: const TextStyle(fontSize:13, color:AppColors.textMuted));
+          }),
         const SizedBox(height:20),
 
         if(user.role == UserRole.admin || user.role == UserRole.directeur) ...[

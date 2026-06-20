@@ -1542,44 +1542,66 @@ class UtilisateursPage extends StatelessWidget {
       ),
       Expanded(
         child: StreamBuilder<QuerySnapshot>(
-            stream: user.role == UserRole.directeur
-                ? FirebaseService.streamUtilisateursParEcole(user.school)
-                : FirebaseService.streamUtilisateurs(),
-            builder:(ctx, snap){
-              if (snap.connectionState==ConnectionState.waiting)
-                return const Center(child:CircularProgressIndicator());
-              if (!snap.hasData||snap.data!.docs.isEmpty)
-                return const Center(child:Text('Aucun utilisateur.'));
-              final docs = snap.data!.docs.toList()
-                ..sort((a,b)=>((a.data() as Map)['nom']??'').toString()
+          stream: FirebaseService.streamToutesEcoles(),
+          builder: (ctx, ecSnap) {
+            // Table de correspondance ecoleId -> nom lisible
+            final Map<String, String> noms = {};
+            if (ecSnap.hasData) {
+              for (final d in ecSnap.data!.docs) {
+                final m = d.data() as Map<String, dynamic>;
+                noms[d.id] = (m['nom'] ?? d.id).toString();
+              }
+            }
+            return StreamBuilder<QuerySnapshot>(
+              stream: user.role == UserRole.directeur
+                  ? FirebaseService.streamUtilisateursParEcole(user.school)
+                  : FirebaseService.streamUtilisateurs(),
+              builder:(ctx, snap){
+                if (snap.connectionState==ConnectionState.waiting)
+                  return const Center(child:CircularProgressIndicator());
+                if (!snap.hasData)
+                  return const Center(child:Text('Aucun utilisateur.'));
+                var docs = snap.data!.docs.toList();
+                // Le directeur ne gère que eleves/profs/parents (pas l'admin ni les autres directeurs)
+                if (user.role == UserRole.directeur) {
+                  docs = docs.where((d){
+                    final r = (d.data() as Map)['role'] ?? 'eleve';
+                    return r=='eleve' || r=='prof' || r=='parent';
+                  }).toList();
+                }
+                docs.sort((a,b)=>((a.data() as Map)['nom']??'').toString()
                     .toLowerCase()
                     .compareTo(((b.data() as Map)['nom']??'').toString().toLowerCase()));
-              return ListView.separated(
-                  padding:const EdgeInsets.all(16),
-                  itemCount:docs.length,
-                  separatorBuilder:(_,__)=>const SizedBox(height:10),
-                  itemBuilder:(_,i){
-                    final data = docs[i].data() as Map<String,dynamic>;
-                    final role = data['role']??'eleve';
-                    final rc = roleColors[role]??(AppColors.green,AppColors.greenBg);
-                    return SCCard(child:Row(children:[
-                      CircleAvatar(radius:20, backgroundColor:rc.$1,
-                          child:Text((data['nom']??'?')[0].toUpperCase(),
-                              style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w800))),
-                      const SizedBox(width:12),
-                      Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-                        Text(data['nom']??'',
-                            style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),
-                        Text(data['ecoleId']??'',
-                            style:const TextStyle(fontSize:11,color:AppColors.textMuted)),
-                      ])),
-                      Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
-                          decoration:BoxDecoration(color:rc.$2,borderRadius:BorderRadius.circular(8)),
-                          child:Text(role,
-                              style:TextStyle(fontSize:10,fontWeight:FontWeight.w800,color:rc.$1))),
-                    ]));
-                  });
-            }),
+                if (docs.isEmpty)
+                  return const Center(child:Text('Aucun utilisateur.'));
+                return ListView.separated(
+                    padding:const EdgeInsets.all(16),
+                    itemCount:docs.length,
+                    separatorBuilder:(_,__)=>const SizedBox(height:10),
+                    itemBuilder:(_,i){
+                      final data = docs[i].data() as Map<String,dynamic>;
+                      final role = data['role']??'eleve';
+                      final rc = roleColors[role]??(AppColors.green,AppColors.greenBg);
+                      final ecoleNom = noms[data['ecoleId']] ?? (data['ecoleId'] ?? '');
+                      return SCCard(child:Row(children:[
+                        CircleAvatar(radius:20, backgroundColor:rc.$1,
+                            child:Text((data['nom']??'?')[0].toUpperCase(),
+                                style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w800))),
+                        const SizedBox(width:12),
+                        Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+                          Text(data['nom']??'',
+                              style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),
+                          Text(ecoleNom,
+                              style:const TextStyle(fontSize:11,color:AppColors.textMuted)),
+                        ])),
+                        Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
+                            decoration:BoxDecoration(color:rc.$2,borderRadius:BorderRadius.circular(8)),
+                            child:Text(role,
+                                style:TextStyle(fontSize:10,fontWeight:FontWeight.w800,color:rc.$1))),
+                      ]));
+                    });
+              });
+          }),
       ),
     ]);
   }

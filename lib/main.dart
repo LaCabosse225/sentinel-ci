@@ -313,6 +313,10 @@ class FirebaseService {
           .where('ecoleId', isEqualTo: ecoleId)
           .snapshots();
 
+  // Crée une classe (écrite par l'app => collection propre)
+  static Future<void> creerClasse(Map<String, dynamic> data) =>
+      _db.collection('classes').add(data);
+
   // Crée un compte (eleve, prof ou parent) : connexion + fiche, SANS déconnecter l'admin.
   // 'champs' contient role, ecoleId et les champs propres au rôle.
   // Retourne null si succès, ou un message d'erreur lisible sinon.
@@ -1511,15 +1515,26 @@ class UtilisateursPage extends StatelessWidget {
     return Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
+        child: Row(children: [
+          Expanded(child: ElevatedButton.icon(
             onPressed: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => AjouterUtilisateurPage(user: user))),
             icon: const Icon(Icons.person_add_rounded, size: 18),
-            label: const Text('Ajouter un utilisateur'),
-          ),
-        ),
+            label: const Text('Ajouter'),
+          )),
+          const SizedBox(width: 10),
+          Expanded(child: OutlinedButton.icon(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => ClassesPage(user: user))),
+            icon: const Icon(Icons.class_rounded, size: 18),
+            label: const Text('Classes'),
+            style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.green,
+                side: const BorderSide(color: AppColors.green),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+          )),
+        ]),
       ),
       Expanded(
         child: StreamBuilder<QuerySnapshot>(
@@ -1557,6 +1572,107 @@ class UtilisateursPage extends StatelessWidget {
             }),
       ),
     ]);
+  }
+}
+
+// ══════════════════════════════════════════
+//  CLASSES (ADMIN) — liste + création
+// ══════════════════════════════════════════
+class ClassesPage extends StatefulWidget {
+  final AppUser user;
+  const ClassesPage({super.key, required this.user});
+  @override State<ClassesPage> createState() => _ClassesPageState();
+}
+
+class _ClassesPageState extends State<ClassesPage> {
+  final _nom = TextEditingController();
+  final _niveau = TextEditingController();
+  final _annee = TextEditingController(text: '2025-2026');
+
+  @override
+  void dispose() { _nom.dispose(); _niveau.dispose(); _annee.dispose(); super.dispose(); }
+
+  void _showAdd() {
+    showModalBottomSheet(context: context, isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (_) => Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Ajouter une classe',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 16),
+              TextField(controller: _nom,
+                  decoration: const InputDecoration(labelText: 'Nom de la classe (ex: Terminale C)')),
+              const SizedBox(height: 10),
+              TextField(controller: _niveau,
+                  decoration: const InputDecoration(labelText: 'Niveau (ex: Terminale)')),
+              const SizedBox(height: 10),
+              TextField(controller: _annee,
+                  decoration: const InputDecoration(labelText: 'Annee scolaire')),
+              const SizedBox(height: 16),
+              SizedBox(width: double.infinity, child: ElevatedButton(
+                  onPressed: () async {
+                    if (_nom.text.trim().isEmpty) {
+                      showSnack(context, 'Renseignez le nom de la classe', error: true); return;
+                    }
+                    await FirebaseService.creerClasse({
+                      'nom': _nom.text.trim(),
+                      'niveau': _niveau.text.trim(),
+                      'anneeScolaire': _annee.text.trim(),
+                      'ecoleId': widget.user.school,
+                    });
+                    _nom.clear(); _niveau.clear();
+                    if (mounted) {
+                      Navigator.pop(context);
+                      showSnack(context, 'Classe ajoutee avec succes !');
+                    }
+                  },
+                  child: const Text('Creer la classe'))),
+            ])));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Classes')),
+      body: Column(children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(width: double.infinity, child: ElevatedButton.icon(
+            onPressed: _showAdd,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Ajouter une classe'),
+          )),
+        ),
+        Expanded(child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseService.streamClasses(widget.user.school),
+          builder: (ctx, snap) {
+            if (snap.connectionState == ConnectionState.waiting)
+              return const Center(child: CircularProgressIndicator());
+            if (!snap.hasData || snap.data!.docs.isEmpty)
+              return const Center(child: Text('Aucune classe. Ajoutez-en une.'));
+            return ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                itemCount: snap.data!.docs.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) {
+                  final d = snap.data!.docs[i].data() as Map<String, dynamic>;
+                  return SCCard(child: Row(children: [
+                    Container(width: 40, height: 40,
+                        decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
+                        child: const Icon(Icons.class_rounded, color: AppColors.green, size: 20)),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(d['nom'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                      Text('${d['niveau'] ?? ''}  •  ${d['anneeScolaire'] ?? ''}',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                    ])),
+                  ]));
+                });
+          })),
+      ]),
+    );
   }
 }
 

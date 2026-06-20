@@ -927,11 +927,14 @@ class NotesPage extends StatefulWidget {
 class _NotesPageState extends State<NotesPage> {
   final _noteCtrl  = TextEditingController();
   final _appreCtrl = TextEditingController();
+  final _coefCtrl  = TextEditingController(text: '1');
   String _selMat   = 'Mathematiques';
   String? _selEleve;
   String _selType  = 'Devoir surveille';
 
   final _matieres = ['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo','EPS'];
+  final _types = ['Devoir surveille','Interrogation','Devoir de maison',
+                  'Conduite','Participation','Cahier','Autre'];
 
   Future<void> _saisir() async {
     if (_selEleve == null) {
@@ -946,6 +949,7 @@ class _NotesPageState extends State<NotesPage> {
       'matiere':      _selMat,
       'type':         _selType,
       'note':         n,
+      'coefficient':  double.tryParse(_coefCtrl.text) ?? 1,
       'appreciation': _appreCtrl.text,
       'ecoleId':      widget.user.school,
       'date':         DateTime.now().toString().substring(0,10),
@@ -1002,13 +1006,18 @@ class _NotesPageState extends State<NotesPage> {
             const SizedBox(height:10),
             DropdownButtonFormField<String>(
                 value: _selType,
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: ['Devoir surveille','Interrogation','Examen','TP','Participation']
-                    .map((t) => DropdownMenuItem(value:t, child:Text(t))).toList(),
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Type de note'),
+                items: _types.map((t) => DropdownMenuItem(value:t, child:Text(t))).toList(),
                 onChanged: (v) => setState(() => _selType = v!)),
             const SizedBox(height:10),
-            TextField(controller:_noteCtrl, keyboardType:TextInputType.number,
-                decoration:const InputDecoration(labelText:'Note (/20)')),
+            Row(children:[
+              Expanded(child: TextField(controller:_noteCtrl, keyboardType:TextInputType.number,
+                  decoration:const InputDecoration(labelText:'Note (/20)'))),
+              const SizedBox(width:10),
+              SizedBox(width:110, child: TextField(controller:_coefCtrl, keyboardType:TextInputType.number,
+                  decoration:const InputDecoration(labelText:'Coefficient'))),
+            ]),
             const SizedBox(height:10),
             TextField(controller:_appreCtrl,
                 decoration:const InputDecoration(labelText:'Appreciation')),
@@ -1055,7 +1064,7 @@ class _NotesPageState extends State<NotesPage> {
                           Expanded(child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:[
                             Text(data['matiere'] ?? '',
                                 style:const TextStyle(fontSize:13, fontWeight:FontWeight.w600)),
-                            Text('${data['type'] ?? ''} · ${data['date'] ?? ''}',
+                            Text('${data['type'] ?? ''}${data['coefficient'] != null ? ' · coef ${(data['coefficient'] as num).toString().replaceAll('.0','')}' : ''} · ${data['date'] ?? ''}',
                                 style:const TextStyle(fontSize:11, color:AppColors.textMuted)),
                             if ((data['appreciation'] ?? '').isNotEmpty)
                               Text(data['appreciation'],
@@ -1083,8 +1092,11 @@ class _DevoirsPageState extends State<DevoirsPage> {
   final _titreCtrl = TextEditingController();
   final _dateCtrl  = TextEditingController();
   String _selMat   = 'Mathematiques';
+  String _selTypeDevoir = 'Devoir programme';
   String? _selClasseId;     // classe choisie par le prof
   String? _selClasseNom;
+
+  final _typesDevoir = ['Devoir programme','Devoir de maison','Interrogation'];
 
   @override
   void dispose() { _titreCtrl.dispose(); _dateCtrl.dispose(); super.dispose(); }
@@ -1099,6 +1111,7 @@ class _DevoirsPageState extends State<DevoirsPage> {
     await FirebaseService.publierDevoir({
       'titre':        _titreCtrl.text,
       'matiere':      _selMat,
+      'typeDevoir':   _selTypeDevoir,
       'date':         _dateCtrl.text.isEmpty ? 'A definir' : _dateCtrl.text,
       'ecoleId':      widget.user.school,
       'classeId':     _selClasseId,
@@ -1154,6 +1167,13 @@ class _DevoirsPageState extends State<DevoirsPage> {
                     .map((m) => DropdownMenuItem(value:m, child:Text(m))).toList(),
                 onChanged: (v) => setState(() => _selMat = v!)),
             const SizedBox(height:10),
+            DropdownButtonFormField<String>(
+                value: _selTypeDevoir,
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Type de devoir'),
+                items: _typesDevoir.map((t) => DropdownMenuItem(value:t, child:Text(t))).toList(),
+                onChanged: (v) => setState(() => _selTypeDevoir = v!)),
+            const SizedBox(height:10),
             TextField(controller:_titreCtrl,
                 decoration:const InputDecoration(labelText:'Description du devoir')),
             const SizedBox(height:10),
@@ -1202,7 +1222,7 @@ class _DevoirsPageState extends State<DevoirsPage> {
                           Expanded(child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:[
                             Text(data['titre'] ?? '',
                                 style:const TextStyle(fontSize:13, fontWeight:FontWeight.w600)),
-                            Text(data['matiere'] ?? '',
+                            Text('${data['matiere'] ?? ''}${data['typeDevoir'] != null ? ' · ${data['typeDevoir']}' : ''}',
                                 style:const TextStyle(fontSize:12, color:AppColors.textMuted)),
                           ])),
                           Text(data['date'] ?? '',

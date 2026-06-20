@@ -312,15 +312,14 @@ class FirebaseService {
           .where('ecoleId', isEqualTo: ecoleId)
           .snapshots();
 
-  // Crée un élève : compte de connexion + fiche, SANS déconnecter l'admin.
+  // Crée un compte (eleve, prof ou parent) : connexion + fiche, SANS déconnecter l'admin.
+  // 'champs' contient role, ecoleId et les champs propres au rôle.
   // Retourne null si succès, ou un message d'erreur lisible sinon.
-  static Future<String?> creerEleve({
+  static Future<String?> creerCompte({
     required String nom,
     required String email,
     required String motDePasse,
-    required String ecoleId,
-    required String classeId,
-    required String matricule,
+    required Map<String, dynamic> champs,
   }) async {
     FirebaseApp? appSecondaire;
     try {
@@ -337,10 +336,7 @@ class FirebaseService {
       await _db.collection('utilisateurs').doc(uid).set({
         'nom': nom.trim(),
         'email': email.trim(),
-        'role': 'eleve',
-        'ecoleId': ecoleId,
-        'classeId': classeId,
-        'matricule': matricule.trim(),
+        ...champs,
       });
       return null;
     } on FirebaseAuthException catch (e) {
@@ -1504,9 +1500,9 @@ class UtilisateursPage extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => AjouterElevePage(user: user))),
+                MaterialPageRoute(builder: (_) => AjouterUtilisateurPage(user: user))),
             icon: const Icon(Icons.person_add_rounded, size: 18),
-            label: const Text('Ajouter un eleve'),
+            label: const Text('Ajouter un utilisateur'),
           ),
         ),
       ),
@@ -1550,25 +1546,29 @@ class UtilisateursPage extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════
-//  AJOUTER UN ÉLÈVE (ADMIN)
+//  AJOUTER UN UTILISATEUR (ADMIN) — élève / prof / parent
 // ══════════════════════════════════════════
-class AjouterElevePage extends StatefulWidget {
+class AjouterUtilisateurPage extends StatefulWidget {
   final AppUser user;
-  const AjouterElevePage({super.key, required this.user});
-  @override State<AjouterElevePage> createState() => _AjouterElevePageState();
+  const AjouterUtilisateurPage({super.key, required this.user});
+  @override State<AjouterUtilisateurPage> createState() => _AjouterUtilisateurPageState();
 }
 
-class _AjouterElevePageState extends State<AjouterElevePage> {
+class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
+  String _role = 'eleve';
   final _nom = TextEditingController();
   final _email = TextEditingController();
   final _pw = TextEditingController();
   final _matricule = TextEditingController();
-  String? _classeId;
+  final _matiere = TextEditingController();
+  String? _classeId;   // pour un élève
+  String? _enfantId;   // pour un parent
   bool _loading = false;
 
   @override
   void dispose() {
-    _nom.dispose(); _email.dispose(); _pw.dispose(); _matricule.dispose();
+    _nom.dispose(); _email.dispose(); _pw.dispose();
+    _matricule.dispose(); _matiere.dispose();
     super.dispose();
   }
 
@@ -1576,21 +1576,31 @@ class _AjouterElevePageState extends State<AjouterElevePage> {
     if (_nom.text.trim().isEmpty) { showSnack(context, 'Renseignez le nom', error:true); return; }
     if (_email.text.trim().isEmpty) { showSnack(context, 'Renseignez l email', error:true); return; }
     if (_pw.text.trim().length < 6) { showSnack(context, 'Mot de passe : 6 caracteres min', error:true); return; }
-    if (_classeId == null) { showSnack(context, 'Choisissez une classe', error:true); return; }
+
+    // Champs propres à chaque rôle
+    final Map<String, dynamic> champs = {
+      'role': _role,
+      'ecoleId': widget.user.school,
+    };
+    if (_role == 'eleve') {
+      if (_classeId == null) { showSnack(context, 'Choisissez une classe', error:true); return; }
+      champs['classeId'] = _classeId;
+      champs['matricule'] = _matricule.text.trim();
+    } else if (_role == 'parent') {
+      if (_enfantId == null) { showSnack(context, 'Choisissez l enfant', error:true); return; }
+      champs['enfants'] = [_enfantId];
+    } else if (_role == 'prof') {
+      if (_matiere.text.trim().isNotEmpty) champs['matiere'] = _matiere.text.trim();
+    }
 
     setState(() => _loading = true);
-    final erreur = await FirebaseService.creerEleve(
-      nom: _nom.text,
-      email: _email.text,
-      motDePasse: _pw.text,
-      ecoleId: widget.user.school,
-      classeId: _classeId!,
-      matricule: _matricule.text,
+    final erreur = await FirebaseService.creerCompte(
+      nom: _nom.text, email: _email.text, motDePasse: _pw.text, champs: champs,
     );
     if (!mounted) return;
     setState(() => _loading = false);
     if (erreur == null) {
-      showSnack(context, 'Eleve ajoute avec succes !');
+      showSnack(context, 'Compte cree avec succes !');
       Navigator.pop(context);
     } else {
       showSnack(context, erreur, error: true);
@@ -1600,61 +1610,116 @@ class _AjouterElevePageState extends State<AjouterElevePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajouter un eleve')),
+      appBar: AppBar(title: const Text('Ajouter un utilisateur')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SCCard(child: DropdownButtonFormField<String>(
+            value: _role,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Type de compte'),
+            items: const [
+              DropdownMenuItem(value: 'eleve',  child: Text('Eleve')),
+              DropdownMenuItem(value: 'prof',   child: Text('Professeur')),
+              DropdownMenuItem(value: 'parent', child: Text('Parent')),
+            ],
+            onChanged: (v) => setState(() {
+              _role = v!; _classeId = null; _enfantId = null;
+            }),
+          )),
+          const SizedBox(height: 16),
+
+          SectionTitle('Informations'),
           SCCard(child: Column(children: [
             TextField(controller: _nom, textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(labelText: 'Nom complet')),
-            const SizedBox(height: 10),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseService.streamClasses(widget.user.school),
-              builder: (ctx, snap) {
-                if (!snap.hasData) {
-                  return const Padding(padding: EdgeInsets.symmetric(vertical:8),
-                      child: Text('Chargement des classes...',
-                          style: TextStyle(color: AppColors.textMuted)));
-                }
-                final classes = snap.data!.docs;
-                if (classes.isEmpty) {
-                  return const Padding(padding: EdgeInsets.symmetric(vertical:8),
-                      child: Text('Aucune classe. Creez d abord une classe.',
-                          style: TextStyle(color: AppColors.textMuted)));
-                }
-                return DropdownButtonFormField<String>(
-                    value: _classeId,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Classe'),
-                    hint: const Text('Choisir une classe'),
-                    items: classes.map((doc) {
-                      final d = doc.data() as Map<String, dynamic>;
-                      return DropdownMenuItem(value: doc.id,
-                          child: Text(d['nom'] ?? doc.id));
-                    }).toList(),
-                    onChanged: (v) => setState(() => _classeId = v));
-              }),
-            const SizedBox(height: 10),
-            TextField(controller: _matricule,
-                decoration: const InputDecoration(labelText: 'Matricule (ex: EL002)')),
+
+            // ---- Champs spécifiques ÉLÈVE ----
+            if (_role == 'eleve') ...[
+              const SizedBox(height: 10),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamClasses(widget.user.school),
+                builder: (ctx, snap) {
+                  if (!snap.hasData) {
+                    return const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                        child: Text('Chargement des classes...',
+                            style: TextStyle(color: AppColors.textMuted)));
+                  }
+                  final classes = snap.data!.docs;
+                  if (classes.isEmpty) {
+                    return const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                        child: Text('Aucune classe. Creez d abord une classe.',
+                            style: TextStyle(color: AppColors.textMuted)));
+                  }
+                  return DropdownButtonFormField<String>(
+                      value: _classeId, isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Classe'),
+                      hint: const Text('Choisir une classe'),
+                      items: classes.map((doc) {
+                        final d = doc.data() as Map<String, dynamic>;
+                        return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                      }).toList(),
+                      onChanged: (v) => setState(() => _classeId = v));
+                }),
+              const SizedBox(height: 10),
+              TextField(controller: _matricule,
+                  decoration: const InputDecoration(labelText: 'Matricule (ex: EL002)')),
+            ],
+
+            // ---- Champ spécifique PARENT (choix de l'enfant) ----
+            if (_role == 'parent') ...[
+              const SizedBox(height: 10),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamEleves(widget.user.school),
+                builder: (ctx, snap) {
+                  if (!snap.hasData) {
+                    return const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                        child: Text('Chargement des eleves...',
+                            style: TextStyle(color: AppColors.textMuted)));
+                  }
+                  final eleves = snap.data!.docs;
+                  if (eleves.isEmpty) {
+                    return const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                        child: Text('Aucun eleve. Creez d abord un eleve.',
+                            style: TextStyle(color: AppColors.textMuted)));
+                  }
+                  return DropdownButtonFormField<String>(
+                      value: _enfantId, isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Enfant (eleve)'),
+                      hint: const Text('Choisir l enfant'),
+                      items: eleves.map((doc) {
+                        final d = doc.data() as Map<String, dynamic>;
+                        return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                      }).toList(),
+                      onChanged: (v) => setState(() => _enfantId = v));
+                }),
+            ],
+
+            // ---- Champ optionnel PROF ----
+            if (_role == 'prof') ...[
+              const SizedBox(height: 10),
+              TextField(controller: _matiere,
+                  decoration: const InputDecoration(labelText: 'Matiere principale (optionnel)')),
+            ],
           ])),
           const SizedBox(height: 16),
-          SectionTitle('Identifiants de connexion de l eleve'),
+
+          SectionTitle('Identifiants de connexion'),
           SCCard(child: Column(children: [
-            TextField(controller: _email,
-                keyboardType: TextInputType.emailAddress,
+            TextField(controller: _email, keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email')),
             const SizedBox(height: 10),
             TextField(controller: _pw,
                 decoration: const InputDecoration(labelText: 'Mot de passe (6 caracteres min)')),
           ])),
           const SizedBox(height: 20),
+
           SizedBox(width: double.infinity, child: ElevatedButton(
             onPressed: _loading ? null : _enregistrer,
             child: _loading
                 ? const SizedBox(height:18, width:18,
                     child: CircularProgressIndicator(strokeWidth:2, color:Colors.white))
-                : const Text('Creer le compte eleve'),
+                : const Text('Creer le compte'),
           )),
         ]),
       ),

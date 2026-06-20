@@ -90,7 +90,20 @@ ThemeData buildTheme() => ThemeData(
 // ══════════════════════════════════════════
 //  MODÈLES
 // ══════════════════════════════════════════
-enum UserRole { admin, prof, eleve, parent }
+enum UserRole { admin, directeur, prof, eleve, parent }
+
+// Convertit le rôle stocké en base en UserRole (sécurité : inconnu => accès minimal)
+UserRole roleFromString(String? r) {
+  switch (r) {
+    case 'admin':
+    case 'super_admin': return UserRole.admin;
+    case 'directeur':   return UserRole.directeur;
+    case 'prof':        return UserRole.prof;
+    case 'eleve':       return UserRole.eleve;
+    case 'parent':      return UserRole.parent;
+    default:            return UserRole.eleve;
+  }
+}
 
 class AppUser {
   final String name, initials, email, school, uid;
@@ -380,18 +393,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  UserRole _role = UserRole.admin;
   final _emailCtrl = TextEditingController();
   final _pwCtrl    = TextEditingController();
   bool _loading    = false;
   String? _error;
-
-  final _roles = [
-    (UserRole.admin,  '⚙️', 'Admin'),
-    (UserRole.prof,   '📚', 'Prof'),
-    (UserRole.eleve,  '🎒', 'Eleve'),
-    (UserRole.parent, '👨‍👩‍👧', 'Parent'),
-  ];
 
   Future<void> _login() async {
     setState(() { _loading = true; _error = null; });
@@ -439,7 +444,7 @@ class _LoginScreenState extends State<LoginScreen> {
       initials: (profile['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
       email: cred.user!.email ?? '',
       school: profile['ecoleId'] ?? 'sentinel_ci',
-      role: _role,
+      role: roleFromString(profile['role']),
       uid: cred.user!.uid,
       childId: childId,
     );
@@ -489,34 +494,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height:28),
                   const Text('Connexion', style: TextStyle(fontSize:20, fontWeight:FontWeight.w800)),
                   const SizedBox(height:4),
-                  Text('Choisissez votre profil', style: TextStyle(fontSize:13, color:Colors.grey[500])),
+                  Text('Entrez vos identifiants', style: TextStyle(fontSize:13, color:Colors.grey[500])),
                   const SizedBox(height:20),
-
-                  // Rôles
-                  Row(children: _roles.map((r) {
-                    final sel = _role == r.$1;
-                    return Expanded(child: GestureDetector(
-                      onTap: () => setState(() => _role = r.$1),
-                      child: Container(
-                        margin: const EdgeInsets.only(right:6),
-                        padding: const EdgeInsets.symmetric(vertical:10),
-                        decoration: BoxDecoration(
-                          color: sel ? AppColors.greenBg : Colors.white,
-                          border: Border.all(
-                              color: sel ? AppColors.green : AppColors.border,
-                              width: sel ? 2 : 1.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(children:[
-                          Text(r.$2, style:const TextStyle(fontSize:18)),
-                          const SizedBox(height:3),
-                          Text(r.$3, style: TextStyle(fontSize:10, fontWeight:FontWeight.w700,
-                              color: sel ? AppColors.green : AppColors.textMuted)),
-                        ]),
-                      ),
-                    ));
-                  }).toList()),
-                  const SizedBox(height:16),
 
                   // Champs
                   TextField(controller: _emailCtrl,
@@ -651,6 +630,12 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
       ];
+      case UserRole.directeur: return [
+        _NavItem(Icons.dashboard_rounded,      'Accueil'),
+        _NavItem(Icons.people_rounded,         'Utilisateurs'),
+        _NavItem(Icons.notifications_rounded,  'Alertes'),
+        _NavItem(Icons.calendar_month_rounded, 'Agenda'),
+      ];
       case UserRole.prof: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.edit_rounded,           'Notes'),
@@ -681,6 +666,12 @@ class _MainShellState extends State<MainShell> {
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
       ];
+      case UserRole.directeur: return [
+        DashboardPage(user: widget.user),
+        UtilisateursPage(user: widget.user),
+        AlertesPage(user: widget.user),
+        AgendaPage(user: widget.user),
+      ];
       case UserRole.prof: return [
         DashboardPage(user: widget.user),
         NotesPage(user: widget.user),
@@ -704,16 +695,18 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final roleColors = {
-      UserRole.admin:  AppColors.purple,
-      UserRole.prof:   AppColors.orange,
-      UserRole.eleve:  AppColors.green,
-      UserRole.parent: AppColors.blue,
+      UserRole.admin:     AppColors.purple,
+      UserRole.directeur: AppColors.gold,
+      UserRole.prof:      AppColors.orange,
+      UserRole.eleve:     AppColors.green,
+      UserRole.parent:    AppColors.blue,
     };
     final roleLabels = {
-      UserRole.admin:  'Admin',
-      UserRole.prof:   'Professeur',
-      UserRole.eleve:  'Eleve',
-      UserRole.parent: 'Parent',
+      UserRole.admin:     'Super Admin',
+      UserRole.directeur: 'Directeur',
+      UserRole.prof:      'Professeur',
+      UserRole.eleve:     'Eleve',
+      UserRole.parent:    'Parent',
     };
 
     return Scaffold(
@@ -807,7 +800,7 @@ class DashboardPage extends StatelessWidget {
         Text(user.school, style: const TextStyle(fontSize:13, color:AppColors.textMuted)),
         const SizedBox(height:20),
 
-        if(user.role == UserRole.admin) ...[
+        if(user.role == UserRole.admin || user.role == UserRole.directeur) ...[
           GridView.count(crossAxisCount:2, shrinkWrap:true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing:12, mainAxisSpacing:12, childAspectRatio:0.95,
@@ -1507,10 +1500,11 @@ class UtilisateursPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final roleColors = {
-      'eleve':   (AppColors.green,  AppColors.greenBg),
-      'parent':  (AppColors.blue,   AppColors.blueBg),
-      'prof':    (AppColors.orange, AppColors.orangeBg),
-      'admin':   (AppColors.purple, AppColors.purpleBg),
+      'eleve':     (AppColors.green,  AppColors.greenBg),
+      'parent':    (AppColors.blue,   AppColors.blueBg),
+      'prof':      (AppColors.orange, AppColors.orangeBg),
+      'directeur': (AppColors.gold,   AppColors.goldBg),
+      'admin':     (AppColors.purple, AppColors.purpleBg),
     };
     return Column(children: [
       Padding(
@@ -1749,10 +1743,13 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
             value: _role,
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'Type de compte'),
-            items: const [
-              DropdownMenuItem(value: 'eleve',  child: Text('Eleve')),
-              DropdownMenuItem(value: 'prof',   child: Text('Professeur')),
-              DropdownMenuItem(value: 'parent', child: Text('Parent')),
+            items: [
+              const DropdownMenuItem(value: 'eleve',  child: Text('Eleve')),
+              const DropdownMenuItem(value: 'prof',   child: Text('Professeur')),
+              const DropdownMenuItem(value: 'parent', child: Text('Parent')),
+              // Seul le Super Admin peut créer un Directeur
+              if (widget.user.role == UserRole.admin)
+                const DropdownMenuItem(value: 'directeur', child: Text('Directeur')),
             ],
             onChanged: (v) => setState(() {
               _role = v!; _classeId = null; _enfantId = null;

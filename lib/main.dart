@@ -108,10 +108,11 @@ UserRole roleFromString(String? r) {
 class AppUser {
   final String name, initials, email, school, uid;
   final UserRole role;
-  final String? childId; // pour un parent : UID de son enfant (1er enfant)
+  final String? childId;   // pour un parent : UID de son enfant (1er enfant)
+  final String? classeId;  // élève : sa classe ; parent : la classe de son enfant
   const AppUser({required this.name, required this.initials,
     required this.email, required this.school,
-    required this.role, required this.uid, this.childId});
+    required this.role, required this.uid, this.childId, this.classeId});
 }
 
 // ══════════════════════════════════════════
@@ -210,6 +211,36 @@ class FirebaseService {
           .where('ecoleId', isEqualTo: ecoleId)
           .where('classe', isEqualTo: classe)
           .orderBy('createdAt', descending: true)
+          .snapshots();
+
+  // Devoirs d'une classe précise (1 seul filtre => pas d'index requis ; tri côté app)
+  static Stream<QuerySnapshot> streamDevoirsParClasse(String classeId) =>
+      _db.collection('devoirs')
+          .where('classeId', isEqualTo: classeId)
+          .snapshots();
+
+  // Récupère la classe d'un élève (pour le parent : la classe de son enfant)
+  static Future<String?> getClasseIdEleve(String eleveUid) async {
+    try {
+      final d = await _db.collection('utilisateurs').doc(eleveUid).get();
+      if (d.exists) return (d.data()?['classeId'] as String?);
+    } catch (_) {}
+    return null;
+  }
+
+  // ---- ABSENCES / PRÉSENCES ----
+  // Enregistre une absence ou un retard (présent = pas d'enregistrement)
+  static Future<void> ajouterAbsence(Map<String,dynamic> abs) async {
+    await _db.collection('absences').add({
+      ...abs,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Absences d'un élève (1 filtre => pas d'index ; tri côté app)
+  static Stream<QuerySnapshot> streamAbsencesEleve(String eleveId) =>
+      _db.collection('absences')
+          .where('eleveId', isEqualTo: eleveId)
           .snapshots();
 
   // Publier devoir
@@ -449,6 +480,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (enfants is List && enfants.isNotEmpty) {
       childId = enfants.first.toString();
     }
+    // Classe de référence : l'élève a la sienne ; le parent prend celle de son enfant
+    String? classeId = profile['classeId'] as String?;
+    if (classeId == null && childId != null) {
+      classeId = await FirebaseService.getClasseIdEleve(childId);
+    }
+    if (!mounted) return;
     final user = AppUser(
       name: profile['nom'] ?? 'Utilisateur',
       initials: (profile['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
@@ -457,6 +494,7 @@ class _LoginScreenState extends State<LoginScreen> {
       role: roleFromString(profile['role']),
       uid: cred.user!.uid,
       childId: childId,
+      classeId: classeId,
     );
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (_) => MainShell(user: user)));
@@ -650,6 +688,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.edit_rounded,           'Notes'),
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
+        _NavItem(Icons.how_to_reg_rounded,     'Absences'),
         _NavItem(Icons.menu_book_rounded,      'Lecons'),
         _NavItem(Icons.message_rounded,        'Messages'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
@@ -659,6 +698,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.bar_chart_rounded,      'Notes'),
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
+        _NavItem(Icons.how_to_reg_rounded,     'Absences'),
         _NavItem(Icons.menu_book_rounded,      'Programme'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
@@ -686,6 +726,7 @@ class _MainShellState extends State<MainShell> {
         DashboardPage(user: widget.user),
         NotesPage(user: widget.user),
         DevoirsPage(user: widget.user),
+        AbsencesPage(user: widget.user),
         LeconsPage(user: widget.user),
         MessageriePage(user: widget.user),
         AgendaPage(user: widget.user),
@@ -695,6 +736,7 @@ class _MainShellState extends State<MainShell> {
         DashboardPage(user: widget.user),
         NotesPage(user: widget.user),
         DevoirsPage(user: widget.user),
+        AbsencesPage(user: widget.user),
         LeconsPage(user: widget.user),
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
@@ -1041,17 +1083,26 @@ class _DevoirsPageState extends State<DevoirsPage> {
   final _titreCtrl = TextEditingController();
   final _dateCtrl  = TextEditingController();
   String _selMat   = 'Mathematiques';
+  String? _selClasseId;     // classe choisie par le prof
+  String? _selClasseNom;
+
+  @override
+  void dispose() { _titreCtrl.dispose(); _dateCtrl.dispose(); super.dispose(); }
 
   Future<void> _publier() async {
+    if (_selClasseId == null) {
+      showSnack(context, 'Choisissez une classe', error:true); return;
+    }
     if (_titreCtrl.text.isEmpty) {
-      showSnack(context, 'Renseignez le titre', error:true); return;
+      showSnack(context, 'Renseignez le devoir', error:true); return;
     }
     await FirebaseService.publierDevoir({
       'titre':        _titreCtrl.text,
       'matiere':      _selMat,
       'date':         _dateCtrl.text.isEmpty ? 'A definir' : _dateCtrl.text,
       'ecoleId':      widget.user.school,
-      'classe':       'Terminale C',
+      'classeId':     _selClasseId,
+      'classe':       _selClasseNom ?? '',
       'professeurId': widget.user.uid,
     });
     _titreCtrl.clear(); _dateCtrl.clear();
@@ -1061,12 +1112,41 @@ class _DevoirsPageState extends State<DevoirsPage> {
   @override
   Widget build(BuildContext context) {
     final isProf = widget.user.role==UserRole.prof || widget.user.role==UserRole.admin;
+    // Classe à afficher : le prof voit celle qu'il choisit, l'élève/parent la sienne
+    final classeAffichee = isProf ? _selClasseId : widget.user.classeId;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:[
         if (isProf) ...[
           SectionTitle('Publier un devoir'),
           SCCard(child: Column(children:[
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseService.streamClasses(widget.user.school),
+              builder: (ctx, snap) {
+                if (!snap.hasData) {
+                  return const Text('Chargement des classes...',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                final classes = snap.data!.docs;
+                if (classes.isEmpty) {
+                  return const Text('Aucune classe disponible.',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                return DropdownButtonFormField<String>(
+                    value: _selClasseId, isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Classe'),
+                    hint: const Text('Choisir une classe'),
+                    items: classes.map((doc) {
+                      final d = doc.data() as Map<String, dynamic>;
+                      return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                    }).toList(),
+                    onChanged: (v) {
+                      final doc = classes.firstWhere((c) => c.id == v);
+                      final d = doc.data() as Map<String, dynamic>;
+                      setState(() { _selClasseId = v; _selClasseNom = d['nom'] ?? v; });
+                    });
+              }),
+            const SizedBox(height:10),
             DropdownButtonFormField<String>(
                 value: _selMat,
                 decoration: const InputDecoration(labelText: 'Matiere'),
@@ -1088,16 +1168,29 @@ class _DevoirsPageState extends State<DevoirsPage> {
         ],
 
         SectionTitle('Devoirs en cours'),
+        if (classeAffichee == null)
+          SCCard(child: Text(
+              isProf ? 'Choisissez une classe pour voir ses devoirs.'
+                     : 'Aucune classe rattachee a ce compte.',
+              style: const TextStyle(color:AppColors.textMuted)))
+        else
         StreamBuilder<QuerySnapshot>(
-            stream: FirebaseService.streamDevoirs(widget.user.school, 'Terminale C'),
+            stream: FirebaseService.streamDevoirsParClasse(classeAffichee),
             builder: (ctx, snap) {
               if (snap.connectionState == ConnectionState.waiting)
                 return const Center(child: CircularProgressIndicator());
               if (!snap.hasData || snap.data!.docs.isEmpty)
                 return SCCard(child: const Text('Aucun devoir publie.',
                     style:TextStyle(color:AppColors.textMuted)));
+              final docs = snap.data!.docs.toList()
+                ..sort((a,b){
+                  final ta = (a.data() as Map)['createdAt'];
+                  final tb = (b.data() as Map)['createdAt'];
+                  if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
+                  return 0;
+                });
               return SCCard(child: Column(
-                  children: snap.data!.docs.map((d) {
+                  children: docs.map((d) {
                     final data = d.data() as Map<String,dynamic>;
                     return Padding(
                         padding: const EdgeInsets.symmetric(vertical:8),
@@ -1117,6 +1210,186 @@ class _DevoirsPageState extends State<DevoirsPage> {
                         ]));
                   }).toList()));
             }),
+      ]),
+    );
+  }
+}
+
+// ══════════════════════════════════════════
+//  ABSENCES / PRÉSENCES
+// ══════════════════════════════════════════
+class AbsencesPage extends StatefulWidget {
+  final AppUser user;
+  const AbsencesPage({super.key, required this.user});
+  @override State<AbsencesPage> createState() => _AbsencesPageState();
+}
+
+class _AbsencesPageState extends State<AbsencesPage> {
+  String? _selClasseId;
+  late final TextEditingController _dateCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    final d = '${now.year}-${now.month.toString().padLeft(2,'0')}-${now.day.toString().padLeft(2,'0')}';
+    _dateCtrl = TextEditingController(text: d);
+  }
+
+  @override
+  void dispose() { _dateCtrl.dispose(); super.dispose(); }
+
+  Future<void> _marquer(String eleveId, String eleveNom, String statut) async {
+    if (_selClasseId == null) { showSnack(context, 'Choisissez une classe', error:true); return; }
+    await FirebaseService.ajouterAbsence({
+      'eleveId': eleveId,
+      'eleveNom': eleveNom,
+      'ecoleId': widget.user.school,
+      'classeId': _selClasseId,
+      'date': _dateCtrl.text.trim(),
+      'statut': statut, // 'absent' ou 'retard'
+      'justifie': false,
+      'professeurId': widget.user.uid,
+    });
+    if (mounted) {
+      showSnack(context, '$eleveNom : ${statut == 'absent' ? 'absent' : 'en retard'} le ${_dateCtrl.text.trim()}');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isProf = widget.user.role==UserRole.prof || widget.user.role==UserRole.admin;
+
+    if (isProf) {
+      // ---- PROF : faire l'appel ----
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+          SectionTitle('Faire l appel'),
+          SCCard(child: Column(children:[
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseService.streamClasses(widget.user.school),
+              builder: (ctx, snap) {
+                if (!snap.hasData) {
+                  return const Text('Chargement des classes...',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                final classes = snap.data!.docs;
+                if (classes.isEmpty) {
+                  return const Text('Aucune classe disponible.',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                return DropdownButtonFormField<String>(
+                    value: _selClasseId, isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Classe'),
+                    hint: const Text('Choisir une classe'),
+                    items: classes.map((doc) {
+                      final d = doc.data() as Map<String,dynamic>;
+                      return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                    }).toList(),
+                    onChanged: (v)=>setState(()=>_selClasseId=v));
+              }),
+            const SizedBox(height:10),
+            TextField(controller: _dateCtrl,
+                decoration: const InputDecoration(labelText: 'Date (AAAA-MM-JJ)')),
+          ])),
+          const SizedBox(height:20),
+          SectionTitle('Eleves de la classe'),
+          if (_selClasseId == null)
+            SCCard(child: const Text('Choisissez une classe ci-dessus.',
+                style: TextStyle(color: AppColors.textMuted)))
+          else
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseService.streamEleves(widget.user.school),
+            builder: (ctx, snap) {
+              if (snap.connectionState==ConnectionState.waiting)
+                return const Center(child: CircularProgressIndicator());
+              final eleves = (snap.data?.docs ?? [])
+                  .where((d)=>(d.data() as Map)['classeId']==_selClasseId).toList();
+              if (eleves.isEmpty)
+                return SCCard(child: const Text('Aucun eleve dans cette classe.',
+                    style: TextStyle(color: AppColors.textMuted)));
+              return Column(children: eleves.map((d){
+                final data = d.data() as Map<String,dynamic>;
+                final nom = (data['nom'] ?? '').toString();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom:10),
+                  child: SCCard(child: Row(children:[
+                    Expanded(child: Text(nom,
+                        style: const TextStyle(fontSize:13, fontWeight: FontWeight.w700))),
+                    OutlinedButton(
+                        onPressed: ()=>_marquer(d.id, nom, 'retard'),
+                        style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.gold,
+                            side: const BorderSide(color: AppColors.gold),
+                            padding: const EdgeInsets.symmetric(horizontal:10, vertical:6)),
+                        child: const Text('Retard', style: TextStyle(fontSize:12))),
+                    const SizedBox(width:8),
+                    ElevatedButton(
+                        onPressed: ()=>_marquer(d.id, nom, 'absent'),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.red,
+                            padding: const EdgeInsets.symmetric(horizontal:10, vertical:8)),
+                        child: const Text('Absent', style: TextStyle(fontSize:12))),
+                  ])),
+                );
+              }).toList());
+            }),
+        ]),
+      );
+    }
+
+    // ---- ÉLÈVE / PARENT : consulter ----
+    final cible = widget.user.role == UserRole.parent ? widget.user.childId : widget.user.uid;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+        SectionTitle('Absences et retards'),
+        if (cible == null)
+          SCCard(child: const Text('Aucun eleve rattache a ce compte.',
+              style: TextStyle(color: AppColors.textMuted)))
+        else
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseService.streamAbsencesEleve(cible),
+          builder: (ctx, snap) {
+            if (snap.connectionState==ConnectionState.waiting)
+              return const Center(child: CircularProgressIndicator());
+            if (!snap.hasData || snap.data!.docs.isEmpty)
+              return SCCard(child: const Text('Aucune absence enregistree. 👍',
+                  style: TextStyle(color: AppColors.textMuted)));
+            final docs = snap.data!.docs.toList()
+              ..sort((a,b)=>((b.data() as Map)['date']??'').toString()
+                  .compareTo(((a.data() as Map)['date']??'').toString()));
+            return Column(children: docs.map((d){
+              final data = d.data() as Map<String,dynamic>;
+              final retard = data['statut']=='retard';
+              final justifie = data['justifie']==true;
+              return Padding(padding: const EdgeInsets.only(bottom:10),
+                child: SCCard(child: Row(children:[
+                  Container(width:40,height:40,
+                      decoration: BoxDecoration(
+                          color: retard?AppColors.goldBg:AppColors.redBg,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Icon(retard?Icons.schedule_rounded:Icons.event_busy_rounded,
+                          color: retard?AppColors.gold:AppColors.red, size:20)),
+                  const SizedBox(width:12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                    Text(retard?'Retard':'Absence',
+                        style: const TextStyle(fontSize:13, fontWeight: FontWeight.w700)),
+                    Text(data['date']??'',
+                        style: const TextStyle(fontSize:12, color: AppColors.textMuted)),
+                  ])),
+                  Container(padding: const EdgeInsets.symmetric(horizontal:8, vertical:3),
+                      decoration: BoxDecoration(
+                          color: justifie?AppColors.greenBg:AppColors.bg,
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text(justifie?'Justifie':'Non justifie',
+                          style: TextStyle(fontSize:10, fontWeight: FontWeight.w800,
+                              color: justifie?AppColors.green:AppColors.textMuted))),
+                ])),
+              );
+            }).toList());
+          }),
       ]),
     );
   }

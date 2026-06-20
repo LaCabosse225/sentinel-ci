@@ -305,6 +305,55 @@ class FirebaseService {
           .where('role', isEqualTo: 'eleve')
           .where('ecoleId', isEqualTo: ecoleId)
           .snapshots();
+
+  // Stream des classes d'une école (pour le formulaire d'ajout d'élève)
+  static Stream<QuerySnapshot> streamClasses(String ecoleId) =>
+      _db.collection('classes')
+          .where('ecoleId', isEqualTo: ecoleId)
+          .snapshots();
+
+  // Crée un élève : compte de connexion + fiche, SANS déconnecter l'admin.
+  // Retourne null si succès, ou un message d'erreur lisible sinon.
+  static Future<String?> creerEleve({
+    required String nom,
+    required String email,
+    required String motDePasse,
+    required String ecoleId,
+    required String classeId,
+    required String matricule,
+  }) async {
+    FirebaseApp? appSecondaire;
+    try {
+      // Session secondaire isolée : crée le compte sans toucher à celle de l'admin
+      appSecondaire = await Firebase.initializeApp(
+        name: 'createur_${DateTime.now().millisecondsSinceEpoch}',
+        options: Firebase.app().options,
+      );
+      final cred = await FirebaseAuth.instanceFor(app: appSecondaire)
+          .createUserWithEmailAndPassword(
+              email: email.trim(), password: motDePasse.trim());
+      final uid = cred.user!.uid;
+      // Fiche écrite par l'app => collection 'utilisateurs' propre, garantie
+      await _db.collection('utilisateurs').doc(uid).set({
+        'nom': nom.trim(),
+        'email': email.trim(),
+        'role': 'eleve',
+        'ecoleId': ecoleId,
+        'classeId': classeId,
+        'matricule': matricule.trim(),
+      });
+      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') return 'Cet email est deja utilise.';
+      if (e.code == 'weak-password') return 'Mot de passe trop faible (6 caracteres min).';
+      if (e.code == 'invalid-email') return 'Adresse email invalide.';
+      return 'Erreur : ${e.code}';
+    } catch (e) {
+      return 'Erreur : $e';
+    } finally {
+      await appSecondaire?.delete();
+    }
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1448,39 +1497,168 @@ class UtilisateursPage extends StatelessWidget {
       'prof':    (AppColors.orange, AppColors.orangeBg),
       'admin':   (AppColors.purple, AppColors.purpleBg),
     };
-    return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseService.streamUtilisateurs(),
-        builder:(ctx, snap){
-          if (snap.connectionState==ConnectionState.waiting)
-            return const Center(child:CircularProgressIndicator());
-          if (!snap.hasData||snap.data!.docs.isEmpty)
-            return const Center(child:Text('Aucun utilisateur.'));
-          return ListView.separated(
-              padding:const EdgeInsets.all(16),
-              itemCount:snap.data!.docs.length,
-              separatorBuilder:(_,__)=>const SizedBox(height:10),
-              itemBuilder:(_,i){
-                final data = snap.data!.docs[i].data() as Map<String,dynamic>;
-                final role = data['role']??'eleve';
-                final rc = roleColors[role]??(AppColors.green,AppColors.greenBg);
-                return SCCard(child:Row(children:[
-                  CircleAvatar(radius:20, backgroundColor:rc.$1,
-                      child:Text((data['nom']??'?')[0].toUpperCase(),
-                          style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w800))),
-                  const SizedBox(width:12),
-                  Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-                    Text(data['nom']??'',
-                        style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),
-                    Text(data['ecoleId']??'',
-                        style:const TextStyle(fontSize:11,color:AppColors.textMuted)),
-                  ])),
-                  Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
-                      decoration:BoxDecoration(color:rc.$2,borderRadius:BorderRadius.circular(8)),
-                      child:Text(role,
-                          style:TextStyle(fontSize:10,fontWeight:FontWeight.w800,color:rc.$1))),
-                ]));
-              });
-        });
+    return Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => AjouterElevePage(user: user))),
+            icon: const Icon(Icons.person_add_rounded, size: 18),
+            label: const Text('Ajouter un eleve'),
+          ),
+        ),
+      ),
+      Expanded(
+        child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseService.streamUtilisateurs(),
+            builder:(ctx, snap){
+              if (snap.connectionState==ConnectionState.waiting)
+                return const Center(child:CircularProgressIndicator());
+              if (!snap.hasData||snap.data!.docs.isEmpty)
+                return const Center(child:Text('Aucun utilisateur.'));
+              return ListView.separated(
+                  padding:const EdgeInsets.all(16),
+                  itemCount:snap.data!.docs.length,
+                  separatorBuilder:(_,__)=>const SizedBox(height:10),
+                  itemBuilder:(_,i){
+                    final data = snap.data!.docs[i].data() as Map<String,dynamic>;
+                    final role = data['role']??'eleve';
+                    final rc = roleColors[role]??(AppColors.green,AppColors.greenBg);
+                    return SCCard(child:Row(children:[
+                      CircleAvatar(radius:20, backgroundColor:rc.$1,
+                          child:Text((data['nom']??'?')[0].toUpperCase(),
+                              style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w800))),
+                      const SizedBox(width:12),
+                      Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+                        Text(data['nom']??'',
+                            style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),
+                        Text(data['ecoleId']??'',
+                            style:const TextStyle(fontSize:11,color:AppColors.textMuted)),
+                      ])),
+                      Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
+                          decoration:BoxDecoration(color:rc.$2,borderRadius:BorderRadius.circular(8)),
+                          child:Text(role,
+                              style:TextStyle(fontSize:10,fontWeight:FontWeight.w800,color:rc.$1))),
+                    ]));
+                  });
+            }),
+      ),
+    ]);
+  }
+}
+
+// ══════════════════════════════════════════
+//  AJOUTER UN ÉLÈVE (ADMIN)
+// ══════════════════════════════════════════
+class AjouterElevePage extends StatefulWidget {
+  final AppUser user;
+  const AjouterElevePage({super.key, required this.user});
+  @override State<AjouterElevePage> createState() => _AjouterElevePageState();
+}
+
+class _AjouterElevePageState extends State<AjouterElevePage> {
+  final _nom = TextEditingController();
+  final _email = TextEditingController();
+  final _pw = TextEditingController();
+  final _matricule = TextEditingController();
+  String? _classeId;
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _nom.dispose(); _email.dispose(); _pw.dispose(); _matricule.dispose();
+    super.dispose();
+  }
+
+  Future<void> _enregistrer() async {
+    if (_nom.text.trim().isEmpty) { showSnack(context, 'Renseignez le nom', error:true); return; }
+    if (_email.text.trim().isEmpty) { showSnack(context, 'Renseignez l email', error:true); return; }
+    if (_pw.text.trim().length < 6) { showSnack(context, 'Mot de passe : 6 caracteres min', error:true); return; }
+    if (_classeId == null) { showSnack(context, 'Choisissez une classe', error:true); return; }
+
+    setState(() => _loading = true);
+    final erreur = await FirebaseService.creerEleve(
+      nom: _nom.text,
+      email: _email.text,
+      motDePasse: _pw.text,
+      ecoleId: widget.user.school,
+      classeId: _classeId!,
+      matricule: _matricule.text,
+    );
+    if (!mounted) return;
+    setState(() => _loading = false);
+    if (erreur == null) {
+      showSnack(context, 'Eleve ajoute avec succes !');
+      Navigator.pop(context);
+    } else {
+      showSnack(context, erreur, error: true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ajouter un eleve')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SCCard(child: Column(children: [
+            TextField(controller: _nom, textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Nom complet')),
+            const SizedBox(height: 10),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseService.streamClasses(widget.user.school),
+              builder: (ctx, snap) {
+                if (!snap.hasData) {
+                  return const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                      child: Text('Chargement des classes...',
+                          style: TextStyle(color: AppColors.textMuted)));
+                }
+                final classes = snap.data!.docs;
+                if (classes.isEmpty) {
+                  return const Padding(padding: EdgeInsets.symmetric(vertical:8),
+                      child: Text('Aucune classe. Creez d abord une classe.',
+                          style: TextStyle(color: AppColors.textMuted)));
+                }
+                return DropdownButtonFormField<String>(
+                    value: _classeId,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Classe'),
+                    hint: const Text('Choisir une classe'),
+                    items: classes.map((doc) {
+                      final d = doc.data() as Map<String, dynamic>;
+                      return DropdownMenuItem(value: doc.id,
+                          child: Text(d['nom'] ?? doc.id));
+                    }).toList(),
+                    onChanged: (v) => setState(() => _classeId = v));
+              }),
+            const SizedBox(height: 10),
+            TextField(controller: _matricule,
+                decoration: const InputDecoration(labelText: 'Matricule (ex: EL002)')),
+          ])),
+          const SizedBox(height: 16),
+          SectionTitle('Identifiants de connexion de l eleve'),
+          SCCard(child: Column(children: [
+            TextField(controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email')),
+            const SizedBox(height: 10),
+            TextField(controller: _pw,
+                decoration: const InputDecoration(labelText: 'Mot de passe (6 caracteres min)')),
+          ])),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, child: ElevatedButton(
+            onPressed: _loading ? null : _enregistrer,
+            child: _loading
+                ? const SizedBox(height:18, width:18,
+                    child: CircularProgressIndicator(strokeWidth:2, color:Colors.white))
+                : const Text('Creer le compte eleve'),
+          )),
+        ]),
+      ),
+    );
   }
 }
 

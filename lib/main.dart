@@ -1050,11 +1050,56 @@ class _NotesPageState extends State<NotesPage> {
               if (!snap.hasData || snap.data!.docs.isEmpty)
                 return SCCard(child:const Text('Aucune note enregistree.',
                     style:TextStyle(color:AppColors.textMuted)));
-              return SCCard(padding:EdgeInsets.zero, child:Column(
-                  children: snap.data!.docs.asMap().entries.map((e) {
+              final docs = snap.data!.docs;
+              // ---- Calcul automatique des moyennes (note x coefficient) ----
+              final Map<String,double> pts = {}; // matiere -> somme(note*coef)
+              final Map<String,double> cfs = {}; // matiere -> somme(coef)
+              for (final d in docs) {
+                final m = d.data() as Map<String,dynamic>;
+                final mat = (m['matiere'] ?? 'Autre').toString();
+                final nt = (m['note'] as num?)?.toDouble() ?? 0;
+                final cf = (m['coefficient'] as num?)?.toDouble() ?? 1;
+                pts[mat] = (pts[mat] ?? 0) + nt*cf;
+                cfs[mat] = (cfs[mat] ?? 0) + cf;
+              }
+              double totPts = 0, totCfs = 0;
+              pts.forEach((k,v) => totPts += v);
+              cfs.forEach((k,v) => totCfs += v);
+              final moyGen = totCfs > 0 ? totPts/totCfs : 0.0;
+              return Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                // ---- Carte Moyennes ----
+                SCCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                  Row(children:[
+                    const Expanded(child: Text('Moyenne generale',
+                        style: TextStyle(fontSize:14, fontWeight: FontWeight.w800))),
+                    Text('${moyGen.toStringAsFixed(2)}/20',
+                        style: TextStyle(fontSize:18, fontWeight: FontWeight.w800,
+                            color: moyGen>=10?AppColors.green:AppColors.red)),
+                  ]),
+                  const Divider(height:20),
+                  ...pts.keys.map((mat){
+                    final moy = (cfs[mat] ?? 0) > 0 ? pts[mat]!/cfs[mat]! : 0.0;
+                    return Padding(padding: const EdgeInsets.symmetric(vertical:4),
+                      child: Row(children:[
+                        Expanded(child: Text(mat, style: const TextStyle(fontSize:12.5))),
+                        Text('${moy.toStringAsFixed(2)}/20',
+                            style: TextStyle(fontSize:12.5, fontWeight: FontWeight.w700,
+                                color: moy>=10?AppColors.green:AppColors.red)),
+                      ]));
+                  }),
+                ])),
+                const SizedBox(height:12),
+                // ---- Simulateur (eleve / parent) ----
+                if (!isProf) ...[
+                  SimulateurMoyenne(points: pts, coefs: cfs),
+                  const SizedBox(height:12),
+                ],
+                // ---- Detail des notes ----
+                SCCard(padding:EdgeInsets.zero, child:Column(
+                  children: docs.asMap().entries.map((e) {
                     final data = e.value.data() as Map<String,dynamic>;
                     final note = (data['note'] as num?)?.toDouble() ?? 0;
-                    final last = e.key == snap.data!.docs.length - 1;
+                    final last = e.key == docs.length - 1;
                     return Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
@@ -1072,10 +1117,105 @@ class _NotesPageState extends State<NotesPage> {
                           ])),
                           NotePill(note:note),
                         ]));
-                  }).toList()));
+                  }).toList())),
+              ]);
             }),
       ]),
     );
+  }
+}
+
+// ══════════════════════════════════════════
+//  SIMULATEUR DE MOYENNE (espace élève)
+// ══════════════════════════════════════════
+class SimulateurMoyenne extends StatefulWidget {
+  final Map<String,double> points; // matiere -> somme(note*coef)
+  final Map<String,double> coefs;  // matiere -> somme(coef)
+  const SimulateurMoyenne({super.key, required this.points, required this.coefs});
+  @override State<SimulateurMoyenne> createState() => _SimulateurMoyenneState();
+}
+
+class _SimulateurMoyenneState extends State<SimulateurMoyenne> {
+  String? _matiere;
+  final _cibleCtrl = TextEditingController(text: '10');
+  final _coefCtrl  = TextEditingController(text: '1');
+  String? _resultat;
+  Color _resColor = AppColors.green;
+
+  @override
+  void dispose() { _cibleCtrl.dispose(); _coefCtrl.dispose(); super.dispose(); }
+
+  void _calculer() {
+    if (_matiere == null) {
+      showSnack(context, 'Choisis une matiere', error:true); return;
+    }
+    final S = widget.points[_matiere] ?? 0;     // points actuels
+    final C = widget.coefs[_matiere] ?? 0;      // coefs actuels
+    final M = double.tryParse(_cibleCtrl.text.replaceAll(',', '.')) ?? 10; // cible
+    final k = double.tryParse(_coefCtrl.text.replaceAll(',', '.')) ?? 1;   // coef du prochain
+    if (k <= 0) { showSnack(context, 'Coefficient invalide', error:true); return; }
+
+    final x = (M*(C+k) - S) / k; // note necessaire
+    String msg; Color col;
+    if (x <= 0) {
+      msg = 'Bonne nouvelle : la moyenne de ${M.toStringAsFixed(0)} est deja assuree, '
+            'meme avec 0 au prochain ! 🎉';
+      col = AppColors.green;
+    } else if (x > 20) {
+      msg = 'Avec une seule note, atteindre ${M.toStringAsFixed(0)} ne sera pas possible ce coup-ci '
+            '(il faudrait plus de 20/20). Mais chaque note compte — accroche-toi ! 💪';
+      col = AppColors.red;
+    } else {
+      msg = 'Il te faut au moins ${x.toStringAsFixed(2)}/20 au prochain '
+            '(coef ${k.toString().replaceAll('.0','')}) pour atteindre ${M.toStringAsFixed(0)} de moyenne en $_matiere. Tu peux le faire ! 💪';
+      col = x <= 12 ? AppColors.green : AppColors.gold;
+    }
+    setState(() { _resultat = msg; _resColor = col; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final matieres = widget.points.keys.toList()..sort();
+    return SCCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+      Row(children: const [
+        Icon(Icons.calculate_rounded, size:18, color: AppColors.green),
+        SizedBox(width:8),
+        Text('Simulateur de moyenne', style: TextStyle(fontSize:14, fontWeight: FontWeight.w800)),
+      ]),
+      const SizedBox(height:4),
+      const Text('Quelle note te faut-il au prochain devoir ?',
+          style: TextStyle(fontSize:12, color: AppColors.textMuted)),
+      const SizedBox(height:12),
+      DropdownButtonFormField<String>(
+          value: _matiere, isExpanded: true,
+          decoration: const InputDecoration(labelText: 'Matiere'),
+          hint: const Text('Choisir une matiere'),
+          items: matieres.map((m)=>DropdownMenuItem(value:m, child:Text(m))).toList(),
+          onChanged: (v)=>setState((){ _matiere = v; _resultat = null; })),
+      const SizedBox(height:10),
+      Row(children:[
+        Expanded(child: TextField(controller:_cibleCtrl, keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Moyenne visee'))),
+        const SizedBox(width:10),
+        Expanded(child: TextField(controller:_coefCtrl, keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Coef du prochain'))),
+      ]),
+      const SizedBox(height:12),
+      SizedBox(width: double.infinity, child: ElevatedButton(
+          onPressed: _calculer, child: const Text('Calculer'))),
+      if (_resultat != null) ...[
+        const SizedBox(height:12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+              color: _resColor.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _resColor.withOpacity(0.4))),
+          child: Text(_resultat!, style: TextStyle(fontSize:13, fontWeight: FontWeight.w600, color: _resColor)),
+        ),
+      ],
+    ]));
   }
 }
 

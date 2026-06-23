@@ -404,6 +404,15 @@ class FirebaseService {
   static Future<void> creerClasse(Map<String, dynamic> data) =>
       _db.collection('classes').add(data);
 
+  // Matières d'une école (1 filtre => pas d'index)
+  static Stream<QuerySnapshot> streamMatieres(String ecoleId) =>
+      _db.collection('matieres')
+          .where('ecoleId', isEqualTo: ecoleId)
+          .snapshots();
+
+  static Future<void> creerMatiere(Map<String, dynamic> data) =>
+      _db.collection('matieres').add(data);
+
   // Crée un compte (eleve, prof ou parent) : connexion + fiche, SANS déconnecter l'admin.
   // 'champs' contient role, ecoleId et les champs propres au rôle.
   // Retourne null si succès, ou un message d'erreur lisible sinon.
@@ -2190,25 +2199,39 @@ class UtilisateursPage extends StatelessWidget {
     return Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Row(children: [
-          Expanded(child: ElevatedButton.icon(
+        child: Column(children: [
+          SizedBox(width: double.infinity, child: ElevatedButton.icon(
             onPressed: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => AjouterUtilisateurPage(user: user))),
             icon: const Icon(Icons.person_add_rounded, size: 18),
-            label: const Text('Ajouter'),
+            label: const Text('Ajouter un utilisateur'),
           )),
-          const SizedBox(width: 10),
-          Expanded(child: OutlinedButton.icon(
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => ClassesPage(user: user))),
-            icon: const Icon(Icons.class_rounded, size: 18),
-            label: const Text('Classes'),
-            style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.green,
-                side: const BorderSide(color: AppColors.green),
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          )),
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => ClassesPage(user: user))),
+              icon: const Icon(Icons.class_rounded, size: 18),
+              label: const Text('Classes'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.green,
+                  side: const BorderSide(color: AppColors.green),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => MatieresPage(user: user))),
+              icon: const Icon(Icons.menu_book_rounded, size: 18),
+              label: const Text('Matieres'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.green,
+                  side: const BorderSide(color: AppColors.green),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            )),
+          ]),
         ]),
       ),
       Expanded(
@@ -2375,6 +2398,133 @@ class _ClassesPageState extends State<ClassesPage> {
                 });
           })),
       ]),
+    );
+  }
+}
+
+// ══════════════════════════════════════════
+//  MATIÈRES (ADMIN / DIRECTEUR) — liste + création
+// ══════════════════════════════════════════
+class MatieresPage extends StatefulWidget {
+  final AppUser user;
+  const MatieresPage({super.key, required this.user});
+  @override State<MatieresPage> createState() => _MatieresPageState();
+}
+
+class _MatieresPageState extends State<MatieresPage> {
+  final _nom = TextEditingController();
+
+  // Liste de démarrage rapide (matières courantes en Côte d'Ivoire)
+  static const _courantes = [
+    'Mathematiques','Physique-Chimie','SVT','Francais','Anglais',
+    'Histoire-Geographie','EPS','Philosophie','Allemand','Espagnol',
+    'Informatique','Education civique et morale','Arts plastiques','Musique',
+  ];
+
+  @override
+  void dispose() { _nom.dispose(); super.dispose(); }
+
+  void _showAdd() {
+    showModalBottomSheet(context: context, isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (_) => Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Ajouter une matiere',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 16),
+              TextField(controller: _nom, textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(labelText: 'Nom de la matiere')),
+              const SizedBox(height: 16),
+              SizedBox(width: double.infinity, child: ElevatedButton(
+                  onPressed: () async {
+                    if (_nom.text.trim().isEmpty) {
+                      showSnack(context, 'Renseignez le nom', error: true); return;
+                    }
+                    await FirebaseService.creerMatiere({
+                      'nom': _nom.text.trim(),
+                      'ecoleId': widget.user.school,
+                    });
+                    _nom.clear();
+                    if (mounted) {
+                      Navigator.pop(context);
+                      showSnack(context, 'Matiere ajoutee !');
+                    }
+                  },
+                  child: const Text('Creer la matiere'))),
+            ])));
+  }
+
+  Future<void> _seedCourantes(List<String> existantes) async {
+    int ajoutees = 0;
+    for (final m in _courantes) {
+      if (!existantes.contains(m.toLowerCase())) {
+        await FirebaseService.creerMatiere({'nom': m, 'ecoleId': widget.user.school});
+        ajoutees++;
+      }
+    }
+    if (mounted) {
+      showSnack(context, ajoutees == 0
+          ? 'Les matieres courantes sont deja presentes.'
+          : '$ajoutees matiere(s) ajoutee(s).');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Matieres')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseService.streamMatieres(widget.user.school),
+        builder: (ctx, snap) {
+          final docs = snap.hasData ? snap.data!.docs.toList() : [];
+          docs.sort((a,b)=>((a.data() as Map)['nom']??'').toString()
+              .toLowerCase().compareTo(((b.data() as Map)['nom']??'').toString().toLowerCase()));
+          final existantes = docs.map((d)=>((d.data() as Map)['nom']??'').toString().toLowerCase()).toList();
+          return Column(children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(children: [
+                SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                  onPressed: _showAdd,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Ajouter une matiere'),
+                )),
+                const SizedBox(height: 10),
+                SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                  onPressed: () => _seedCourantes(existantes),
+                  icon: const Icon(Icons.playlist_add_check_rounded, size: 18),
+                  label: const Text('Ajouter les matieres courantes'),
+                  style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.green,
+                      side: const BorderSide(color: AppColors.green),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                )),
+              ]),
+            ),
+            Expanded(child: !snap.hasData
+                ? const Center(child: CircularProgressIndicator())
+                : docs.isEmpty
+                  ? const Center(child: Text('Aucune matiere. Ajoutez-en une.'))
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      itemCount: docs.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, i) {
+                        final d = docs[i].data() as Map<String, dynamic>;
+                        return SCCard(child: Row(children: [
+                          Container(width: 38, height: 38,
+                              decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
+                              child: const Icon(Icons.menu_book_rounded, color: AppColors.green, size: 19)),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(d['nom'] ?? '',
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+                        ]));
+                      })),
+          ]);
+        }),
     );
   }
 }
@@ -2600,12 +2750,30 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
             // ---- Champs PROF : matière (obligatoire) + classes enseignées ----
             if (_role == 'prof') ...[
               const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                  value: _profMatiere, isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Matiere enseignee'),
-                  hint: const Text('Choisir la matiere'),
-                  items: _matieresProf.map((m)=>DropdownMenuItem(value:m, child:Text(m))).toList(),
-                  onChanged: (v)=>setState(()=>_profMatiere=v)),
+              if (_ecoleId == null)
+                const Text('Choisissez d abord une ecole.',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 12))
+              else
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamMatieres(_ecoleId!),
+                builder: (ctx, snap) {
+                  if (!snap.hasData) {
+                    return const Text('Chargement des matieres...',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 12));
+                  }
+                  final mats = snap.data!.docs;
+                  if (mats.isEmpty) {
+                    return const Text('Aucune matiere. Ajoutez-en via le bouton "Matieres".',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 12));
+                  }
+                  final noms = mats.map((d)=>((d.data() as Map)['nom']??'').toString()).toList()..sort();
+                  return DropdownButtonFormField<String>(
+                      value: _profMatiere, isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Matiere enseignee'),
+                      hint: const Text('Choisir la matiere'),
+                      items: noms.map((m)=>DropdownMenuItem(value:m, child:Text(m))).toList(),
+                      onChanged: (v)=>setState(()=>_profMatiere=v));
+                }),
               const SizedBox(height: 14),
               const Text('Classes enseignees',
                   style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),

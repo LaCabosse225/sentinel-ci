@@ -144,6 +144,26 @@ class AppUser {
   return (generale: tc > 0 ? tp/tc : 0.0, parMatiere: parMatiere);
 }
 
+// Mention ivoirienne d'après la moyenne /20
+String mentionDe(double m) {
+  if (m >= 16) return 'Excellent';
+  if (m >= 14) return 'Tres Bien';
+  if (m >= 12) return 'Bien';
+  if (m >= 10) return 'Assez Bien';
+  if (m >= 8)  return 'Passable';
+  return 'Insuffisant';
+}
+
+// Appréciation bienveillante d'après la moyenne /20
+String appreciationDe(double m) {
+  if (m >= 16) return 'Travail remarquable. Continue ainsi, tu es sur une excellente voie !';
+  if (m >= 14) return 'Tres bon trimestre. Poursuis tes efforts, c est tres encourageant.';
+  if (m >= 12) return 'Bon ensemble. Avec un peu plus de regularite, tu iras encore plus haut.';
+  if (m >= 10) return 'Resultats corrects. Accroche-toi, tu as les capacites pour progresser.';
+  if (m >= 8)  return 'Trimestre en demi-teinte. Des efforts cibles te feront vite remonter.';
+  return 'Trimestre difficile, mais ne te decourage pas. On est la pour t aider a rebondir.';
+}
+
 // ══════════════════════════════════════════
 //  SERVICE FIREBASE
 // ══════════════════════════════════════════
@@ -275,6 +295,13 @@ class FirebaseService {
   // Récupère une fois toutes les notes d'un élève (pour le prof principal)
   static Future<QuerySnapshot> getNotesEleve(String eleveId) =>
       _db.collection('notes').where('eleveId', isEqualTo: eleveId).get();
+
+  // Récupère une fois les élèves d'une école (pour le rang dans le bulletin)
+  static Future<QuerySnapshot> getElevesEcole(String ecoleId) =>
+      _db.collection('utilisateurs')
+          .where('role', isEqualTo: 'eleve')
+          .where('ecoleId', isEqualTo: ecoleId)
+          .get();
 
   // Publier devoir
   static Future<void> publierDevoir(Map<String,dynamic> devoir) async {
@@ -959,8 +986,24 @@ class DashboardPage extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing:12, mainAxisSpacing:12, childAspectRatio:0.95,
               children:[
-                StatCard(value:'--', label:'Moyenne generale', sub:'Chargement...', icon:Icons.bar_chart_rounded, color:AppColors.green, iconBg:AppColors.greenBg),
-                StatCard(value:'--', label:'Rang classe', sub:'Chargement...', icon:Icons.emoji_events_rounded, color:AppColors.gold, iconBg:AppColors.goldBg),
+                Builder(builder: (context){
+                  final cibleId = user.role == UserRole.parent ? user.childId
+                                : (user.role == UserRole.eleve ? user.uid : null);
+                  if (cibleId == null) {
+                    return StatCard(value:'--', label:'Moyenne generale', sub:'-', icon:Icons.bar_chart_rounded, color:AppColors.green, iconBg:AppColors.greenBg);
+                  }
+                  return FutureBuilder<QuerySnapshot>(
+                    future: FirebaseService.getNotesEleve(cibleId),
+                    builder: (ctx, s){
+                      String val = '...'; String sub = 'Calcul...';
+                      if (s.hasData) {
+                        if (s.data!.docs.isEmpty) { val = '--'; sub = 'Aucune note'; }
+                        else { val = calculerMoyennes(s.data!.docs).generale.toStringAsFixed(2); sub = 'Sur 20'; }
+                      }
+                      return StatCard(value:val, label:'Moyenne generale', sub:sub, icon:Icons.bar_chart_rounded, color:AppColors.green, iconBg:AppColors.greenBg);
+                    });
+                }),
+                StatCard(value:'--', label:'Rang classe', sub:'Voir bulletin', icon:Icons.emoji_events_rounded, color:AppColors.gold, iconBg:AppColors.goldBg),
                 StatCard(value:'--', label:'Devoirs urgents', sub:'Chargement...', icon:Icons.assignment_late_rounded, color:AppColors.orange, iconBg:AppColors.orangeBg),
                 StatCard(value:'--', label:'Alertes', sub:'Non lues', icon:Icons.notifications_rounded, color:AppColors.red, iconBg:AppColors.redBg),
               ]),
@@ -1190,6 +1233,29 @@ class _NotesPageState extends State<NotesPage> {
                 const SizedBox(height:12),
                 // ---- Simulateur (eleve / parent) ----
                 if (!isProf) ...[
+                  // Bouton bulletin (élève / parent) si une classe est connue
+                  if (widget.user.classeId != null) ...[
+                    SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                      onPressed: () {
+                        final cible = widget.user.role == UserRole.parent
+                            ? widget.user.childId : widget.user.uid;
+                        Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                          BulletinPage(
+                            eleveId: cible!,
+                            eleveNom: widget.user.role == UserRole.parent ? 'Mon enfant' : widget.user.name,
+                            classeId: widget.user.classeId!,
+                            ecoleId: widget.user.school)));
+                      },
+                      icon: const Icon(Icons.description_rounded, size: 18),
+                      label: const Text('Voir le bulletin (rang + mention)'),
+                      style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.green,
+                          side: const BorderSide(color: AppColors.green),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                    )),
+                    const SizedBox(height:12),
+                  ],
                   SimulateurMoyenne(points: pts, coefs: cfs),
                   const SizedBox(height:12),
                 ],
@@ -1365,7 +1431,8 @@ class MoyennesClassePage extends StatelessWidget {
                   }
                   return InkWell(
                     onTap: () => Navigator.push(context, MaterialPageRoute(
-                        builder: (_) => MoyenneEleveDetailPage(eleveNom: nom, eleveId: eleveId))),
+                        builder: (_) => MoyenneEleveDetailPage(eleveNom: nom, eleveId: eleveId,
+                            classeId: user.classePrincipale, ecoleId: user.school))),
                     borderRadius: BorderRadius.circular(14),
                     child: SCCard(child: Row(children:[
                       CircleAvatar(radius:18, backgroundColor: AppColors.greenBg,
@@ -1388,7 +1455,10 @@ class MoyennesClassePage extends StatelessWidget {
 class MoyenneEleveDetailPage extends StatelessWidget {
   final String eleveNom;
   final String eleveId;
-  const MoyenneEleveDetailPage({super.key, required this.eleveNom, required this.eleveId});
+  final String? classeId;
+  final String? ecoleId;
+  const MoyenneEleveDetailPage({super.key, required this.eleveNom, required this.eleveId,
+      this.classeId, this.ecoleId});
 
   @override
   Widget build(BuildContext context) {
@@ -1425,10 +1495,168 @@ class MoyenneEleveDetailPage extends StatelessWidget {
                             color: moy >= 10 ? AppColors.green : AppColors.red)),
                   ]));
               }).toList())),
+              if (classeId != null && ecoleId != null) ...[
+                const SizedBox(height: 16),
+                SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                    BulletinPage(eleveId: eleveId, eleveNom: eleveNom,
+                        classeId: classeId!, ecoleId: ecoleId!))),
+                  icon: const Icon(Icons.description_rounded, size: 18),
+                  label: const Text('Voir le bulletin complet'),
+                )),
+              ],
             ]),
           );
         }),
     );
+  }
+}
+
+// ══════════════════════════════════════════
+//  BULLETIN (moyennes + rang + mention + appréciation)
+// ══════════════════════════════════════════
+class BulletinPage extends StatelessWidget {
+  final String eleveId, eleveNom, classeId, ecoleId;
+  const BulletinPage({super.key, required this.eleveId, required this.eleveNom,
+      required this.classeId, required this.ecoleId});
+
+  Future<Map<String,dynamic>> _calcul() async {
+    // Nom de l'école
+    String ecoleNom = ecoleId;
+    try {
+      final ecSnap = await FirebaseService.streamToutesEcoles().first;
+      for (final d in ecSnap.docs) {
+        if (d.id == ecoleId) { ecoleNom = ((d.data() as Map)['nom'] ?? ecoleId).toString(); break; }
+      }
+    } catch (_) {}
+    // Nom de la classe
+    String classeNom = '';
+    try {
+      final clSnap = await FirebaseService.streamClasses(ecoleId).first;
+      for (final d in clSnap.docs) {
+        if (d.id == classeId) { classeNom = ((d.data() as Map)['nom'] ?? '').toString(); break; }
+      }
+    } catch (_) {}
+    // Roster de la classe + moyenne de chacun (pour le rang)
+    final elevesSnap = await FirebaseService.getElevesEcole(ecoleId);
+    final classmates = elevesSnap.docs
+        .where((d)=>(d.data() as Map)['classeId'] == classeId).toList();
+    final List<MapEntry<String,double>> liste = [];
+    Map<String,double> maMat = {};
+    double maMoy = 0;
+    String nomCible = eleveNom;
+    for (final c in classmates) {
+      final notes = await FirebaseService.getNotesEleve(c.id);
+      final m = calculerMoyennes(notes.docs);
+      liste.add(MapEntry(c.id, m.generale));
+      if (c.id == eleveId) {
+        maMoy = m.generale; maMat = m.parMatiere;
+        nomCible = ((c.data() as Map)['nom'] ?? eleveNom).toString();
+      }
+    }
+    liste.sort((a,b)=>b.value.compareTo(a.value));
+    final rang = liste.indexWhere((e)=>e.key == eleveId) + 1;
+    return {
+      'ecoleNom': ecoleNom, 'classeNom': classeNom, 'eleveNom': nomCible,
+      'generale': maMoy, 'parMatiere': maMat,
+      'rang': rang, 'total': classmates.length,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Bulletin')),
+      body: FutureBuilder<Map<String,dynamic>>(
+        future: _calcul(),
+        builder: (ctx, snap) {
+          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          final d = snap.data!;
+          final moy = (d['generale'] as double);
+          final parMat = (d['parMatiere'] as Map<String,double>);
+          final rang = d['rang'] as int;
+          final total = d['total'] as int;
+          final matieres = parMat.keys.toList()..sort();
+          final aDesNotes = parMat.isNotEmpty;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+              // En-tête
+              SCCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                Row(children:[
+                  const Text('SENTINEL ', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.green, fontSize: 16)),
+                  const Text('CI', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.orange, fontSize: 16)),
+                  const Spacer(),
+                  Text(d['ecoleNom'] ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                ]),
+                const Divider(height: 18),
+                Text(d['eleveNom'] ?? eleveNom, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                Text('Classe : ${d['classeNom'] ?? ''}', style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                const Text('Bulletin scolaire', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              ])),
+              const SizedBox(height: 12),
+
+              if (!aDesNotes)
+                SCCard(child: const Text('Aucune note enregistree pour le moment.',
+                    style: TextStyle(color: AppColors.textMuted)))
+              else ...[
+                // Tableau des moyennes par matière
+                SectionTitle('Moyennes par matiere'),
+                SCCard(padding: EdgeInsets.zero, child: Column(children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(color: AppColors.bg))),
+                    child: Row(children: const [
+                      Expanded(child: Text('Matiere', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted))),
+                      Text('Moyenne', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                    ]),
+                  ),
+                  ...matieres.map((mat){
+                    final mm = parMat[mat] ?? 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: AppColors.bg))),
+                      child: Row(children:[
+                        Expanded(child: Text(mat, style: const TextStyle(fontSize: 13))),
+                        Text('${mm.toStringAsFixed(2)}/20',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                                color: mm >= 10 ? AppColors.green : AppColors.red)),
+                      ]),
+                    );
+                  }),
+                ])),
+                const SizedBox(height: 12),
+
+                // Synthèse : moyenne générale, rang, mention
+                SCCard(child: Column(children:[
+                  _ligneSynthese('Moyenne generale', '${moy.toStringAsFixed(2)}/20',
+                      moy >= 10 ? AppColors.green : AppColors.red),
+                  const Divider(height: 18),
+                  _ligneSynthese('Rang', total > 0 ? '$rang e / $total' : '-', AppColors.textMain),
+                  const Divider(height: 18),
+                  _ligneSynthese('Mention', mentionDe(moy),
+                      moy >= 10 ? AppColors.green : AppColors.red),
+                ])),
+                const SizedBox(height: 12),
+
+                // Appréciation
+                SectionTitle('Appreciation'),
+                SCCard(child: Text(appreciationDe(moy),
+                    style: const TextStyle(fontSize: 13, height: 1.4))),
+              ],
+            ]),
+          );
+        }),
+    );
+  }
+
+  Widget _ligneSynthese(String label, String valeur, Color col) {
+    return Row(children:[
+      Expanded(child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+      Text(valeur, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: col)),
+    ]);
   }
 }
 

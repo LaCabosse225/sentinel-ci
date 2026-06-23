@@ -4,11 +4,15 @@
 // ============================================================
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 
   void main() async {
@@ -162,6 +166,114 @@ String appreciationDe(double m) {
   if (m >= 10) return 'Resultats corrects. Accroche-toi, tu as les capacites pour progresser.';
   if (m >= 8)  return 'Trimestre en demi-teinte. Des efforts cibles te feront vite remonter.';
   return 'Trimestre difficile, mais ne te decourage pas. On est la pour t aider a rebondir.';
+}
+
+// Calcule (une fois) la liste classée des élèves d'une classe avec leur moyenne.
+Future<List<({String nom, double moy})>> calculerMoyennesClasse(
+    String ecoleId, String classeId) async {
+  final elevesSnap = await FirebaseService.getElevesEcole(ecoleId);
+  final classmates = elevesSnap.docs
+      .where((d)=>(d.data() as Map)['classeId'] == classeId).toList();
+  final List<({String nom, double moy})> res = [];
+  for (final c in classmates) {
+    final notes = await FirebaseService.getNotesEleve(c.id);
+    final m = calculerMoyennes(notes.docs);
+    res.add((nom: ((c.data() as Map)['nom'] ?? '').toString(), moy: m.generale));
+  }
+  res.sort((a,b)=>b.moy.compareTo(a.moy));
+  return res;
+}
+
+// ---- Génération PDF ----
+pw.Widget _pdfEntete(String ecoleNom) => pw.Column(children:[
+  pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children:[
+    pw.Text('SENTINEL CI',
+        style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.green800)),
+    pw.Text(ecoleNom, style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+  ]),
+  pw.Divider(color: PdfColors.green800),
+]);
+
+Future<Uint8List> buildBulletinPdf({
+  required String ecoleNom, required String classeNom, required String eleveNom,
+  required double generale, required Map<String,double> parMatiere,
+  required int rang, required int total,
+}) async {
+  final doc = pw.Document();
+  final matieres = parMatiere.keys.toList()..sort();
+  doc.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.all(28),
+    build: (ctx) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children:[
+      _pdfEntete(ecoleNom),
+      pw.SizedBox(height: 10),
+      pw.Text(eleveNom, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+      pw.Text('Classe : $classeNom', style: const pw.TextStyle(color: PdfColors.grey700)),
+      pw.Text('Bulletin scolaire', style: const pw.TextStyle(color: PdfColors.grey700)),
+      pw.SizedBox(height: 16),
+      pw.TableHelper.fromTextArray(
+        headers: ['Matiere', 'Moyenne /20'],
+        data: matieres.map((m)=>[m, parMatiere[m]!.toStringAsFixed(2)]).toList(),
+        headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+        headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
+        cellAlignments: {0: pw.Alignment.centerLeft, 1: pw.Alignment.centerRight},
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      ),
+      pw.SizedBox(height: 18),
+      pw.Container(
+        padding: const pw.EdgeInsets.all(12),
+        decoration: pw.BoxDecoration(
+            color: PdfColors.grey100, borderRadius: pw.BorderRadius.circular(6)),
+        child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children:[
+          pw.Text('Moyenne generale : ${generale.toStringAsFixed(2)}/20',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          pw.Text('Rang : ${total > 0 ? '$rang / $total' : '-'}'),
+          pw.Text('Mention : ${mentionDe(generale)}'),
+        ])),
+      pw.SizedBox(height: 14),
+      pw.Text('Appreciation :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+      pw.SizedBox(height: 4),
+      pw.Text(appreciationDe(generale)),
+      pw.Spacer(),
+      pw.Text('Genere par Sentinel CI — Veiller, pas surveiller',
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
+    ]),
+  ));
+  return doc.save();
+}
+
+Future<Uint8List> buildClassePdf({
+  required String ecoleNom, required String classeNom,
+  required List<({String nom, double moy})> eleves,
+}) async {
+  final doc = pw.Document();
+  doc.addPage(pw.MultiPage(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.all(28),
+    build: (ctx) => [
+      _pdfEntete(ecoleNom),
+      pw.SizedBox(height: 10),
+      pw.Text('Moyennes de la classe', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+      pw.Text('Classe : $classeNom', style: const pw.TextStyle(color: PdfColors.grey700)),
+      pw.SizedBox(height: 14),
+      pw.TableHelper.fromTextArray(
+        headers: ['Rang', 'Eleve', 'Moyenne /20'],
+        data: List.generate(eleves.length, (i)=>[
+          '${i+1}', eleves[i].nom,
+          eleves[i].moy > 0 ? eleves[i].moy.toStringAsFixed(2) : '-',
+        ]),
+        headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+        headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
+        cellAlignments: {0: pw.Alignment.center, 1: pw.Alignment.centerLeft, 2: pw.Alignment.centerRight},
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      ),
+      pw.SizedBox(height: 16),
+      pw.Text('Genere par Sentinel CI — Veiller, pas surveiller',
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
+    ],
+  ));
+  return doc.save();
 }
 
 // ══════════════════════════════════════════
@@ -1391,10 +1503,49 @@ class MoyennesClassePage extends StatelessWidget {
   final AppUser user;
   const MoyennesClassePage({super.key, required this.user});
 
+  Future<void> _exporterClasse(BuildContext context, {required bool imprimer}) async {
+    showDialog(context: context, barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()));
+    try {
+      // Nom de la classe
+      String classeNom = '';
+      String ecoleNom = user.school;
+      try {
+        final clSnap = await FirebaseService.streamClasses(user.school).first;
+        for (final d in clSnap.docs) {
+          if (d.id == user.classePrincipale) { classeNom = ((d.data() as Map)['nom'] ?? '').toString(); break; }
+        }
+        final ecSnap = await FirebaseService.streamToutesEcoles().first;
+        for (final d in ecSnap.docs) {
+          if (d.id == user.school) { ecoleNom = ((d.data() as Map)['nom'] ?? user.school).toString(); break; }
+        }
+      } catch (_) {}
+      final eleves = await calculerMoyennesClasse(user.school, user.classePrincipale!);
+      final bytes = await buildClassePdf(ecoleNom: ecoleNom, classeNom: classeNom, eleves: eleves);
+      if (context.mounted) Navigator.pop(context); // ferme le loader
+      if (imprimer) {
+        await Printing.layoutPdf(onLayout: (_) async => bytes);
+      } else {
+        await Printing.sharePdf(bytes: bytes, filename: 'moyennes_classe.pdf');
+      }
+    } catch (e) {
+      if (context.mounted) { Navigator.pop(context); showSnack(context, 'Erreur PDF : $e', error: true); }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Moyennes de ma classe')),
+      appBar: AppBar(title: const Text('Moyennes de ma classe'), actions: [
+        IconButton(
+            tooltip: 'Partager en PDF',
+            icon: const Icon(Icons.share_rounded),
+            onPressed: () => _exporterClasse(context, imprimer: false)),
+        IconButton(
+            tooltip: 'Imprimer',
+            icon: const Icon(Icons.print_rounded),
+            onPressed: () => _exporterClasse(context, imprimer: true)),
+      ]),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseService.streamEleves(user.school),
         builder: (ctx, snap) {
@@ -1645,6 +1796,40 @@ class BulletinPage extends StatelessWidget {
                 SectionTitle('Appreciation'),
                 SCCard(child: Text(appreciationDe(moy),
                     style: const TextStyle(fontSize: 13, height: 1.4))),
+                const SizedBox(height: 16),
+
+                // Partager / Imprimer
+                Row(children:[
+                  Expanded(child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final bytes = await buildBulletinPdf(
+                        ecoleNom: d['ecoleNom'] ?? '', classeNom: d['classeNom'] ?? '',
+                        eleveNom: d['eleveNom'] ?? eleveNom,
+                        generale: moy, parMatiere: parMat, rang: rang, total: total);
+                      await Printing.sharePdf(bytes: bytes,
+                          filename: 'bulletin_${(d['eleveNom'] ?? eleveNom).toString().replaceAll(' ', '_')}.pdf');
+                    },
+                    icon: const Icon(Icons.share_rounded, size: 18),
+                    label: const Text('Partager'),
+                  )),
+                  const SizedBox(width: 10),
+                  Expanded(child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final bytes = await buildBulletinPdf(
+                        ecoleNom: d['ecoleNom'] ?? '', classeNom: d['classeNom'] ?? '',
+                        eleveNom: d['eleveNom'] ?? eleveNom,
+                        generale: moy, parMatiere: parMat, rang: rang, total: total);
+                      await Printing.layoutPdf(onLayout: (_) async => bytes);
+                    },
+                    icon: const Icon(Icons.print_rounded, size: 18),
+                    label: const Text('Imprimer'),
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.green,
+                        side: const BorderSide(color: AppColors.green),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  )),
+                ]),
               ],
             ]),
           );

@@ -39,6 +39,10 @@ dependencies:
   firebase_messaging: ^16.4.0
   firebase_auth: ^6.5.3
 
+  # Génération + partage/impression de PDF (bulletins, listes de classe)
+  pdf: ^3.11.0
+  printing: ^5.13.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

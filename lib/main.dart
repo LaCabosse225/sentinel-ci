@@ -112,10 +112,36 @@ class AppUser {
   final String? classeId;  // élève : sa classe ; parent : la classe de son enfant
   final String? matiere;          // prof : sa matière
   final List<String> classes;     // prof : les classes qu'il enseigne (ids)
+  final bool estPrincipal;        // prof principal ?
+  final String? classePrincipale; // prof principal : classe dont il est responsable
   const AppUser({required this.name, required this.initials,
     required this.email, required this.school,
     required this.role, required this.uid, this.childId, this.classeId,
-    this.matiere, this.classes = const []});
+    this.matiere, this.classes = const [], this.estPrincipal = false,
+    this.classePrincipale});
+}
+
+// Calcule la moyenne générale et par matière à partir d'une liste de notes.
+({double generale, Map<String,double> parMatiere}) calculerMoyennes(List docs) {
+  final Map<String,double> pts = {};
+  final Map<String,double> cfs = {};
+  for (final d in docs) {
+    final m = (d.data() as Map);
+    final mat = (m['matiere'] ?? 'Autre').toString();
+    final nt = (m['note'] as num?)?.toDouble() ?? 0;
+    final cf = (m['coefficient'] as num?)?.toDouble() ?? 1;
+    pts[mat] = (pts[mat] ?? 0) + nt*cf;
+    cfs[mat] = (cfs[mat] ?? 0) + cf;
+  }
+  double tp = 0, tc = 0;
+  pts.forEach((k,v) => tp += v);
+  cfs.forEach((k,v) => tc += v);
+  final parMatiere = <String,double>{};
+  for (final mat in pts.keys) {
+    final c = cfs[mat] ?? 0;
+    parMatiere[mat] = c > 0 ? pts[mat]!/c : 0;
+  }
+  return (generale: tc > 0 ? tp/tc : 0.0, parMatiere: parMatiere);
 }
 
 // ══════════════════════════════════════════
@@ -245,6 +271,10 @@ class FirebaseService {
       _db.collection('absences')
           .where('eleveId', isEqualTo: eleveId)
           .snapshots();
+
+  // Récupère une fois toutes les notes d'un élève (pour le prof principal)
+  static Future<QuerySnapshot> getNotesEleve(String eleveId) =>
+      _db.collection('notes').where('eleveId', isEqualTo: eleveId).get();
 
   // Publier devoir
   static Future<void> publierDevoir(Map<String,dynamic> devoir) async {
@@ -505,6 +535,8 @@ class _LoginScreenState extends State<LoginScreen> {
       classeId: classeId,
       matiere: matiere,
       classes: classes,
+      estPrincipal: profile['estPrincipal'] == true,
+      classePrincipale: profile['classePrincipale'] as String?,
     );
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (_) => MainShell(user: user)));
@@ -874,6 +906,34 @@ class DashboardPage extends StatelessWidget {
             return Text(nom, style: const TextStyle(fontSize:13, color:AppColors.textMuted));
           }),
         const SizedBox(height:20),
+
+        // Carte "Prof principal" : acces aux moyennes de sa classe
+        if (user.role == UserRole.prof && user.estPrincipal && user.classePrincipale != null) ...[
+          InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => MoyennesClassePage(user: user))),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors:[AppColors.green, Color(0xFF0E9F5B)]),
+                  borderRadius: BorderRadius.circular(14)),
+              child: Row(children: const [
+                Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 28),
+                SizedBox(width:12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                  Text('Professeur principal',
+                      style: TextStyle(color: Colors.white, fontSize:15, fontWeight: FontWeight.w800)),
+                  Text('Voir les moyennes de ma classe',
+                      style: TextStyle(color: Colors.white70, fontSize:12)),
+                ])),
+                Icon(Icons.chevron_right_rounded, color: Colors.white),
+              ]),
+            ),
+          ),
+          const SizedBox(height:20),
+        ],
 
         if(user.role == UserRole.admin || user.role == UserRole.directeur) ...[
           GridView.count(crossAxisCount:2, shrinkWrap:true,
@@ -1246,6 +1306,120 @@ class _SimulateurMoyenneState extends State<SimulateurMoyenne> {
         ),
       ],
     ]));
+  }
+}
+
+// ══════════════════════════════════════════
+//  PROF PRINCIPAL — MOYENNES DE LA CLASSE
+// ══════════════════════════════════════════
+class MoyennesClassePage extends StatelessWidget {
+  final AppUser user;
+  const MoyennesClassePage({super.key, required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Moyennes de ma classe')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseService.streamEleves(user.school),
+        builder: (ctx, snap) {
+          if (snap.connectionState == ConnectionState.waiting)
+            return const Center(child: CircularProgressIndicator());
+          final eleves = (snap.data?.docs ?? [])
+              .where((d)=>(d.data() as Map)['classeId'] == user.classePrincipale)
+              .toList();
+          if (eleves.isEmpty)
+            return const Center(child: Text('Aucun eleve dans cette classe.'));
+          eleves.sort((a,b)=>((a.data() as Map)['nom']??'').toString()
+              .toLowerCase().compareTo(((b.data() as Map)['nom']??'').toString().toLowerCase()));
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: eleves.length,
+            separatorBuilder: (_,__)=>const SizedBox(height:10),
+            itemBuilder: (_, i) {
+              final data = eleves[i].data() as Map<String,dynamic>;
+              final nom = (data['nom'] ?? '').toString();
+              final eleveId = eleves[i].id;
+              return FutureBuilder<QuerySnapshot>(
+                future: FirebaseService.getNotesEleve(eleveId),
+                builder: (ctx, ns) {
+                  String moyTxt = '...';
+                  Color col = AppColors.textMuted;
+                  if (ns.hasData) {
+                    if (ns.data!.docs.isEmpty) {
+                      moyTxt = 'Aucune note';
+                    } else {
+                      final m = calculerMoyennes(ns.data!.docs);
+                      moyTxt = '${m.generale.toStringAsFixed(2)}/20';
+                      col = m.generale >= 10 ? AppColors.green : AppColors.red;
+                    }
+                  }
+                  return InkWell(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => MoyenneEleveDetailPage(eleveNom: nom, eleveId: eleveId))),
+                    borderRadius: BorderRadius.circular(14),
+                    child: SCCard(child: Row(children:[
+                      CircleAvatar(radius:18, backgroundColor: AppColors.greenBg,
+                          child: Text(nom.isNotEmpty ? nom[0].toUpperCase() : '?',
+                              style: const TextStyle(color: AppColors.green, fontWeight: FontWeight.w800))),
+                      const SizedBox(width:12),
+                      Expanded(child: Text(nom,
+                          style: const TextStyle(fontSize:13, fontWeight: FontWeight.w700))),
+                      Text(moyTxt, style: TextStyle(fontSize:14, fontWeight: FontWeight.w800, color: col)),
+                      const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                    ])),
+                  );
+                });
+            });
+        }),
+    );
+  }
+}
+
+class MoyenneEleveDetailPage extends StatelessWidget {
+  final String eleveNom;
+  final String eleveId;
+  const MoyenneEleveDetailPage({super.key, required this.eleveNom, required this.eleveId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(eleveNom)),
+      body: FutureBuilder<QuerySnapshot>(
+        future: FirebaseService.getNotesEleve(eleveId),
+        builder: (ctx, snap) {
+          if (snap.connectionState == ConnectionState.waiting)
+            return const Center(child: CircularProgressIndicator());
+          if (!snap.hasData || snap.data!.docs.isEmpty)
+            return const Center(child: Text('Aucune note pour cet eleve.'));
+          final m = calculerMoyennes(snap.data!.docs);
+          final matieres = m.parMatiere.keys.toList()..sort();
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+              SCCard(child: Row(children:[
+                const Expanded(child: Text('Moyenne generale',
+                    style: TextStyle(fontSize:14, fontWeight: FontWeight.w800))),
+                Text('${m.generale.toStringAsFixed(2)}/20',
+                    style: TextStyle(fontSize:18, fontWeight: FontWeight.w800,
+                        color: m.generale >= 10 ? AppColors.green : AppColors.red)),
+              ])),
+              const SizedBox(height:12),
+              SectionTitle('Moyennes par matiere'),
+              SCCard(child: Column(children: matieres.map((mat){
+                final moy = m.parMatiere[mat] ?? 0;
+                return Padding(padding: const EdgeInsets.symmetric(vertical:5),
+                  child: Row(children:[
+                    Expanded(child: Text(mat, style: const TextStyle(fontSize:13))),
+                    Text('${moy.toStringAsFixed(2)}/20',
+                        style: TextStyle(fontSize:13, fontWeight: FontWeight.w700,
+                            color: moy >= 10 ? AppColors.green : AppColors.red)),
+                  ]));
+              }).toList())),
+            ]),
+          );
+        }),
+    );
   }
 }
 
@@ -2223,6 +2397,8 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
   final _matiere = TextEditingController();
   String? _profMatiere;            // prof : matière choisie
   final Set<String> _profClasses = {}; // prof : classes enseignées (ids)
+  bool _profPrincipal = false;          // prof principal ?
+  String? _profClassePrincipale;        // classe principale (id)
   String? _classeId;   // pour un élève
   String? _enfantId;   // pour un parent
   String? _ecoleId;    // école cible
@@ -2270,6 +2446,10 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
       if (_profClasses.isEmpty) { showSnack(context, 'Choisissez au moins une classe', error:true); return; }
       champs['matiere'] = _profMatiere;
       champs['classes'] = _profClasses.toList();
+      if (_profPrincipal && _profClassePrincipale != null) {
+        champs['estPrincipal'] = true;
+        champs['classePrincipale'] = _profClassePrincipale;
+      }
     }
 
     setState(() => _loading = true);
@@ -2454,13 +2634,49 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
                       selected: sel,
                       onSelected: (v)=>setState((){
                         if (v) { _profClasses.add(doc.id); }
-                        else { _profClasses.remove(doc.id); }
+                        else { _profClasses.remove(doc.id);
+                               if (_profClassePrincipale == doc.id) _profClassePrincipale = null; }
                       }),
                       selectedColor: AppColors.greenBg,
                       checkmarkColor: AppColors.green,
                     );
                   }).toList());
                 }),
+              const SizedBox(height:12),
+              const Divider(),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Professeur principal',
+                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                subtitle: const Text('Acces a toutes les moyennes d une classe',
+                    style: TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
+                value: _profPrincipal,
+                activeColor: AppColors.green,
+                onChanged: (v)=>setState(()=> _profPrincipal = v),
+              ),
+              if (_profPrincipal) ...[
+                if (_profClasses.isEmpty)
+                  const Text('Cochez d abord la classe dont il est responsable ci-dessus.',
+                      style: TextStyle(color: AppColors.textMuted, fontSize: 12))
+                else
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseService.streamClasses(_ecoleId!),
+                  builder: (ctx, snap) {
+                    if (!snap.hasData) return const SizedBox.shrink();
+                    // Choix limité aux classes qu'il enseigne
+                    final mesClasses = snap.data!.docs
+                        .where((c)=>_profClasses.contains(c.id)).toList();
+                    return DropdownButtonFormField<String>(
+                        value: _profClassePrincipale, isExpanded: true,
+                        decoration: const InputDecoration(labelText: 'Classe principale'),
+                        hint: const Text('Choisir sa classe'),
+                        items: mesClasses.map((doc){
+                          final d = doc.data() as Map<String,dynamic>;
+                          return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                        }).toList(),
+                        onChanged: (v)=>setState(()=> _profClassePrincipale = v));
+                  }),
+              ],
             ],
           ])),
           const SizedBox(height: 16),

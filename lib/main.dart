@@ -505,12 +505,30 @@ class FirebaseService {
     });
   }
 
+  static Future<void> supprimerEvenement(String id) =>
+      _db.collection('agenda').doc(id).delete();
+
   // Stream emploi du temps
   static Stream<QuerySnapshot> streamEmploiDuTemps(String ecoleId, String classe) =>
       _db.collection('emploiDuTemps')
           .where('ecoleId', isEqualTo: ecoleId)
           .where('classe', isEqualTo: classe)
           .snapshots();
+
+  // Emploi du temps d'une classe (1 filtre => pas d'index ; tri côté app)
+  static Stream<QuerySnapshot> streamEmploiDuTempsParClasse(String classeId) =>
+      _db.collection('emploiDuTemps')
+          .where('classeId', isEqualTo: classeId)
+          .snapshots();
+
+  static Future<void> ajouterCreneau(Map<String,dynamic> data) =>
+      _db.collection('emploiDuTemps').add({
+        ...data,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+  static Future<void> supprimerCreneau(String id) =>
+      _db.collection('emploiDuTemps').doc(id).delete();
 
   // Stream utilisateurs (admin)
   static Stream<QuerySnapshot> streamUtilisateurs() =>
@@ -3409,21 +3427,37 @@ class AgendaPage extends StatefulWidget {
 class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateMixin {
   late TabController _tab;
   String _selectedDay = 'Lundi';
-  final _jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+  final _jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+
+  // Agenda
   final _titreCtrl = TextEditingController();
   final _dateCtrl  = TextEditingController();
   String _selType  = 'evenement';
+
+  // Emploi du temps
+  String? _edtClasseId;     // classe affichée / remplie
+  String? _edtClasseNom;
 
   @override
   void initState() {
     super.initState();
     _tab = TabController(length:2, vsync:this);
+    // Élève / parent : emploi du temps de leur propre classe
+    if (widget.user.role==UserRole.eleve || widget.user.role==UserRole.parent) {
+      _edtClasseId = widget.user.classeId;
+    }
   }
 
   @override
-  void dispose() { _tab.dispose(); super.dispose(); }
+  void dispose() { _tab.dispose(); _titreCtrl.dispose(); _dateCtrl.dispose(); super.dispose(); }
 
-  bool get _canEdit => widget.user.role==UserRole.prof||widget.user.role==UserRole.admin;
+  // L'administration gère le calendrier ET l'emploi du temps. Le prof peut aussi poster au calendrier.
+  bool get _canEditAgenda =>
+      widget.user.role==UserRole.directeur || widget.user.role==UserRole.admin || widget.user.role==UserRole.prof;
+  bool get _canEditEdt =>
+      widget.user.role==UserRole.directeur || widget.user.role==UserRole.admin;
+  bool get _choisitClasse =>
+      widget.user.role==UserRole.directeur || widget.user.role==UserRole.admin || widget.user.role==UserRole.prof;
 
   Future<void> _ajouterEvt() async {
     if (_titreCtrl.text.isEmpty||_dateCtrl.text.isEmpty) {
@@ -3434,11 +3468,90 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
       'date':    _dateCtrl.text,
       'type':    _selType,
       'ecoleId': widget.user.school,
-      'classe':  'Terminale C',
       'notifie': false,
     });
     _titreCtrl.clear(); _dateCtrl.clear();
     if (mounted) showSnack(context, 'Evenement ajoute — Tous notifies 📲');
+  }
+
+  void _ajouterCreneau() {
+    final heureCtrl = TextEditingController();
+    final salleCtrl = TextEditingController();
+    String jour = _selectedDay;
+    String? matiere;
+    String? profNom;
+    showModalBottomSheet(context: context, isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (_) => StatefulBuilder(builder: (ctx, setSheet) => Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+            child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Ajouter un creneau — $_edtClasseNom',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                  value: jour, isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Jour'),
+                  items: _jours.map((j)=>DropdownMenuItem(value:j, child:Text(j))).toList(),
+                  onChanged: (v)=>setSheet(()=>jour=v!)),
+              const SizedBox(height: 10),
+              TextField(controller: heureCtrl,
+                  decoration: const InputDecoration(labelText: 'Heure (ex. 08h - 10h)')),
+              const SizedBox(height: 10),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamMatieres(widget.user.school),
+                builder: (c, s) {
+                  final noms = s.hasData
+                      ? (s.data!.docs.map((d)=>((d.data() as Map)['nom']??'').toString()).toList()..sort())
+                      : <String>[];
+                  return DropdownButtonFormField<String>(
+                      value: matiere, isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Matiere'),
+                      hint: const Text('Choisir'),
+                      items: noms.map((m)=>DropdownMenuItem(value:m, child:Text(m))).toList(),
+                      onChanged: (v)=>setSheet(()=>matiere=v));
+                }),
+              const SizedBox(height: 10),
+              TextField(controller: salleCtrl,
+                  decoration: const InputDecoration(labelText: 'Salle (optionnel)')),
+              const SizedBox(height: 10),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamUtilisateursParEcole(widget.user.school),
+                builder: (c, s) {
+                  final profs = s.hasData
+                      ? s.data!.docs.where((d)=>(d.data() as Map)['role']=='prof').toList()
+                      : [];
+                  return DropdownButtonFormField<String>(
+                      value: profNom, isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Professeur (optionnel)'),
+                      hint: const Text('Choisir'),
+                      items: profs.map((d){
+                        final n = ((d.data() as Map)['nom']??'').toString();
+                        return DropdownMenuItem(value:n, child:Text(n));
+                      }).toList(),
+                      onChanged: (v)=>setSheet(()=>profNom=v));
+                }),
+              const SizedBox(height: 16),
+              SizedBox(width: double.infinity, child: ElevatedButton(
+                  onPressed: () async {
+                    if (matiere == null || heureCtrl.text.trim().isEmpty) {
+                      showSnack(context, 'Heure et matiere obligatoires', error: true); return;
+                    }
+                    await FirebaseService.ajouterCreneau({
+                      'ecoleId': widget.user.school,
+                      'classeId': _edtClasseId,
+                      'classe': _edtClasseNom,
+                      'jour': jour,
+                      'heure': heureCtrl.text.trim(),
+                      'matiere': matiere,
+                      'salle': salleCtrl.text.trim(),
+                      'profNom': profNom ?? '',
+                    });
+                    if (context.mounted) { Navigator.pop(context); showSnack(context, 'Creneau ajoute !'); }
+                  },
+                  child: const Text('Ajouter le creneau'))),
+            ])))));
   }
 
   @override
@@ -3455,72 +3568,131 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
           ])),
       Expanded(child:TabBarView(controller:_tab, children:[
 
-        // EMPLOI DU TEMPS
+        // ===== EMPLOI DU TEMPS =====
         SingleChildScrollView(
             padding:const EdgeInsets.all(16),
             child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-              SizedBox(height:44, child:ListView.builder(
-                  scrollDirection:Axis.horizontal,
-                  itemCount:_jours.length,
-                  itemBuilder:(_,i){
-                    final j=_jours[i]; final sel=j==_selectedDay;
-                    return GestureDetector(
-                        onTap:()=>setState(()=>_selectedDay=j),
-                        child:Container(
-                            margin:const EdgeInsets.only(right:8),
-                            padding:const EdgeInsets.symmetric(horizontal:18,vertical:10),
-                            decoration:BoxDecoration(
-                                color:sel?AppColors.green:Colors.white,
-                                borderRadius:BorderRadius.circular(22),
-                                border:Border.all(color:sel?AppColors.green:AppColors.border)),
-                            child:Text(j,style:TextStyle(fontSize:13,fontWeight:FontWeight.w700,
-                                color:sel?Colors.white:AppColors.textMuted))));
-                  })),
-              const SizedBox(height:16),
-              StreamBuilder<QuerySnapshot>(
-                  stream:FirebaseService.streamEmploiDuTemps(widget.user.school,'Terminale C'),
-                  builder:(ctx,snap){
-                    if (!snap.hasData) return const Center(child:CircularProgressIndicator());
-                    final docs = snap.data!.docs
-                        .where((d)=>(d.data() as Map)['jour']==_selectedDay).toList();
-                    if (docs.isEmpty)
-                      return const Text('Aucun cours ce jour.',
-                          style:TextStyle(color:AppColors.textMuted));
-                    return Column(children:docs.map((d){
-                      final data=d.data() as Map<String,dynamic>;
-                      return Container(
-                          margin:const EdgeInsets.only(bottom:10),
-                          decoration:BoxDecoration(
-                              color:Colors.white,
-                              borderRadius:BorderRadius.circular(12),
-                              border:Border.all(color:AppColors.border)),
-                          child:Row(children:[
-                            Container(width:5,height:80,
-                                decoration:const BoxDecoration(
-                                    color:AppColors.green,
-                                    borderRadius:BorderRadius.only(
-                                        topLeft:Radius.circular(12),bottomLeft:Radius.circular(12)))),
-                            Padding(padding:const EdgeInsets.all(14),child:Column(
-                                crossAxisAlignment:CrossAxisAlignment.start,children:[
-                              Text(data['heure']??'',
-                                  style:const TextStyle(fontSize:12,fontWeight:FontWeight.w800,color:AppColors.green)),
-                              const SizedBox(height:3),
-                              Text(data['matiere']??'',
-                                  style:const TextStyle(fontSize:15,fontWeight:FontWeight.w800)),
-                              const SizedBox(height:3),
-                              Text('Salle ${data['salle']??''} · ${data['professeurId']??''}',
-                                  style:const TextStyle(fontSize:12,color:AppColors.textMuted)),
-                            ])),
-                          ]));
-                    }).toList());
+
+              // Sélecteur de classe (staff) — auto pour élève/parent
+              if (_choisitClasse)
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseService.streamClasses(widget.user.school),
+                  builder: (ctx, snap) {
+                    if (!snap.hasData) return const Text('Chargement des classes...',
+                        style: TextStyle(color: AppColors.textMuted));
+                    var classes = snap.data!.docs;
+                    // Le prof ne voit que ses classes (si assignées)
+                    if (widget.user.role==UserRole.prof && widget.user.classes.isNotEmpty) {
+                      classes = classes.where((c)=>widget.user.classes.contains(c.id)).toList();
+                    }
+                    if (classes.isEmpty) return const Text('Aucune classe.',
+                        style: TextStyle(color: AppColors.textMuted));
+                    return DropdownButtonFormField<String>(
+                        value: _edtClasseId, isExpanded: true,
+                        decoration: const InputDecoration(labelText: 'Classe'),
+                        hint: const Text('Choisir une classe'),
+                        items: classes.map((doc){
+                          final d = doc.data() as Map<String,dynamic>;
+                          return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                        }).toList(),
+                        onChanged: (v){
+                          final doc = classes.firstWhere((c)=>c.id==v);
+                          setState((){ _edtClasseId=v; _edtClasseNom=((doc.data() as Map)['nom']??'').toString(); });
+                        });
                   }),
+              if (_choisitClasse) const SizedBox(height:14),
+
+              if (_edtClasseId == null)
+                const Padding(padding: EdgeInsets.only(top:20),
+                    child: Text('Choisissez une classe pour voir son emploi du temps.',
+                        style: TextStyle(color: AppColors.textMuted)))
+              else ...[
+                if (_canEditEdt) ...[
+                  SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                    onPressed: _ajouterCreneau,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Ajouter un creneau'),
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.green,
+                        side: const BorderSide(color: AppColors.green),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  )),
+                  const SizedBox(height:14),
+                ],
+                // Sélecteur de jour
+                SizedBox(height:44, child:ListView.builder(
+                    scrollDirection:Axis.horizontal,
+                    itemCount:_jours.length,
+                    itemBuilder:(_,i){
+                      final j=_jours[i]; final sel=j==_selectedDay;
+                      return GestureDetector(
+                          onTap:()=>setState(()=>_selectedDay=j),
+                          child:Container(
+                              margin:const EdgeInsets.only(right:8),
+                              padding:const EdgeInsets.symmetric(horizontal:18,vertical:10),
+                              decoration:BoxDecoration(
+                                  color:sel?AppColors.green:Colors.white,
+                                  borderRadius:BorderRadius.circular(22),
+                                  border:Border.all(color:sel?AppColors.green:AppColors.border)),
+                              child:Text(j,style:TextStyle(fontSize:13,fontWeight:FontWeight.w700,
+                                  color:sel?Colors.white:AppColors.textMuted))));
+                    })),
+                const SizedBox(height:16),
+                StreamBuilder<QuerySnapshot>(
+                    stream:FirebaseService.streamEmploiDuTempsParClasse(_edtClasseId!),
+                    builder:(ctx,snap){
+                      if (!snap.hasData) return const Center(child:CircularProgressIndicator());
+                      final docs = snap.data!.docs
+                          .where((d)=>(d.data() as Map)['jour']==_selectedDay).toList()
+                        ..sort((a,b)=>((a.data() as Map)['heure']??'').toString()
+                            .compareTo(((b.data() as Map)['heure']??'').toString()));
+                      if (docs.isEmpty)
+                        return const Text('Aucun cours ce jour.',
+                            style:TextStyle(color:AppColors.textMuted));
+                      return Column(children:docs.map((d){
+                        final data=d.data() as Map<String,dynamic>;
+                        return Container(
+                            margin:const EdgeInsets.only(bottom:10),
+                            decoration:BoxDecoration(
+                                color:Colors.white,
+                                borderRadius:BorderRadius.circular(12),
+                                border:Border.all(color:AppColors.border)),
+                            child:Row(children:[
+                              Container(width:5,height:80,
+                                  decoration:const BoxDecoration(
+                                      color:AppColors.green,
+                                      borderRadius:BorderRadius.only(
+                                          topLeft:Radius.circular(12),bottomLeft:Radius.circular(12)))),
+                              Expanded(child: Padding(padding:const EdgeInsets.all(14),child:Column(
+                                  crossAxisAlignment:CrossAxisAlignment.start,children:[
+                                Text(data['heure']??'',
+                                    style:const TextStyle(fontSize:12,fontWeight:FontWeight.w800,color:AppColors.green)),
+                                const SizedBox(height:3),
+                                Text(data['matiere']??'',
+                                    style:const TextStyle(fontSize:15,fontWeight:FontWeight.w800)),
+                                const SizedBox(height:3),
+                                Text([
+                                  if ((data['salle']??'').toString().isNotEmpty) 'Salle ${data['salle']}',
+                                  if ((data['profNom']??'').toString().isNotEmpty) '${data['profNom']}',
+                                ].join(' · '),
+                                    style:const TextStyle(fontSize:12,color:AppColors.textMuted)),
+                              ]))),
+                              if (_canEditEdt)
+                                IconButton(
+                                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.red, size: 20),
+                                    onPressed: () => FirebaseService.supprimerCreneau(d.id)),
+                            ]));
+                      }).toList());
+                    }),
+              ],
             ])),
 
-        // CALENDRIER SCOLAIRE
+        // ===== CALENDRIER SCOLAIRE =====
         SingleChildScrollView(
             padding:const EdgeInsets.all(16),
             child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-              if (_canEdit)...[
+              if (_canEditAgenda)...[
                 SectionTitle('Ajouter un evenement'),
                 SCCard(child:Column(children:[
                   TextField(controller:_titreCtrl,
@@ -3578,6 +3750,10 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
                               Text(data['date']??'',
                                   style:const TextStyle(fontSize:12,color:AppColors.textMuted)),
                             ])),
+                            if (_canEditAgenda)
+                              IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.red, size: 20),
+                                  onPressed: () => FirebaseService.supprimerEvenement(d.id)),
                           ]));
                     }).toList());
                   }),

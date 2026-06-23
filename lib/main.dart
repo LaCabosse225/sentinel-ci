@@ -110,9 +110,12 @@ class AppUser {
   final UserRole role;
   final String? childId;   // pour un parent : UID de son enfant (1er enfant)
   final String? classeId;  // élève : sa classe ; parent : la classe de son enfant
+  final String? matiere;          // prof : sa matière
+  final List<String> classes;     // prof : les classes qu'il enseigne (ids)
   const AppUser({required this.name, required this.initials,
     required this.email, required this.school,
-    required this.role, required this.uid, this.childId, this.classeId});
+    required this.role, required this.uid, this.childId, this.classeId,
+    this.matiere, this.classes = const []});
 }
 
 // ══════════════════════════════════════════
@@ -486,6 +489,11 @@ class _LoginScreenState extends State<LoginScreen> {
       classeId = await FirebaseService.getClasseIdEleve(childId);
     }
     if (!mounted) return;
+    // Pour un prof : sa matière et ses classes
+    final String? matiere = profile['matiere'] as String?;
+    final List<String> classes = (profile['classes'] is List)
+        ? List<String>.from((profile['classes'] as List).map((e) => e.toString()))
+        : <String>[];
     final user = AppUser(
       name: profile['nom'] ?? 'Utilisateur',
       initials: (profile['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
@@ -495,6 +503,8 @@ class _LoginScreenState extends State<LoginScreen> {
       uid: cred.user!.uid,
       childId: childId,
       classeId: classeId,
+      matiere: matiere,
+      classes: classes,
     );
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (_) => MainShell(user: user)));
@@ -932,6 +942,16 @@ class _NotesPageState extends State<NotesPage> {
   String? _selEleve;
   String _selType  = 'Devoir surveille';
 
+  // Le prof est verrouillé sur sa matière (si définie)
+  bool get _matiereVerrouillee =>
+      widget.user.matiere != null && widget.user.matiere!.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_matiereVerrouillee) _selMat = widget.user.matiere!;
+  }
+
   final _matieres = ['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo','EPS'];
   final _types = ['Devoir surveille','Interrogation','Devoir de maison',
                   'Conduite','Participation','Cahier','Autre'];
@@ -977,11 +997,16 @@ class _NotesPageState extends State<NotesPage> {
                         child: Text('Chargement des eleves...',
                             style: TextStyle(color:AppColors.textMuted)));
                   }
-                  final eleves = snap.data!.docs;
+                  // Si le prof a des classes assignées, on limite à SES classes
+                  final classesProf = widget.user.classes;
+                  final eleves = classesProf.isEmpty
+                      ? snap.data!.docs
+                      : snap.data!.docs.where((d)=>
+                          classesProf.contains((d.data() as Map)['classeId'])).toList();
                   if (eleves.isEmpty) {
                     return const Padding(
                         padding: EdgeInsets.symmetric(vertical:8),
-                        child: Text('Aucun eleve dans cette ecole.',
+                        child: Text('Aucun eleve dans vos classes.',
                             style: TextStyle(color:AppColors.textMuted)));
                   }
                   return DropdownButtonFormField<String>(
@@ -998,11 +1023,16 @@ class _NotesPageState extends State<NotesPage> {
                       onChanged: (v) => setState(() => _selEleve = v));
                 }),
             const SizedBox(height:10),
-            DropdownButtonFormField<String>(
-                value: _selMat,
+            if (_matiereVerrouillee)
+              InputDecorator(
                 decoration: const InputDecoration(labelText: 'Matiere'),
-                items: _matieres.map((m) => DropdownMenuItem(value:m, child:Text(m))).toList(),
-                onChanged: (v) => setState(() => _selMat = v!)),
+                child: Text(_selMat, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)))
+            else
+              DropdownButtonFormField<String>(
+                  value: _selMat,
+                  decoration: const InputDecoration(labelText: 'Matiere'),
+                  items: _matieres.map((m) => DropdownMenuItem(value:m, child:Text(m))).toList(),
+                  onChanged: (v) => setState(() => _selMat = v!)),
             const SizedBox(height:10),
             DropdownButtonFormField<String>(
                 value: _selType,
@@ -1238,6 +1268,15 @@ class _DevoirsPageState extends State<DevoirsPage> {
 
   final _typesDevoir = ['Devoir programme','Devoir de maison','Interrogation'];
 
+  bool get _matiereVerrouillee =>
+      widget.user.matiere != null && widget.user.matiere!.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_matiereVerrouillee) _selMat = widget.user.matiere!;
+  }
+
   @override
   void dispose() { _titreCtrl.dispose(); _dateCtrl.dispose(); super.dispose(); }
 
@@ -1280,9 +1319,13 @@ class _DevoirsPageState extends State<DevoirsPage> {
                   return const Text('Chargement des classes...',
                       style: TextStyle(color: AppColors.textMuted));
                 }
-                final classes = snap.data!.docs;
+                // Limiter aux classes du prof (si assignées)
+                final classesProf = widget.user.classes;
+                final classes = classesProf.isEmpty
+                    ? snap.data!.docs
+                    : snap.data!.docs.where((c)=>classesProf.contains(c.id)).toList();
                 if (classes.isEmpty) {
-                  return const Text('Aucune classe disponible.',
+                  return const Text('Aucune classe assignee.',
                       style: TextStyle(color: AppColors.textMuted));
                 }
                 return DropdownButtonFormField<String>(
@@ -1300,12 +1343,17 @@ class _DevoirsPageState extends State<DevoirsPage> {
                     });
               }),
             const SizedBox(height:10),
-            DropdownButtonFormField<String>(
-                value: _selMat,
+            if (_matiereVerrouillee)
+              InputDecorator(
                 decoration: const InputDecoration(labelText: 'Matiere'),
-                items: ['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo']
-                    .map((m) => DropdownMenuItem(value:m, child:Text(m))).toList(),
-                onChanged: (v) => setState(() => _selMat = v!)),
+                child: Text(_selMat, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)))
+            else
+              DropdownButtonFormField<String>(
+                  value: _selMat,
+                  decoration: const InputDecoration(labelText: 'Matiere'),
+                  items: ['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo']
+                      .map((m) => DropdownMenuItem(value:m, child:Text(m))).toList(),
+                  onChanged: (v) => setState(() => _selMat = v!)),
             const SizedBox(height:10),
             DropdownButtonFormField<String>(
                 value: _selTypeDevoir,
@@ -1434,9 +1482,12 @@ class _AbsencesPageState extends State<AbsencesPage> {
                   return const Text('Chargement des classes...',
                       style: TextStyle(color: AppColors.textMuted));
                 }
-                final classes = snap.data!.docs;
+                final classesProf = widget.user.classes;
+                final classes = classesProf.isEmpty
+                    ? snap.data!.docs
+                    : snap.data!.docs.where((c)=>classesProf.contains(c.id)).toList();
                 if (classes.isEmpty) {
-                  return const Text('Aucune classe disponible.',
+                  return const Text('Aucune classe assignee.',
                       style: TextStyle(color: AppColors.textMuted));
                 }
                 return DropdownButtonFormField<String>(
@@ -2170,10 +2221,15 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
   final _pw = TextEditingController();
   final _matricule = TextEditingController();
   final _matiere = TextEditingController();
+  String? _profMatiere;            // prof : matière choisie
+  final Set<String> _profClasses = {}; // prof : classes enseignées (ids)
   String? _classeId;   // pour un élève
   String? _enfantId;   // pour un parent
   String? _ecoleId;    // école cible
   bool _loading = false;
+
+  final _matieresProf = ['Mathematiques','Physique-Chimie','SVT','Francais',
+                         'Anglais','Histoire-Geo','EPS','Philosophie','Allemand','Espagnol'];
 
   bool get _estSuperAdmin => widget.user.role == UserRole.admin;
 
@@ -2210,7 +2266,10 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
       if (_enfantId == null) { showSnack(context, 'Choisissez l enfant', error:true); return; }
       champs['enfants'] = [_enfantId];
     } else if (_role == 'prof') {
-      if (_matiere.text.trim().isNotEmpty) champs['matiere'] = _matiere.text.trim();
+      if (_profMatiere == null) { showSnack(context, 'Choisissez la matiere du prof', error:true); return; }
+      if (_profClasses.isEmpty) { showSnack(context, 'Choisissez au moins une classe', error:true); return; }
+      champs['matiere'] = _profMatiere;
+      champs['classes'] = _profClasses.toList();
     }
 
     setState(() => _loading = true);
@@ -2358,11 +2417,50 @@ class _AjouterUtilisateurPageState extends State<AjouterUtilisateurPage> {
                 }),
             ],
 
-            // ---- Champ optionnel PROF ----
+            // ---- Champs PROF : matière (obligatoire) + classes enseignées ----
             if (_role == 'prof') ...[
               const SizedBox(height: 10),
-              TextField(controller: _matiere,
-                  decoration: const InputDecoration(labelText: 'Matiere principale (optionnel)')),
+              DropdownButtonFormField<String>(
+                  value: _profMatiere, isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Matiere enseignee'),
+                  hint: const Text('Choisir la matiere'),
+                  items: _matieresProf.map((m)=>DropdownMenuItem(value:m, child:Text(m))).toList(),
+                  onChanged: (v)=>setState(()=>_profMatiere=v)),
+              const SizedBox(height: 14),
+              const Text('Classes enseignees',
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              if (_ecoleId == null)
+                const Text('Choisissez d abord une ecole.',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 12))
+              else
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseService.streamClasses(_ecoleId!),
+                builder: (ctx, snap) {
+                  if (!snap.hasData) {
+                    return const Text('Chargement des classes...',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 12));
+                  }
+                  final classes = snap.data!.docs;
+                  if (classes.isEmpty) {
+                    return const Text('Aucune classe. Creez d abord une classe.',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 12));
+                  }
+                  return Wrap(spacing: 8, runSpacing: 4, children: classes.map((doc){
+                    final d = doc.data() as Map<String,dynamic>;
+                    final sel = _profClasses.contains(doc.id);
+                    return FilterChip(
+                      label: Text(d['nom'] ?? doc.id),
+                      selected: sel,
+                      onSelected: (v)=>setState((){
+                        if (v) { _profClasses.add(doc.id); }
+                        else { _profClasses.remove(doc.id); }
+                      }),
+                      selectedColor: AppColors.greenBg,
+                      checkmarkColor: AppColors.green,
+                    );
+                  }).toList());
+                }),
             ],
           ])),
           const SizedBox(height: 16),

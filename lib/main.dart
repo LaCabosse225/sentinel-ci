@@ -118,11 +118,12 @@ class AppUser {
   final List<String> classes;     // prof : les classes qu'il enseigne (ids)
   final bool estPrincipal;        // prof principal ?
   final String? classePrincipale; // prof principal : classe dont il est responsable
+  final int enfantsCount;         // parent : nombre d'enfants (réduction famille)
   const AppUser({required this.name, required this.initials,
     required this.email, required this.school,
     required this.role, required this.uid, this.childId, this.classeId,
     this.matiere, this.classes = const [], this.estPrincipal = false,
-    this.classePrincipale});
+    this.classePrincipale, this.enfantsCount = 1});
 }
 
 // Calcule la moyenne générale et par matière à partir d'une liste de notes.
@@ -166,6 +167,17 @@ String appreciationDe(double m) {
   if (m >= 10) return 'Resultats corrects. Accroche-toi, tu as les capacites pour progresser.';
   if (m >= 8)  return 'Trimestre en demi-teinte. Des efforts cibles te feront vite remonter.';
   return 'Trimestre difficile, mais ne te decourage pas. On est la pour t aider a rebondir.';
+}
+
+// ---- ABONNEMENTS : forfaits & tarifs ----
+const Map<String,int> kForfaitPrix  = {'mensuel':2000, 'trimestriel':5000, 'annuel':10000};
+const Map<String,int> kForfaitJours = {'mensuel':30,   'trimestriel':90,   'annuel':365};
+const Map<String,String> kForfaitLabel = {'mensuel':'Mensuel', 'trimestriel':'Trimestriel', 'annuel':'Annuel'};
+
+// Prix d'un forfait avec réduction famille (-20% dès 2 enfants)
+int prixForfait(String forfait, int nbEnfants) {
+  final base = kForfaitPrix[forfait] ?? 0;
+  return nbEnfants >= 2 ? (base * 0.8).round() : base;
 }
 
 // Calcule (une fois) la liste classée des élèves d'une classe avec leur moyenne.
@@ -569,9 +581,48 @@ class FirebaseService {
   static Future<void> creerMatiere(Map<String, dynamic> data) =>
       _db.collection('matieres').add(data);
 
+  // ---- ABONNEMENTS ----
+  static Future<DocumentSnapshot> getAbonnement(String parentId) =>
+      _db.collection('abonnements').doc(parentId).get();
+
+  static Future<void> setAbonnement(String parentId, Map<String,dynamic> data) =>
+      _db.collection('abonnements').doc(parentId).set({
+        ...data,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
   // Crée un compte (eleve, prof ou parent) : connexion + fiche, SANS déconnecter l'admin.
   // 'champs' contient role, ecoleId et les champs propres au rôle.
   // Retourne null si succès, ou un message d'erreur lisible sinon.
+  // Trouve un élève par son code (auto-inscription parent) — 1 filtre, pas d'index
+  static Future<QuerySnapshot> findEleveParCode(String code) =>
+      _db.collection('utilisateurs')
+          .where('codeParent', isEqualTo: code.trim().toUpperCase())
+          .get();
+
+  // Auto-inscription d'un parent (il devient connecté) rattaché à son enfant
+  static Future<String?> inscrireParent({
+    required String nom, required String email, required String motDePasse,
+    required String childId, required String ecoleId,
+  }) async {
+    try {
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.trim(), password: motDePasse.trim());
+      await _db.collection('utilisateurs').doc(cred.user!.uid).set({
+        'nom': nom.trim(), 'email': email.trim(), 'role': 'parent',
+        'ecoleId': ecoleId, 'enfants': [childId],
+      });
+      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') return 'Cet email est deja utilise.';
+      if (e.code == 'weak-password') return 'Mot de passe trop faible (6 caracteres min).';
+      if (e.code == 'invalid-email') return 'Adresse email invalide.';
+      return 'Erreur : ${e.code}';
+    } catch (e) {
+      return 'Erreur : $e';
+    }
+  }
+
   static Future<String?> creerCompte({
     required String nom,
     required String email,
@@ -590,11 +641,16 @@ class FirebaseService {
               email: email.trim(), password: motDePasse.trim());
       final uid = cred.user!.uid;
       // Fiche écrite par l'app => collection 'utilisateurs' propre, garantie
-      await _db.collection('utilisateurs').doc(uid).set({
+      final fiche = <String, dynamic>{
         'nom': nom.trim(),
         'email': email.trim(),
         ...champs,
-      });
+      };
+      // Un élève reçoit un code unique que l'école communique à sa famille
+      if (champs['role'] == 'eleve' && champs['codeParent'] == null) {
+        fiche['codeParent'] = uid.substring(0, 6).toUpperCase();
+      }
+      await _db.collection('utilisateurs').doc(uid).set(fiche);
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') return 'Cet email est deja utilise.';
@@ -607,6 +663,40 @@ class FirebaseService {
       await appSecondaire?.delete();
     }
   }
+}
+
+// Construit l'AppUser à partir d'un profil Firestore (connexion ET inscription).
+Future<AppUser> construireAppUser(Map<String,dynamic> profile, String uid, String email) async {
+  String? childId;
+  int enfantsCount = 1;
+  final enfants = profile['enfants'];
+  if (enfants is List && enfants.isNotEmpty) {
+    childId = enfants.first.toString();
+    enfantsCount = enfants.length;
+  }
+  String? classeId = profile['classeId'] as String?;
+  if (classeId == null && childId != null) {
+    classeId = await FirebaseService.getClasseIdEleve(childId);
+  }
+  final String? matiere = profile['matiere'] as String?;
+  final List<String> classes = (profile['classes'] is List)
+      ? List<String>.from((profile['classes'] as List).map((e) => e.toString()))
+      : <String>[];
+  return AppUser(
+    name: profile['nom'] ?? 'Utilisateur',
+    initials: (profile['nom'] ?? 'U').toString().substring(0,1).toUpperCase() + 'A',
+    email: email,
+    school: profile['ecoleId'] ?? 'sentinel_ci',
+    role: roleFromString(profile['role']),
+    uid: uid,
+    childId: childId,
+    classeId: classeId,
+    matiere: matiere,
+    classes: classes,
+    estPrincipal: profile['estPrincipal'] == true,
+    classePrincipale: profile['classePrincipale'] as String?,
+    enfantsCount: enfantsCount,
+  );
 }
 
 // ══════════════════════════════════════════
@@ -672,37 +762,9 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       return;
     }
-    // Pour un parent : récupérer l'UID de son enfant (1er de la liste)
-    String? childId;
-    final enfants = profile['enfants'];
-    if (enfants is List && enfants.isNotEmpty) {
-      childId = enfants.first.toString();
-    }
-    // Classe de référence : l'élève a la sienne ; le parent prend celle de son enfant
-    String? classeId = profile['classeId'] as String?;
-    if (classeId == null && childId != null) {
-      classeId = await FirebaseService.getClasseIdEleve(childId);
-    }
     if (!mounted) return;
-    // Pour un prof : sa matière et ses classes
-    final String? matiere = profile['matiere'] as String?;
-    final List<String> classes = (profile['classes'] is List)
-        ? List<String>.from((profile['classes'] as List).map((e) => e.toString()))
-        : <String>[];
-    final user = AppUser(
-      name: profile['nom'] ?? 'Utilisateur',
-      initials: (profile['nom'] ?? 'U').substring(0,1).toUpperCase() + 'A',
-      email: cred.user!.email ?? '',
-      school: profile['ecoleId'] ?? 'sentinel_ci',
-      role: roleFromString(profile['role']),
-      uid: cred.user!.uid,
-      childId: childId,
-      classeId: classeId,
-      matiere: matiere,
-      classes: classes,
-      estPrincipal: profile['estPrincipal'] == true,
-      classePrincipale: profile['classePrincipale'] as String?,
-    );
+    final user = await construireAppUser(profile, cred.user!.uid, cred.user!.email ?? '');
+    if (!mounted) return;
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (_) => MainShell(user: user)));
   }
@@ -781,11 +843,176 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height:12),
                   Center(child: Text('🔒 Connexion chiffree SSL',
                       style: TextStyle(fontSize:11, color:Colors.grey[400]))),
+                  const Divider(height:28),
+                  Center(child: Column(children: [
+                    Text('Vous etes un parent ?',
+                        style: TextStyle(fontSize:12, color: Colors.grey[600])),
+                    TextButton(
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const InscriptionParentPage())),
+                      child: const Text('Creer un compte parent',
+                          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.green)),
+                    ),
+                  ])),
                 ]),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════
+//  INSCRIPTION PARENT (auto-inscription + code enfant)
+// ══════════════════════════════════════════
+class InscriptionParentPage extends StatefulWidget {
+  const InscriptionParentPage({super.key});
+  @override State<InscriptionParentPage> createState() => _InscriptionParentPageState();
+}
+
+class _InscriptionParentPageState extends State<InscriptionParentPage> {
+  final _codeCtrl  = TextEditingController();
+  final _nomCtrl   = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _pwCtrl    = TextEditingController();
+
+  Map<String,dynamic>? _enfant; // enfant trouvé via le code
+  String? _enfantId, _ecoleId;
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() { _codeCtrl.dispose(); _nomCtrl.dispose(); _emailCtrl.dispose(); _pwCtrl.dispose(); super.dispose(); }
+
+  Future<void> _verifierCode() async {
+    if (_codeCtrl.text.trim().isEmpty) { setState(()=>_error='Entrez le code de votre enfant'); return; }
+    setState(() { _loading = true; _error = null; _enfant = null; });
+    try {
+      final snap = await FirebaseService.findEleveParCode(_codeCtrl.text);
+      final eleves = snap.docs.where((d)=>(d.data() as Map)['role']=='eleve').toList();
+      if (eleves.isEmpty) {
+        setState(() { _loading = false; _error = 'Code introuvable. Verifiez aupres de l ecole.'; });
+        return;
+      }
+      final e = eleves.first;
+      setState(() {
+        _enfant = e.data() as Map<String,dynamic>;
+        _enfantId = e.id;
+        _ecoleId = _enfant!['ecoleId'];
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() { _loading = false; _error = 'Erreur : $e'; });
+    }
+  }
+
+  Future<void> _creerCompte() async {
+    if (_nomCtrl.text.trim().isEmpty || _emailCtrl.text.trim().isEmpty || _pwCtrl.text.trim().length < 6) {
+      setState(()=>_error='Remplissez tous les champs (mot de passe 6 caracteres min).'); return;
+    }
+    setState(() { _loading = true; _error = null; });
+    final err = await FirebaseService.inscrireParent(
+      nom: _nomCtrl.text, email: _emailCtrl.text, motDePasse: _pwCtrl.text,
+      childId: _enfantId!, ecoleId: _ecoleId!,
+    );
+    if (!mounted) return;
+    if (err != null) { setState(() { _loading = false; _error = err; }); return; }
+    // Connecté automatiquement : on charge le profil et on entre
+    final u = FirebaseAuth.instance.currentUser!;
+    final profile = await FirebaseService.getUserProfile(u.uid, u.email ?? '');
+    if (!mounted) return;
+    if (profile == null) { setState(() { _loading = false; _error = 'Profil introuvable.'; }); return; }
+    final user = await construireAppUser(profile, u.uid, u.email ?? '');
+    if (!mounted) return;
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => MainShell(user: user)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Creer un compte parent')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Rattachez votre enfant',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          const Text('Saisissez le code que l ecole vous a communique pour votre enfant.',
+              style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+          const SizedBox(height: 16),
+
+          SCCard(child: Column(children: [
+            TextField(controller: _codeCtrl,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(labelText: 'Code de l enfant')),
+            const SizedBox(height: 12),
+            SizedBox(width: double.infinity, child: OutlinedButton(
+              onPressed: _loading ? null : _verifierCode,
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.green,
+                  side: const BorderSide(color: AppColors.green),
+                  padding: const EdgeInsets.symmetric(vertical: 12)),
+              child: const Text('Verifier le code'),
+            )),
+            if (_enfant != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
+                child: Row(children: [
+                  const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('Enfant trouve : ${_enfant!['nom'] ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.green))),
+                ]),
+              ),
+            ],
+          ])),
+
+          if (_enfant != null) ...[
+            const SizedBox(height: 16),
+            const Text('Vos informations',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 10),
+            SCCard(child: Column(children: [
+              TextField(controller: _nomCtrl,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(labelText: 'Votre nom complet')),
+              const SizedBox(height: 12),
+              TextField(controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(labelText: 'Email')),
+              const SizedBox(height: 12),
+              TextField(controller: _pwCtrl, obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Mot de passe (6 caracteres min)')),
+            ])),
+          ],
+
+          if (_error != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: AppColors.redBg, borderRadius: BorderRadius.circular(8)),
+              child: Text(_error!, style: const TextStyle(color: AppColors.red, fontSize: 13)),
+            ),
+          ],
+
+          if (_enfant != null) ...[
+            const SizedBox(height: 18),
+            SizedBox(width: double.infinity, child: ElevatedButton(
+              onPressed: _loading ? null : _creerCompte,
+              child: _loading
+                  ? const SizedBox(width:20, height:20, child: CircularProgressIndicator(color:Colors.white, strokeWidth:2))
+                  : const Text('Creer mon compte et demarrer'),
+            )),
+            const SizedBox(height: 10),
+            const Center(child: Text('Essai gratuit de 2 semaines inclus 🎁',
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted))),
+          ],
+        ]),
       ),
     );
   }
@@ -1091,6 +1318,34 @@ class DashboardPage extends StatelessWidget {
                   Text('Professeur principal',
                       style: TextStyle(color: Colors.white, fontSize:15, fontWeight: FontWeight.w800)),
                   Text('Voir les moyennes de ma classe',
+                      style: TextStyle(color: Colors.white70, fontSize:12)),
+                ])),
+                Icon(Icons.chevron_right_rounded, color: Colors.white),
+              ]),
+            ),
+          ),
+          const SizedBox(height:20),
+        ],
+
+        // Carte "Mon abonnement" (parent)
+        if (user.role == UserRole.parent) ...[
+          InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => ParentAbonnementPage(user: user))),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors:[AppColors.blue, Color(0xFF1E88E5)]),
+                  borderRadius: BorderRadius.circular(14)),
+              child: Row(children: const [
+                Icon(Icons.card_membership_rounded, color: Colors.white, size: 28),
+                SizedBox(width:12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                  Text('Mon abonnement',
+                      style: TextStyle(color: Colors.white, fontSize:15, fontWeight: FontWeight.w800)),
+                  Text('Voir mon statut et mes forfaits',
                       style: TextStyle(color: Colors.white70, fontSize:12)),
                 ])),
                 Icon(Icons.chevron_right_rounded, color: Colors.white),
@@ -1859,6 +2114,166 @@ class BulletinPage extends StatelessWidget {
       Expanded(child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
       Text(valeur, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: col)),
     ]);
+  }
+}
+
+// ══════════════════════════════════════════
+//  ABONNEMENT (espace parent)
+// ══════════════════════════════════════════
+class ParentAbonnementPage extends StatefulWidget {
+  final AppUser user;
+  const ParentAbonnementPage({super.key, required this.user});
+  @override State<ParentAbonnementPage> createState() => _ParentAbonnementPageState();
+}
+
+class _ParentAbonnementPageState extends State<ParentAbonnementPage> {
+  Map<String,dynamic>? _abo;
+  bool _loading = true;
+
+  @override
+  void initState() { super.initState(); _charger(); }
+
+  Future<void> _charger() async {
+    setState(()=>_loading = true);
+    final id = widget.user.uid;
+    var snap = await FirebaseService.getAbonnement(id);
+    if (!snap.exists) {
+      // Première visite : on démarre l'essai gratuit de 2 semaines
+      final now = DateTime.now();
+      await FirebaseService.setAbonnement(id, {
+        'parentId': id, 'ecoleId': widget.user.school,
+        'type': 'essai', 'forfait': null,
+        'dateDebut': Timestamp.fromDate(now),
+        'dateFin': Timestamp.fromDate(now.add(const Duration(days:14))),
+        'montant': 0, 'nbEnfants': widget.user.enfantsCount,
+      });
+      snap = await FirebaseService.getAbonnement(id);
+    }
+    if (mounted) setState((){ _abo = snap.data() as Map<String,dynamic>?; _loading = false; });
+  }
+
+  Future<void> _souscrire(String forfait) async {
+    final now = DateTime.now();
+    final fin = now.add(Duration(days: kForfaitJours[forfait]!));
+    await FirebaseService.setAbonnement(widget.user.uid, {
+      'parentId': widget.user.uid, 'ecoleId': widget.user.school,
+      'type': 'paye', 'forfait': forfait,
+      'dateDebut': Timestamp.fromDate(now),
+      'dateFin': Timestamp.fromDate(fin),
+      'montant': prixForfait(forfait, widget.user.enfantsCount),
+      'nbEnfants': widget.user.enfantsCount,
+    });
+    if (mounted) { showSnack(context, 'Abonnement ${kForfaitLabel[forfait]} active ! 🎉'); _charger(); }
+  }
+
+  String _d(DateTime x) => '${x.day.toString().padLeft(2,'0')}/${x.month.toString().padLeft(2,'0')}/${x.year}';
+
+  // Statut calculé à partir des dates
+  ({String label, Color color, Color bg, String detail, IconData icon}) _statut() {
+    final fin = (_abo!['dateFin'] as Timestamp).toDate();
+    final type = _abo!['type'];
+    final now = DateTime.now();
+    final grace = fin.add(const Duration(days:14));
+    if (!now.isAfter(fin)) {
+      if (type=='essai') {
+        return (label:'Essai gratuit', color:AppColors.blue, bg:AppColors.blueBg,
+            detail:'Profitez de Sentinel CI jusqu au ${_d(fin)}', icon:Icons.card_giftcard_rounded);
+      }
+      return (label:'Abonnement actif', color:AppColors.green, bg:AppColors.greenBg,
+          detail:'Valable jusqu au ${_d(fin)}', icon:Icons.verified_rounded);
+    }
+    if (now.isBefore(grace)) {
+      return (label:'En relance', color:AppColors.orange, bg:AppColors.orangeBg,
+          detail:'Regularisez avant le ${_d(grace)} pour garder votre acces', icon:Icons.access_time_rounded);
+    }
+    return (label:'Acces limite', color:AppColors.red, bg:AppColors.redBg,
+        detail:'Votre abonnement a expire. Reactivez pour retrouver tout le suivi.', icon:Icons.lock_outline_rounded);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final nb = widget.user.enfantsCount;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mon abonnement')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : (_abo == null
+            ? const Center(child: Text('Indisponible.'))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  // Carte statut
+                  Builder(builder: (_) {
+                    final s = _statut();
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: s.bg, borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: s.color.withOpacity(0.4))),
+                      child: Row(children:[
+                        Icon(s.icon, color: s.color, size: 30),
+                        const SizedBox(width: 14),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                          Text(s.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: s.color)),
+                          const SizedBox(height: 3),
+                          Text(s.detail, style: const TextStyle(fontSize: 12.5, color: AppColors.textMain)),
+                        ])),
+                      ]),
+                    );
+                  }),
+                  const SizedBox(height: 20),
+
+                  Row(children:[
+                    const Expanded(child: SectionTitle('Choisir un forfait')),
+                    if (nb >= 2)
+                      Container(padding: const EdgeInsets.symmetric(horizontal:10, vertical:5),
+                          decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(20)),
+                          child: const Text('Famille -20% 🎉',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.green))),
+                  ]),
+                  const SizedBox(height: 4),
+
+                  ...['mensuel','trimestriel','annuel'].map((f){
+                    final prix = prixForfait(f, nb);
+                    final base = kForfaitPrix[f]!;
+                    final remise = nb >= 2;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.border)),
+                      child: Row(children:[
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                          Text(kForfaitLabel[f]!, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 2),
+                          Row(children:[
+                            Text('$prix FCFA', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.green)),
+                            if (remise) ...[
+                              const SizedBox(width: 8),
+                              Text('$base', style: const TextStyle(fontSize: 12, color: AppColors.textMuted,
+                                  decoration: TextDecoration.lineThrough)),
+                            ],
+                          ]),
+                        ])),
+                        ElevatedButton(
+                          onPressed: () => _souscrire(f),
+                          child: const Text('Souscrire'),
+                        ),
+                      ]),
+                    );
+                  }),
+
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(10)),
+                    child: const Text(
+                      'Le paiement en ligne (mobile money, carte) arrive bientot. '
+                      'Pour l instant, la souscription est activee immediatement (mode demo).',
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                  ),
+                ]))),
+    );
   }
 }
 
@@ -2717,6 +3132,10 @@ class UtilisateursPage extends StatelessWidget {
                               style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),
                           Text(ecoleNom,
                               style:const TextStyle(fontSize:11,color:AppColors.textMuted)),
+                          if (role=='eleve' && (data['codeParent']??'').toString().isNotEmpty)
+                            Padding(padding: const EdgeInsets.only(top:3),
+                              child: Text('Code parent : ${data['codeParent']}',
+                                  style: const TextStyle(fontSize:11, fontWeight: FontWeight.w800, color: AppColors.green))),
                         ])),
                         Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
                             decoration:BoxDecoration(color:rc.$2,borderRadius:BorderRadius.circular(8)),

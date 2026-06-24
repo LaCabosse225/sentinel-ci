@@ -490,11 +490,10 @@ class FirebaseService {
           .limit(50)
           .snapshots();
 
-  // Stream agenda
+  // Stream agenda (1 filtre => pas d'index ; tri côté app)
   static Stream<QuerySnapshot> streamAgenda(String ecoleId) =>
       _db.collection('agenda')
           .where('ecoleId', isEqualTo: ecoleId)
-          .orderBy('date')
           .snapshots();
 
   // Ajouter événement agenda
@@ -3721,11 +3720,21 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
               StreamBuilder<QuerySnapshot>(
                   stream:FirebaseService.streamAgenda(widget.user.school),
                   builder:(ctx,snap){
+                    if (snap.hasError)
+                      return const Text('Impossible de charger le calendrier.',
+                          style:TextStyle(color:AppColors.textMuted));
                     if (!snap.hasData) return const Center(child:CircularProgressIndicator());
                     if (snap.data!.docs.isEmpty)
                       return const Text('Aucun evenement.',
                           style:TextStyle(color:AppColors.textMuted));
-                    return Column(children:snap.data!.docs.map((d){
+                    final docs = snap.data!.docs.toList()
+                      ..sort((a,b){
+                        final ta=(a.data() as Map)['createdAt'];
+                        final tb=(b.data() as Map)['createdAt'];
+                        if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
+                        return 0;
+                      });
+                    return Column(children:docs.map((d){
                       final data=d.data() as Map<String,dynamic>;
                       final icons={'reunion':'👨‍👩‍👧','exam':'📝','sortie':'🎭',
                         'conge':'🏖️','rentree':'🎒','info':'📢','evenement':'📅'};

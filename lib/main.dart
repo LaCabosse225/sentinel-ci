@@ -501,6 +501,25 @@ class FirebaseService {
           .where('conversationId', isEqualTo: conversationId)
           .snapshots();
 
+  // Tous les messages reçus par un utilisateur (pour les badges non lus) — 1 filtre
+  static Stream<QuerySnapshot> streamMessagesRecus(String userId) =>
+      _db.collection('messages')
+          .where('vers', isEqualTo: userId)
+          .snapshots();
+
+  // Marque comme lus les messages d'une conversation reçus par moi
+  static Future<void> marquerConversationLue(String conversationId, String monUid) async {
+    final snap = await _db.collection('messages')
+        .where('conversationId', isEqualTo: conversationId).get();
+    final batch = _db.batch();
+    var nb = 0;
+    for (final d in snap.docs) {
+      final m = d.data();
+      if (m['vers'] == monUid && m['lu'] != true) { batch.update(d.reference, {'lu': true}); nb++; }
+    }
+    if (nb > 0) await batch.commit();
+  }
+
   // Stream lecons
   static Stream<QuerySnapshot> streamLecons(String ecoleId, String classe) =>
       _db.collection('lecons')
@@ -1572,30 +1591,46 @@ class DashboardPage extends StatelessWidget {
         // Carte "Messages" (prof, directeur, élève, parent)
         if (user.role == UserRole.prof || user.role == UserRole.directeur ||
             user.role == UserRole.eleve || user.role == UserRole.parent) ...[
-          InkWell(
-            onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => MessageriePage(user: user))),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.border)),
-              child: Row(children: const [
-                Icon(Icons.forum_rounded, color: AppColors.green, size: 26),
-                SizedBox(width:12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
-                  Text('Messages',
-                      style: TextStyle(fontSize:15, fontWeight: FontWeight.w800)),
-                  Text('Discuter avec vos contacts',
-                      style: TextStyle(color: AppColors.textMuted, fontSize:12)),
-                ])),
-                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-              ]),
-            ),
-          ),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseService.streamMessagesRecus(user.uid),
+            builder: (ctx, msnap) {
+              final nonLus = msnap.hasData
+                  ? msnap.data!.docs.where((d)=>(d.data() as Map)['lu'] != true).length
+                  : 0;
+              return InkWell(
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => MessageriePage(user: user))),
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: nonLus>0 ? AppColors.green : AppColors.border,
+                          width: nonLus>0 ? 1.5 : 1)),
+                  child: Row(children: [
+                    Stack(clipBehavior: Clip.none, children: [
+                      const Icon(Icons.forum_rounded, color: AppColors.green, size: 26),
+                      if (nonLus > 0) Positioned(right: -8, top: -8, child: _PastilleNonLus(n: nonLus)),
+                    ]),
+                    const SizedBox(width:12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                      const Text('Messages',
+                          style: TextStyle(fontSize:15, fontWeight: FontWeight.w800)),
+                      Text(nonLus > 0
+                              ? '$nonLus nouveau${nonLus>1?'x':''} message${nonLus>1?'s':''}'
+                              : 'Discuter avec vos contacts',
+                          style: TextStyle(
+                              color: nonLus>0 ? AppColors.green : AppColors.textMuted,
+                              fontSize:12,
+                              fontWeight: nonLus>0 ? FontWeight.w700 : FontWeight.w400)),
+                    ])),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                  ]),
+                ),
+              );
+            }),
           const SizedBox(height:20),
         ],
 
@@ -3273,6 +3308,24 @@ final Map<UserRole, String> kRoleNom = {
   UserRole.prof:'Professeur', UserRole.eleve:'Eleve', UserRole.parent:'Parent',
 };
 
+// Pastille rouge avec compteur de messages non lus
+class _PastilleNonLus extends StatelessWidget {
+  final int n;
+  const _PastilleNonLus({required this.n});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      constraints: const BoxConstraints(minWidth: 18),
+      decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white, width: 1.5)),
+      child: Text(n > 9 ? '9+' : '$n',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
+    );
+  }
+}
+
 class MessageriePage extends StatelessWidget {
   final AppUser user;
   const MessageriePage({super.key, required this.user});
@@ -3282,39 +3335,62 @@ class MessageriePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Messagerie')),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseService.streamUtilisateursParEcole(user.school),
-        builder: (ctx, snap) {
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-          final contacts = contactsMessagerie(user, snap.data!.docs);
-          if (contacts.isEmpty) {
-            return const Center(child: Padding(padding: EdgeInsets.all(28),
-                child: Text('Aucun contact disponible pour le moment.',
-                    textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted))));
+        stream: FirebaseService.streamMessagesRecus(user.uid),
+        builder: (ctx, msnap) {
+          // Expéditeurs dont j'ai des messages non lus
+          final nonLusParExp = <String,int>{};
+          if (msnap.hasData) {
+            for (final d in msnap.data!.docs) {
+              final m = d.data() as Map;
+              if (m['lu'] != true && m['de'] != null) {
+                final de = m['de'].toString();
+                nonLusParExp[de] = (nonLusParExp[de] ?? 0) + 1;
+              }
+            }
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: contacts.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (_, i) {
-              final c = contacts[i];
-              final col = kRoleCouleur[c.role] ?? AppColors.green;
-              return SCCard(child: InkWell(
-                onTap: () => Navigator.push(context, MaterialPageRoute(
-                    builder: (_) => ConversationPage(
-                        user: user, contactUid: c.uid, contactNom: c.nom, contactRole: c.role))),
-                child: Row(children: [
-                  CircleAvatar(radius: 20, backgroundColor: col.withOpacity(.15),
-                      child: Text(c.nom.isNotEmpty ? c.nom[0].toUpperCase() : '?',
-                          style: TextStyle(color: col, fontWeight: FontWeight.w800))),
-                  const SizedBox(width: 12),
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(c.nom, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                    Text(kRoleNom[c.role] ?? '',
-                        style: TextStyle(fontSize: 11.5, color: col, fontWeight: FontWeight.w600)),
-                  ])),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-                ]),
-              ));
+          return StreamBuilder<QuerySnapshot>(
+            stream: FirebaseService.streamUtilisateursParEcole(user.school),
+            builder: (ctx2, snap) {
+              if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+              final contacts = contactsMessagerie(user, snap.data!.docs);
+              if (contacts.isEmpty) {
+                return const Center(child: Padding(padding: EdgeInsets.all(28),
+                    child: Text('Aucun contact disponible pour le moment.',
+                        textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted))));
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(12),
+                itemCount: contacts.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (_, i) {
+                  final c = contacts[i];
+                  final col = kRoleCouleur[c.role] ?? AppColors.green;
+                  final nl = nonLusParExp[c.uid] ?? 0;
+                  return SCCard(child: InkWell(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => ConversationPage(
+                            user: user, contactUid: c.uid, contactNom: c.nom, contactRole: c.role))),
+                    child: Row(children: [
+                      Stack(clipBehavior: Clip.none, children: [
+                        CircleAvatar(radius: 20, backgroundColor: col.withOpacity(.15),
+                            child: Text(c.nom.isNotEmpty ? c.nom[0].toUpperCase() : '?',
+                                style: TextStyle(color: col, fontWeight: FontWeight.w800))),
+                        if (nl > 0) Positioned(right: -4, top: -4, child: _PastilleNonLus(n: nl)),
+                      ]),
+                      const SizedBox(width: 12),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(c.nom, style: TextStyle(fontSize: 14,
+                            fontWeight: nl>0 ? FontWeight.w800 : FontWeight.w700)),
+                        Text(kRoleNom[c.role] ?? '',
+                            style: TextStyle(fontSize: 11.5, color: col, fontWeight: FontWeight.w600)),
+                      ])),
+                      if (nl > 0)
+                        const Icon(Icons.circle, color: AppColors.red, size: 10)
+                      else
+                        const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                    ]),
+                  ));
+                });
             });
         }),
     );
@@ -3333,6 +3409,13 @@ class ConversationPage extends StatefulWidget {
 class _ConversationPageState extends State<ConversationPage> {
   final _ctrl = TextEditingController();
   late final String _convId = FirebaseService.convId(widget.user.uid, widget.contactUid);
+
+  @override
+  void initState() {
+    super.initState();
+    // Ouvrir la conversation = marquer ses messages comme lus
+    FirebaseService.marquerConversationLue(_convId, widget.user.uid);
+  }
 
   Future<void> _send() async {
     final v = _ctrl.text.trim();

@@ -180,6 +180,27 @@ int prixForfait(String forfait, int nbEnfants) {
   return nbEnfants >= 2 ? (base * 0.8).round() : base;
 }
 
+// Statut d'un abonnement (réutilisé : espace parent + tableau de bord directeur)
+({String label, Color color, Color bg, bool aJour}) statutAbo(Map<String,dynamic> abo) {
+  final finTs = abo['dateFin'];
+  if (finTs is! Timestamp) {
+    return (label:'Inconnu', color:AppColors.textMuted, bg:AppColors.bg, aJour:false);
+  }
+  final fin = finTs.toDate();
+  final type = abo['type'];
+  final now = DateTime.now();
+  final grace = fin.add(const Duration(days:14));
+  if (!now.isAfter(fin)) {
+    return type=='essai'
+      ? (label:'Essai gratuit', color:AppColors.blue, bg:AppColors.blueBg, aJour:true)
+      : (label:'Actif', color:AppColors.green, bg:AppColors.greenBg, aJour:true);
+  }
+  if (now.isBefore(grace)) {
+    return (label:'En relance', color:AppColors.orange, bg:AppColors.orangeBg, aJour:false);
+  }
+  return (label:'Acces limite', color:AppColors.red, bg:AppColors.redBg, aJour:false);
+}
+
 // Calcule (une fois) la liste classée des élèves d'une classe avec leur moyenne.
 Future<List<({String nom, double moy})>> calculerMoyennesClasse(
     String ecoleId, String classeId) async {
@@ -590,6 +611,10 @@ class FirebaseService {
         ...data,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+
+  // Tous les abonnements d'une école (tableau de bord directeur) — 1 filtre, pas d'index
+  static Future<QuerySnapshot> getAbonnementsEcole(String ecoleId) =>
+      _db.collection('abonnements').where('ecoleId', isEqualTo: ecoleId).get();
 
   // Crée un compte (eleve, prof ou parent) : connexion + fiche, SANS déconnecter l'admin.
   // 'champs' contient role, ecoleId et les champs propres au rôle.
@@ -1115,6 +1140,7 @@ class _MainShellState extends State<MainShell> {
       case UserRole.directeur: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.people_rounded,         'Utilisateurs'),
+        _NavItem(Icons.card_membership_rounded,'Abonnements'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
       ];
@@ -1133,7 +1159,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.bar_chart_rounded,      'Notes'),
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
         _NavItem(Icons.how_to_reg_rounded,     'Absences'),
-        _NavItem(Icons.menu_book_rounded,      'Programme'),
+        _NavItem(Icons.menu_book_rounded,      'Cours'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
       ];
@@ -1153,6 +1179,7 @@ class _MainShellState extends State<MainShell> {
       case UserRole.directeur: return [
         DashboardPage(user: widget.user),
         UtilisateursPage(user: widget.user),
+        AbonnementsDirecteurPage(user: widget.user),
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
       ];
@@ -2286,6 +2313,116 @@ class _ParentAbonnementPageState extends State<ParentAbonnementPage> {
                   ),
                 ]))),
     );
+  }
+}
+
+// ══════════════════════════════════════════
+//  ABONNEMENTS — TABLEAU DE BORD (directeur)
+// ══════════════════════════════════════════
+class AbonnementsDirecteurPage extends StatelessWidget {
+  final AppUser user;
+  const AbonnementsDirecteurPage({super.key, required this.user});
+
+  Future<Map<String,dynamic>> _charger() async {
+    final aboSnap = await FirebaseService.getAbonnementsEcole(user.school);
+    final usersSnap = await FirebaseService.streamUtilisateursParEcole(user.school).first;
+    final noms = <String,String>{};
+    for (final u in usersSnap.docs) {
+      noms[u.id] = ((u.data() as Map)['nom'] ?? '').toString();
+    }
+    final List<Map<String,dynamic>> familles = [];
+    double totalEncaisse = 0;
+    int aJour = 0;
+    for (final a in aboSnap.docs) {
+      final data = a.data() as Map<String,dynamic>;
+      final st = statutAbo(data);
+      if (st.aJour) aJour++;
+      final montant = (data['montant'] as num?)?.toDouble() ?? 0;
+      if (data['type'] == 'paye') totalEncaisse += montant;
+      familles.add({
+        'nom': noms[data['parentId']] ?? 'Parent',
+        'label': st.label, 'color': st.color, 'bg': st.bg,
+        'forfait': data['forfait'], 'montant': montant,
+      });
+    }
+    familles.sort((a,b)=>(a['nom'] as String).toLowerCase().compareTo((b['nom'] as String).toLowerCase()));
+    return {'familles': familles, 'totalEncaisse': totalEncaisse, 'aJour': aJour, 'total': aboSnap.docs.length};
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String,dynamic>>(
+      future: _charger(),
+      builder: (ctx, snap) {
+        if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+        final d = snap.data!;
+        final familles = d['familles'] as List;
+        final totalEncaisse = d['totalEncaisse'] as double;
+        final aReverser = (totalEncaisse * 0.15).round();
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SectionTitle('Vue d ensemble'),
+            Row(children:[
+              Expanded(child: StatCard(value:'${d['total']}', label:'Familles', sub:'Inscrites',
+                  icon:Icons.groups_rounded, color:AppColors.blue, iconBg:AppColors.blueBg)),
+              const SizedBox(width:12),
+              Expanded(child: StatCard(value:'${d['aJour']}', label:'A jour', sub:'Actives / essai',
+                  icon:Icons.check_circle_rounded, color:AppColors.green, iconBg:AppColors.greenBg)),
+            ]),
+            const SizedBox(height:12),
+            // Revenu reversé à l'école
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors:[AppColors.green, Color(0xFF0E9F5B)]),
+                  borderRadius: BorderRadius.circular(14)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                const Text('A reverser a votre ecole (15%)',
+                    style: TextStyle(color: Colors.white70, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                const SizedBox(height:4),
+                Text('$aReverser FCFA',
+                    style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
+                const SizedBox(height:2),
+                Text('Sur ${totalEncaisse.round()} FCFA encaisses au total',
+                    style: const TextStyle(color: Colors.white70, fontSize: 11)),
+              ]),
+            ),
+            const SizedBox(height:20),
+
+            SectionTitle('Les familles'),
+            if (familles.isEmpty)
+              SCCard(child: const Text('Aucune famille abonnee pour le moment.',
+                  style: TextStyle(color: AppColors.textMuted)))
+            else
+              ...familles.map((f){
+                final forfait = f['forfait'];
+                final montant = (f['montant'] as double).round();
+                return Container(
+                  margin: const EdgeInsets.only(bottom:10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border)),
+                  child: Row(children:[
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                      Text(f['nom'], style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                      const SizedBox(height:2),
+                      Text(forfait != null
+                          ? '${kForfaitLabel[forfait] ?? forfait} · $montant FCFA'
+                          : 'Periode d essai',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                    ])),
+                    Container(padding: const EdgeInsets.symmetric(horizontal:10, vertical:5),
+                        decoration: BoxDecoration(color: f['bg'], borderRadius: BorderRadius.circular(20)),
+                        child: Text(f['label'],
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: f['color']))),
+                  ]),
+                );
+              }),
+          ]),
+        );
+      });
   }
 }
 

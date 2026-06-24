@@ -489,6 +489,18 @@ class FirebaseService {
     });
   }
 
+  // Identifiant unique d'une conversation entre 2 personnes (ordre stable)
+  static String convId(String a, String b) {
+    final p = [a, b]..sort();
+    return '${p[0]}__${p[1]}';
+  }
+
+  // Fil d'une conversation — 1 filtre (conversationId), tri côté client, pas d'index
+  static Stream<QuerySnapshot> streamConversation(String conversationId) =>
+      _db.collection('messages')
+          .where('conversationId', isEqualTo: conversationId)
+          .snapshots();
+
   // Stream lecons
   static Stream<QuerySnapshot> streamLecons(String ecoleId, String classe) =>
       _db.collection('lecons')
@@ -740,6 +752,65 @@ Future<AppUser> construireAppUser(Map<String,dynamic> profile, String uid, Strin
     classePrincipale: profile['classePrincipale'] as String?,
     enfantsCount: enfantsCount,
   );
+}
+
+// Calcule la liste des contacts autorisés selon les règles de messagerie.
+List<({String uid, String nom, UserRole role})> contactsMessagerie(
+    AppUser me, List<QueryDocumentSnapshot> docs) {
+  Map<String,dynamic> dataOf(QueryDocumentSnapshot d) => d.data() as Map<String,dynamic>;
+  UserRole roleOf(Map m) => roleFromString(m['role']);
+  final out = <({String uid, String nom, UserRole role})>[];
+  void add(QueryDocumentSnapshot d) {
+    final m = dataOf(d);
+    out.add((uid: d.id, nom: (m['nom'] ?? 'Utilisateur').toString(), role: roleOf(m)));
+  }
+
+  switch (me.role) {
+    case UserRole.eleve:
+      // Camarades de sa classe + son/ses parent(s)
+      for (final d in docs) {
+        if (d.id == me.uid) continue;
+        final m = dataOf(d); final r = roleOf(m);
+        if (r == UserRole.eleve && m['classeId'] == me.classeId) add(d);
+        else if (r == UserRole.parent && m['enfants'] is List &&
+            (m['enfants'] as List).contains(me.uid)) add(d);
+      }
+      break;
+    case UserRole.parent:
+      // Son enfant + les profs de la classe de l'enfant
+      for (final d in docs) {
+        final m = dataOf(d); final r = roleOf(m);
+        if (d.id == me.childId) add(d);
+        else if (r == UserRole.prof && m['classes'] is List &&
+            (m['classes'] as List).contains(me.classeId)) add(d);
+      }
+      break;
+    case UserRole.prof:
+      // Élèves des classes du prof -> leurs parents + le directeur
+      final studentIds = <String>{};
+      for (final d in docs) {
+        final m = dataOf(d);
+        if (roleOf(m) == UserRole.eleve && me.classes.contains(m['classeId'])) {
+          studentIds.add(d.id);
+        }
+      }
+      for (final d in docs) {
+        final m = dataOf(d); final r = roleOf(m);
+        if (r == UserRole.directeur) add(d);
+        else if (r == UserRole.parent && m['enfants'] is List &&
+            (m['enfants'] as List).any((e) => studentIds.contains(e))) add(d);
+      }
+      break;
+    case UserRole.directeur:
+    case UserRole.admin:
+      for (final d in docs) {
+        final r = roleOf(dataOf(d));
+        if (r == UserRole.prof || r == UserRole.parent) add(d);
+      }
+      break;
+  }
+  out.sort((a, b) => a.nom.toLowerCase().compareTo(b.nom.toLowerCase()));
+  return out;
 }
 
 // ══════════════════════════════════════════
@@ -1189,7 +1260,6 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
         _NavItem(Icons.how_to_reg_rounded,     'Absences'),
         _NavItem(Icons.menu_book_rounded,      'Lecons'),
-        _NavItem(Icons.message_rounded,        'Messages'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
       ];
       case UserRole.eleve:
@@ -1228,7 +1298,6 @@ class _MainShellState extends State<MainShell> {
         DevoirsPage(user: widget.user),
         AbsencesPage(user: widget.user),
         LeconsPage(user: widget.user),
-        MessageriePage(user: widget.user),
         AgendaPage(user: widget.user),
       ];
       case UserRole.eleve:
@@ -1494,6 +1563,36 @@ class DashboardPage extends StatelessWidget {
                       style: TextStyle(color: Colors.white70, fontSize:12)),
                 ])),
                 Icon(Icons.chevron_right_rounded, color: Colors.white),
+              ]),
+            ),
+          ),
+          const SizedBox(height:20),
+        ],
+
+        // Carte "Messages" (prof, directeur, élève, parent)
+        if (user.role == UserRole.prof || user.role == UserRole.directeur ||
+            user.role == UserRole.eleve || user.role == UserRole.parent) ...[
+          InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => MessageriePage(user: user))),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border)),
+              child: Row(children: const [
+                Icon(Icons.forum_rounded, color: AppColors.green, size: 26),
+                SizedBox(width:12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                  Text('Messages',
+                      style: TextStyle(fontSize:15, fontWeight: FontWeight.w800)),
+                  Text('Discuter avec vos contacts',
+                      style: TextStyle(color: AppColors.textMuted, fontSize:12)),
+                ])),
+                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
               ]),
             ),
           ),
@@ -3164,90 +3263,157 @@ class _AlertesPageState extends State<AlertesPage> {
 // ══════════════════════════════════════════
 //  MESSAGERIE — TEMPS REEL
 // ══════════════════════════════════════════
-class MessageriePage extends StatefulWidget {
+// Couleur / libellé par rôle (réutilisables)
+final Map<UserRole, Color> kRoleCouleur = {
+  UserRole.admin: AppColors.purple, UserRole.directeur: AppColors.gold,
+  UserRole.prof: AppColors.orange, UserRole.eleve: AppColors.green, UserRole.parent: AppColors.blue,
+};
+final Map<UserRole, String> kRoleNom = {
+  UserRole.admin:'Super Admin', UserRole.directeur:'Directeur',
+  UserRole.prof:'Professeur', UserRole.eleve:'Eleve', UserRole.parent:'Parent',
+};
+
+class MessageriePage extends StatelessWidget {
   final AppUser user;
   const MessageriePage({super.key, required this.user});
-  @override State<MessageriePage> createState() => _MessageriePageState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Messagerie')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseService.streamUtilisateursParEcole(user.school),
+        builder: (ctx, snap) {
+          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          final contacts = contactsMessagerie(user, snap.data!.docs);
+          if (contacts.isEmpty) {
+            return const Center(child: Padding(padding: EdgeInsets.all(28),
+                child: Text('Aucun contact disponible pour le moment.',
+                    textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted))));
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.all(12),
+            itemCount: contacts.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (_, i) {
+              final c = contacts[i];
+              final col = kRoleCouleur[c.role] ?? AppColors.green;
+              return SCCard(child: InkWell(
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => ConversationPage(
+                        user: user, contactUid: c.uid, contactNom: c.nom, contactRole: c.role))),
+                child: Row(children: [
+                  CircleAvatar(radius: 20, backgroundColor: col.withOpacity(.15),
+                      child: Text(c.nom.isNotEmpty ? c.nom[0].toUpperCase() : '?',
+                          style: TextStyle(color: col, fontWeight: FontWeight.w800))),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(c.nom, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text(kRoleNom[c.role] ?? '',
+                        style: TextStyle(fontSize: 11.5, color: col, fontWeight: FontWeight.w600)),
+                  ])),
+                  const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                ]),
+              ));
+            });
+        }),
+    );
+  }
 }
 
-class _MessageriePageState extends State<MessageriePage> {
-  final _ctrl   = TextEditingController();
-  final _scroll = ScrollController();
-  String _dest  = 'konan_parent';
+class ConversationPage extends StatefulWidget {
+  final AppUser user;
+  final String contactUid, contactNom;
+  final UserRole contactRole;
+  const ConversationPage({super.key, required this.user,
+      required this.contactUid, required this.contactNom, required this.contactRole});
+  @override State<ConversationPage> createState() => _ConversationPageState();
+}
+
+class _ConversationPageState extends State<ConversationPage> {
+  final _ctrl = TextEditingController();
+  late final String _convId = FirebaseService.convId(widget.user.uid, widget.contactUid);
 
   Future<void> _send() async {
     final v = _ctrl.text.trim();
     if (v.isEmpty) return;
-    await FirebaseService.envoyerMessage({
-      'de':           widget.user.uid,
-      'vers':         _dest,
-      'texte':        v,
-      'roleEmetteur': widget.user.role.name,
-      'ecoleId':      widget.user.school,
-    });
     _ctrl.clear();
+    await FirebaseService.envoyerMessage({
+      'de': widget.user.uid,
+      'vers': widget.contactUid,
+      'conversationId': _convId,
+      'texte': v,
+      'ecoleId': widget.user.school,
+    });
   }
 
   @override
-  Widget build(BuildContext context) => Column(children:[
-    Padding(padding:const EdgeInsets.all(12),
-        child:DropdownButtonFormField<String>(
-            value: _dest,
-            decoration: const InputDecoration(labelText:'Conversation avec'),
-            items: ['konan_parent','diabate_prof','konan_amani','administration']
-                .map((t)=>DropdownMenuItem(value:t,child:Text(t))).toList(),
-            onChanged:(v)=>setState(()=>_dest=v!))),
-    Expanded(child:StreamBuilder<QuerySnapshot>(
-        stream: FirebaseService.streamMessages(widget.user.uid),
-        builder:(ctx, snap) {
-          if (!snap.hasData) return const Center(child:CircularProgressIndicator());
-          final docs = snap.data!.docs;
-          return ListView.builder(
-              controller: _scroll,
-              padding: const EdgeInsets.symmetric(horizontal:12),
-              itemCount: docs.length,
-              itemBuilder:(_,i){
-                final data = docs[i].data() as Map<String,dynamic>;
-                final moi = data['de'] == widget.user.uid;
-                return Padding(
-                    padding: const EdgeInsets.only(bottom:12),
-                    child:Row(
-                        mainAxisAlignment: moi ? MainAxisAlignment.end : MainAxisAlignment.start,
-                        children:[
-                          if (!moi) ...[
-                            CircleAvatar(radius:14, backgroundColor:AppColors.green,
-                                child:Text((data['de']??'?')[0].toUpperCase(),
-                                    style:const TextStyle(color:Colors.white,fontSize:10,fontWeight:FontWeight.w800))),
-                            const SizedBox(width:6),
-                          ],
-                          Container(
-                              constraints:BoxConstraints(maxWidth:MediaQuery.of(context).size.width*.65),
-                              padding:const EdgeInsets.symmetric(horizontal:14,vertical:10),
-                              decoration:BoxDecoration(
-                                  color:moi?AppColors.green:Colors.white,
-                                  border:moi?null:Border.all(color:AppColors.border),
-                                  borderRadius:BorderRadius.only(
-                                      topLeft:const Radius.circular(14),topRight:const Radius.circular(14),
-                                      bottomLeft:Radius.circular(moi?14:4),
-                                      bottomRight:Radius.circular(moi?4:14))),
-                              child:Text(data['texte']??'',
-                                  style:TextStyle(fontSize:13,color:moi?Colors.white:AppColors.textMain))),
-                        ]));
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.contactNom)),
+      body: Column(children: [
+        Expanded(child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseService.streamConversation(_convId),
+          builder: (ctx, snap) {
+            if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+            final docs = snap.data!.docs.toList()
+              ..sort((a, b) {
+                final ta = (a.data() as Map)['createdAt'];
+                final tb = (b.data() as Map)['createdAt'];
+                if (ta is Timestamp && tb is Timestamp) return ta.compareTo(tb);
+                return 0;
               });
-        })),
-    Container(
-        padding:const EdgeInsets.all(12),
-        decoration:const BoxDecoration(color:Colors.white,
-            border:Border(top:BorderSide(color:AppColors.border))),
-        child:Row(children:[
-          Expanded(child:TextField(controller:_ctrl,
-              decoration:const InputDecoration(hintText:'Votre message...', border:InputBorder.none),
-              onSubmitted:(_)=>_send())),
-          IconButton(icon:const Icon(Icons.send_rounded),
-              color:AppColors.green, onPressed:_send),
-        ])),
-  ]);
+            if (docs.isEmpty) {
+              return const Center(child: Text('Demarrez la conversation 👋',
+                  style: TextStyle(color: AppColors.textMuted)));
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: docs.length,
+              itemBuilder: (_, i) {
+                final m = docs[i].data() as Map<String, dynamic>;
+                final moi = m['de'] == widget.user.uid;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    mainAxisAlignment: moi ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * .72),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: moi ? AppColors.green : Colors.white,
+                          border: moi ? null : Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(14), topRight: const Radius.circular(14),
+                            bottomLeft: Radius.circular(moi ? 14 : 4),
+                            bottomRight: Radius.circular(moi ? 4 : 14))),
+                        child: Text(m['texte'] ?? '',
+                            style: TextStyle(fontSize: 13, color: moi ? Colors.white : AppColors.textMain)),
+                      ),
+                    ]),
+                );
+              });
+          })),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: const BoxDecoration(color: Colors.white,
+              border: Border(top: BorderSide(color: AppColors.border))),
+          child: Row(children: [
+            Expanded(child: TextField(controller: _ctrl,
+                decoration: const InputDecoration(hintText: 'Votre message...', border: InputBorder.none),
+                onSubmitted: (_) => _send())),
+            IconButton(icon: const Icon(Icons.send_rounded),
+                color: AppColors.green, onPressed: _send),
+          ])),
+      ]),
+    );
+  }
 }
+
 
 // ══════════════════════════════════════════
 //  ECOLES PAGE (ADMIN) — TEMPS REEL

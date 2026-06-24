@@ -504,6 +504,24 @@ class FirebaseService {
     });
   }
 
+  // Progression d'une classe (toutes matières) — 1 filtre, pas d'index
+  static Stream<QuerySnapshot> streamLeconsParClasse(String classeId) =>
+      _db.collection('lecons').where('classeId', isEqualTo: classeId).snapshots();
+
+  // Enregistre / met à jour la progression d'une matière pour une classe (upsert)
+  static Future<void> setLecon(String classeId, String matiere,
+      {required String chapitre, required double avancement, String? ecoleId}) {
+    final id = '${classeId}__${matiere.replaceAll(RegExp(r'[^A-Za-z0-9]'), '')}';
+    return _db.collection('lecons').doc(id).set({
+      'classeId': classeId,
+      'matiere': matiere,
+      'chapitre': chapitre,
+      'avancement': avancement,
+      if (ecoleId != null) 'ecoleId': ecoleId,
+      'dateMAJ': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
   // Stream écoles (admin)
   static Stream<QuerySnapshot> streamEcoles() =>
       _db.collection('ecoles').orderBy('nom').snapshots();
@@ -2894,68 +2912,150 @@ class _LeconsPageState extends State<LeconsPage> {
   final _chapCtrl = TextEditingController();
   final _pctCtrl  = TextEditingController();
   String _selMat  = 'Mathematiques';
+  String? _selClasseId;
+  String? _selClasseNom;
+
+  bool get _matiereVerrouillee =>
+      widget.user.matiere != null && widget.user.matiere!.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_matiereVerrouillee) _selMat = widget.user.matiere!;
+  }
+
+  @override
+  void dispose() { _chapCtrl.dispose(); _pctCtrl.dispose(); super.dispose(); }
+
+  Future<void> _enregistrer() async {
+    if (_selClasseId == null) { showSnack(context, 'Choisis d abord une classe', error:true); return; }
+    if (_chapCtrl.text.trim().isEmpty) { showSnack(context, 'Indique le chapitre en cours', error:true); return; }
+    final pct = (double.tryParse(_pctCtrl.text.trim().replaceAll(',', '.')) ?? 0).clamp(0, 100).toDouble();
+    await FirebaseService.setLecon(
+      _selClasseId!, _selMat,
+      chapitre: _chapCtrl.text.trim(),
+      avancement: pct,
+      ecoleId: widget.user.school,
+    );
+    if (!mounted) return;
+    _chapCtrl.clear(); _pctCtrl.clear();
+    showSnack(context, 'Progression mise a jour 📲');
+  }
+
+  // Affiche la progression (lecture seule) d'une classe, matière par matière
+  Widget _affichage(String? classeId) {
+    if (classeId == null) {
+      return SCCard(child: const Text('Aucune classe definie pour le moment.',
+          style: TextStyle(color: AppColors.textMuted)));
+    }
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseService.streamLeconsParClasse(classeId),
+      builder: (ctx, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Padding(padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()));
+        }
+        if (!snap.hasData || snap.data!.docs.isEmpty) {
+          return SCCard(child: const Text('Aucune progression enregistree pour le moment.',
+              style: TextStyle(color: AppColors.textMuted)));
+        }
+        final docs = snap.data!.docs.toList()
+          ..sort((a,b)=>((a.data() as Map)['matiere'] ?? '').toString()
+              .compareTo(((b.data() as Map)['matiere'] ?? '').toString()));
+        return SCCard(child: Column(children: docs.map((d) {
+          final data = d.data() as Map<String,dynamic>;
+          final pct = (data['avancement'] as num?)?.toDouble() ?? 0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom:14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:[
+                Text(data['matiere'] ?? '',
+                    style: const TextStyle(fontSize:13, fontWeight: FontWeight.w700)),
+                Text('${pct.toInt()}%',
+                    style: const TextStyle(fontSize:12, fontWeight: FontWeight.w800, color: AppColors.green)),
+              ]),
+              const SizedBox(height:2),
+              Text(data['chapitre'] ?? '',
+                  style: const TextStyle(fontSize:11, color: AppColors.textMuted)),
+              const SizedBox(height:5),
+              ProgressBar(value: (pct/100).clamp(0,1).toDouble(), color: AppColors.green),
+            ]),
+          );
+        }).toList()));
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isProf = widget.user.role==UserRole.prof || widget.user.role==UserRole.admin;
+    final isProf = widget.user.role == UserRole.prof;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:[
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
         SectionTitle('Avancement du programme'),
-        StreamBuilder<QuerySnapshot>(
-            stream: FirebaseService.streamLecons(widget.user.school, 'Terminale C'),
-            builder: (ctx, snap) {
-              if (snap.connectionState == ConnectionState.waiting)
-                return const Center(child: CircularProgressIndicator());
-              if (!snap.hasData || snap.data!.docs.isEmpty)
-                return SCCard(child:const Text('Aucune lecon enregistree.',
-                    style:TextStyle(color:AppColors.textMuted)));
-              return SCCard(child:Column(
-                  children: snap.data!.docs.map((d) {
-                    final data = d.data() as Map<String,dynamic>;
-                    final pct  = (data['avancement'] as num?)?.toDouble() ?? 0;
-                    return Padding(
-                        padding: const EdgeInsets.only(bottom:14),
-                        child: Column(crossAxisAlignment:CrossAxisAlignment.start, children:[
-                          Row(mainAxisAlignment:MainAxisAlignment.spaceBetween, children:[
-                            Text(data['matiere'] ?? '',
-                                style:const TextStyle(fontSize:13, fontWeight:FontWeight.w700)),
-                            Text('${pct.toInt()}%',
-                                style:const TextStyle(fontSize:12, fontWeight:FontWeight.w800, color:AppColors.green)),
-                          ]),
-                          const SizedBox(height:2),
-                          Text(data['chapitre'] ?? '',
-                              style:const TextStyle(fontSize:11, color:AppColors.textMuted)),
-                          const SizedBox(height:5),
-                          ProgressBar(value:pct/100, color:AppColors.green),
-                        ]));
-                  }).toList()));
-            }),
 
         if (isProf) ...[
+          // Le prof choisit l'une de ses classes
+          SCCard(child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseService.streamClasses(widget.user.school),
+            builder: (ctx, snap) {
+              if (!snap.hasData) {
+                return const Text('Chargement des classes...',
+                    style: TextStyle(color: AppColors.textMuted));
+              }
+              final classesProf = widget.user.classes;
+              final classes = classesProf.isEmpty
+                  ? snap.data!.docs
+                  : snap.data!.docs.where((c)=>classesProf.contains(c.id)).toList();
+              if (classes.isEmpty) {
+                return const Text('Aucune classe assignee.',
+                    style: TextStyle(color: AppColors.textMuted));
+              }
+              return DropdownButtonFormField<String>(
+                  value: _selClasseId, isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Classe'),
+                  hint: const Text('Choisir une classe'),
+                  items: classes.map((doc) {
+                    final d = doc.data() as Map<String,dynamic>;
+                    return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                  }).toList(),
+                  onChanged: (v) {
+                    final doc = classes.firstWhere((c)=>c.id==v);
+                    final d = doc.data() as Map<String,dynamic>;
+                    setState(() { _selClasseId = v; _selClasseNom = d['nom'] ?? v; });
+                  });
+            })),
+          const SizedBox(height:14),
+          if (_selClasseId != null) _affichage(_selClasseId),
+
           const SizedBox(height:20),
-          SectionTitle('Mettre a jour'),
+          SectionTitle('Mettre a jour ma matiere'),
           SCCard(child:Column(children:[
-            DropdownButtonFormField<String>(
-                value: _selMat,
-                decoration: const InputDecoration(labelText:'Matiere'),
-                items:['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo']
-                    .map((m)=>DropdownMenuItem(value:m,child:Text(m))).toList(),
-                onChanged:(v)=>setState(()=>_selMat=v!)),
+            if (_matiereVerrouillee)
+              InputDecorator(
+                decoration: const InputDecoration(labelText: 'Matiere'),
+                child: Text(_selMat, style: const TextStyle(fontSize:14, fontWeight: FontWeight.w600)))
+            else
+              DropdownButtonFormField<String>(
+                  value: _selMat,
+                  decoration: const InputDecoration(labelText:'Matiere'),
+                  items:['Mathematiques','Physique-Chimie','SVT','Francais','Anglais','Histoire-Geo']
+                      .map((m)=>DropdownMenuItem(value:m,child:Text(m))).toList(),
+                  onChanged:(v)=>setState(()=>_selMat=v!)),
             const SizedBox(height:10),
             TextField(controller:_chapCtrl,
-                decoration:const InputDecoration(labelText:'Chapitre en cours')),
+                decoration:const InputDecoration(labelText:'Chapitre / lecon en cours')),
             const SizedBox(height:10),
             TextField(controller:_pctCtrl, keyboardType:TextInputType.number,
                 decoration:const InputDecoration(labelText:'Avancement (%)')),
             const SizedBox(height:14),
             SizedBox(width:double.infinity, child:ElevatedButton(
-                onPressed:() async {
-                  showSnack(context, 'Lecon mise a jour — parents notifies 📲');
-                  _chapCtrl.clear(); _pctCtrl.clear();
-                },
+                onPressed:_enregistrer,
                 child:const Text('Mettre a jour 📲'))),
           ])),
+        ]
+        else ...[
+          // Élève / parent : progression de leur classe (lecture seule)
+          _affichage(widget.user.classeId),
         ],
       ]),
     );

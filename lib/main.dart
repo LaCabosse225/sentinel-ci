@@ -774,14 +774,15 @@ Future<AppUser> construireAppUser(Map<String,dynamic> profile, String uid, Strin
 }
 
 // Calcule la liste des contacts autorisés selon les règles de messagerie.
-List<({String uid, String nom, UserRole role})> contactsMessagerie(
+List<({String uid, String nom, UserRole role, String? matiere})> contactsMessagerie(
     AppUser me, List<QueryDocumentSnapshot> docs) {
   Map<String,dynamic> dataOf(QueryDocumentSnapshot d) => d.data() as Map<String,dynamic>;
   UserRole roleOf(Map m) => roleFromString(m['role']);
-  final out = <({String uid, String nom, UserRole role})>[];
+  final out = <({String uid, String nom, UserRole role, String? matiere})>[];
   void add(QueryDocumentSnapshot d) {
     final m = dataOf(d);
-    out.add((uid: d.id, nom: (m['nom'] ?? 'Utilisateur').toString(), role: roleOf(m)));
+    out.add((uid: d.id, nom: (m['nom'] ?? 'Utilisateur').toString(),
+        role: roleOf(m), matiere: m['matiere'] as String?));
   }
 
   switch (me.role) {
@@ -3381,7 +3382,10 @@ class MessageriePage extends StatelessWidget {
                       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(c.nom, style: TextStyle(fontSize: 14,
                             fontWeight: nl>0 ? FontWeight.w800 : FontWeight.w700)),
-                        Text(kRoleNom[c.role] ?? '',
+                        Text(
+                            c.role == UserRole.prof && (c.matiere ?? '').isNotEmpty
+                                ? 'Professeur · ${c.matiere}'
+                                : (kRoleNom[c.role] ?? ''),
                             style: TextStyle(fontSize: 11.5, color: col, fontWeight: FontWeight.w600)),
                       ])),
                       if (nl > 0)

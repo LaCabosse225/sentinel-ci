@@ -1126,6 +1126,27 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _idx = 0;
+  bool _accesLimite = false;   // parent dont l'abonnement a expiré (au-delà des relances)
+  String? _aboLabel;           // statut d'abonnement (parent)
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.user.role == UserRole.parent) _verifierAbonnement();
+  }
+
+  Future<void> _verifierAbonnement() async {
+    try {
+      final snap = await FirebaseService.getAbonnement(widget.user.uid);
+      if (snap.exists) {
+        final st = statutAbo(snap.data() as Map<String,dynamic>);
+        if (mounted) setState(() {
+          _aboLabel = st.label;
+          _accesLimite = st.label == 'Acces limite';
+        });
+      }
+    } catch (_) {}
+  }
 
   List<_NavItem> get _navItems {
     switch(widget.user.role){
@@ -1269,7 +1290,39 @@ class _MainShellState extends State<MainShell> {
             preferredSize: const Size.fromHeight(1),
             child: Container(height:1, color:AppColors.border)),
       ),
-      body: _pages[_idx.clamp(0, _pages.length-1)],
+      body: Column(children: [
+        // Bandeau de relance / accès limité (parent)
+        if (_aboLabel == 'En relance' || _aboLabel == 'Acces limite')
+          Material(
+            color: _accesLimite ? AppColors.redBg : AppColors.orangeBg,
+            child: InkWell(
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => ParentAbonnementPage(user: widget.user))),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(children: [
+                  Icon(_accesLimite ? Icons.lock_outline_rounded : Icons.access_time_rounded,
+                      size: 18, color: _accesLimite ? AppColors.red : AppColors.orange),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(
+                      _accesLimite
+                          ? 'Abonnement expire. Regularisez pour retrouver le suivi de votre enfant.'
+                          : 'Votre abonnement arrive a echeance. Pensez a le renouveler.',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                          color: _accesLimite ? AppColors.red : AppColors.orange))),
+                  Icon(Icons.chevron_right_rounded, size: 18,
+                      color: _accesLimite ? AppColors.red : AppColors.orange),
+                ]),
+              ),
+            ),
+          ),
+        // Contenu : barrière douce sur les onglets sensibles si accès limité (Accueil reste ouvert)
+        Expanded(
+          child: (_accesLimite && _idx != 0)
+              ? _GateAbonnement(user: widget.user)
+              : _pages[_idx.clamp(0, _pages.length-1)],
+        ),
+      ]),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           height: 66,
@@ -1296,6 +1349,41 @@ class _NavItem {
   final IconData icon;
   final String label;
   const _NavItem(this.icon, this.label);
+}
+
+// Barrière douce affichée au parent dont l'abonnement a expiré
+class _GateAbonnement extends StatelessWidget {
+  final AppUser user;
+  const _GateAbonnement({required this.user});
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 72, height: 72,
+              decoration: BoxDecoration(color: AppColors.redBg, borderRadius: BorderRadius.circular(20)),
+              child: const Icon(Icons.lock_outline_rounded, color: AppColors.red, size: 34)),
+          const SizedBox(height: 18),
+          const Text('Abonnement expire',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800), textAlign: TextAlign.center),
+          const SizedBox(height: 8),
+          const Text(
+              'Pour retrouver les notes, bulletins et le suivi de votre enfant, '
+              'reactivez votre abonnement. Votre enfant, lui, garde son acces.',
+              style: TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4),
+              textAlign: TextAlign.center),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, child: ElevatedButton.icon(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => ParentAbonnementPage(user: user))),
+            icon: const Icon(Icons.card_membership_rounded, size: 18),
+            label: const Text('Voir mon abonnement'),
+          )),
+        ]),
+      ),
+    );
+  }
 }
 
 // ══════════════════════════════════════════
@@ -2256,6 +2344,16 @@ class _ParentAbonnementPageState extends State<ParentAbonnementPage> {
                           Text(s.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: s.color)),
                           const SizedBox(height: 3),
                           Text(s.detail, style: const TextStyle(fontSize: 12.5, color: AppColors.textMain)),
+                          if (_abo!['type'] == 'paye' && _abo!['forfait'] != null) ...[
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                              child: Text(
+                                  'Forfait ${kForfaitLabel[_abo!['forfait']] ?? _abo!['forfait']} · ${(_abo!['montant'] as num?)?.round() ?? 0} FCFA',
+                                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: s.color)),
+                            ),
+                          ],
                         ])),
                       ]),
                     );
@@ -3064,7 +3162,6 @@ class _EcolesPageState extends State<EcolesPage> {
   final _nomCtrl  = TextEditingController();
   final _nbCtrl   = TextEditingController();
   String _commune = 'Cocody';
-  String _plan    = 'Premium';
 
   void _showAdd() {
     showModalBottomSheet(context:context, isScrollControlled:true,
@@ -3085,12 +3182,6 @@ class _EcolesPageState extends State<EcolesPage> {
                     items:['Cocody','Marcory','Plateau','Yopougon','Abobo','Adjame']
                         .map((c)=>DropdownMenuItem(value:c,child:Text(c))).toList(),
                     onChanged:(v)=>ss(()=>_commune=v!))),
-                const SizedBox(width:10),
-                Expanded(child:DropdownButtonFormField<String>(value:_plan,
-                    decoration:const InputDecoration(labelText:'Plan'),
-                    items:['Basique','Premium','Essai']
-                        .map((p)=>DropdownMenuItem(value:p,child:Text(p))).toList(),
-                    onChanged:(v)=>ss(()=>_plan=v!))),
               ]),
               const SizedBox(height:10),
               TextField(controller:_nbCtrl, keyboardType:TextInputType.number,
@@ -3102,10 +3193,8 @@ class _EcolesPageState extends State<EcolesPage> {
                     await FirebaseService.ajouterEcole({
                       'nom':     _nomCtrl.text,
                       'commune': _commune,
-                      'plan':    _plan,
                       'eleves':  int.tryParse(_nbCtrl.text)??0,
                       'statut':  'actif',
-                      'revenus': 0,
                     });
                     _nomCtrl.clear(); _nbCtrl.clear();
                     if (mounted) {
@@ -3158,15 +3247,6 @@ class _EcolesPageState extends State<EcolesPage> {
                         child:Text(actif?'Actif':'Inactif',
                             style:TextStyle(fontSize:11,fontWeight:FontWeight.w800,
                                 color:actif?AppColors.green:AppColors.gold))),
-                  ]),
-                  const SizedBox(height:12),
-                  Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
-                    Container(padding:const EdgeInsets.symmetric(horizontal:10,vertical:4),
-                        decoration:BoxDecoration(color:AppColors.greenBg,borderRadius:BorderRadius.circular(8)),
-                        child:Text(data['plan']??'',
-                            style:const TextStyle(fontSize:11,fontWeight:FontWeight.w700,color:AppColors.green))),
-                    Text('${data['revenus']??0} FCFA/mois',
-                        style:const TextStyle(fontSize:12,fontWeight:FontWeight.w800)),
                   ]),
                 ]));
               });
@@ -3891,39 +3971,6 @@ class RevenusPage extends StatelessWidget {
               StatCard(value:'96%',label:'Taux recouvrement',sub:'Objectif 98%',icon:Icons.check_circle_rounded,color:AppColors.green,iconBg:AppColors.greenBg),
             ]),
         const SizedBox(height:20),
-        SectionTitle('Plans tarifaires'),
-        Row(children:[
-          Expanded(child:Container(
-              padding:const EdgeInsets.all(16),
-              decoration:BoxDecoration(color:Colors.white,
-                  border:Border.all(color:AppColors.green,width:2),
-                  borderRadius:BorderRadius.circular(14)),
-              child:Column(children:[
-                const Text('Basique',style:TextStyle(fontWeight:FontWeight.w800,fontSize:14)),
-                const SizedBox(height:6),
-                const Text('2 500',style:TextStyle(fontSize:26,fontWeight:FontWeight.w900,color:AppColors.green)),
-                const Text('FCFA / parent / mois',style:TextStyle(fontSize:10,color:AppColors.textMuted)),
-                const SizedBox(height:8),
-                const Text('Notes + Devoirs + Alertes',
-                    style:TextStyle(fontSize:11,color:AppColors.textMuted)),
-              ]))),
-          const SizedBox(width:12),
-          Expanded(child:Container(
-              padding:const EdgeInsets.all(16),
-              decoration:BoxDecoration(color:AppColors.greenBg,
-                  border:Border.all(color:AppColors.green),
-                  borderRadius:BorderRadius.circular(14)),
-              child:Column(children:[
-                const Text('Premium',style:TextStyle(fontWeight:FontWeight.w800,fontSize:14)),
-                const SizedBox(height:6),
-                const Text('5 000',style:TextStyle(fontSize:26,fontWeight:FontWeight.w900,color:AppColors.green)),
-                const Text('FCFA / parent / mois',style:TextStyle(fontSize:10,color:AppColors.textMuted)),
-                const SizedBox(height:8),
-                const Text('Tout + Messagerie + Lecons',
-                    style:TextStyle(fontSize:11,color:AppColors.textMuted)),
-              ]))),
-        ]),
-        const SizedBox(height:20),
         SectionTitle('Mobile Money & Paiement'),
         SCCard(child:Column(children:[
           _payRow('Wave CI',       '🟣', AppColors.purple),
@@ -3951,7 +3998,7 @@ class RevenusPage extends StatelessWidget {
                           Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
                             Text(data['parentId']??'',
                                 style:const TextStyle(fontSize:13,fontWeight:FontWeight.w700)),
-                            Text('${data['operateur']??''} · ${data['plan']??''}',
+                            Text('${data['operateur']??''}',
                                 style:const TextStyle(fontSize:11,color:AppColors.textMuted)),
                           ])),
                           Text('${data['montant']??0} F',

@@ -1197,21 +1197,24 @@ class _MainShellState extends State<MainShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(children:[
+        automaticallyImplyLeading: false,
+        titleSpacing: 12,
+        title: Row(mainAxisSize: MainAxisSize.min, children:[
           RichText(text: const TextSpan(children:[
             TextSpan(text:'Sentinel', style:TextStyle(color:AppColors.green, fontWeight:FontWeight.w800, fontSize:18)),
             TextSpan(text:'CI', style:TextStyle(color:AppColors.orange, fontWeight:FontWeight.w800, fontSize:18)),
           ])),
           const SizedBox(width:8),
-          Container(
+          Flexible(child: Container(
             padding: const EdgeInsets.symmetric(horizontal:8, vertical:3),
             decoration: BoxDecoration(
                 color: roleColors[widget.user.role]!.withOpacity(.12),
                 borderRadius: BorderRadius.circular(20)),
             child: Text(roleLabels[widget.user.role]!,
+                maxLines: 1, overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize:10, fontWeight:FontWeight.w800,
                     color:roleColors[widget.user.role], letterSpacing:.5)),
-          ),
+          )),
         ]),
         actions: [
           IconButton(
@@ -1240,14 +1243,23 @@ class _MainShellState extends State<MainShell> {
             child: Container(height:1, color:AppColors.border)),
       ),
       body: _pages[_idx.clamp(0, _pages.length-1)],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _idx,
-        onDestinationSelected: (i) => setState(() => _idx = i.clamp(0, _pages.length-1)),
-        backgroundColor: Colors.white,
-        indicatorColor: AppColors.greenBg,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: _navItems.map((n) => NavigationDestination(
-            icon: Icon(n.icon, size:22), label: n.label)).toList(),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          height: 66,
+          labelTextStyle: WidgetStateProperty.all(
+            const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+          iconTheme: WidgetStateProperty.all(
+            const IconThemeData(size: 20)),
+        ),
+        child: NavigationBar(
+          selectedIndex: _idx,
+          onDestinationSelected: (i) => setState(() => _idx = i.clamp(0, _pages.length-1)),
+          backgroundColor: Colors.white,
+          indicatorColor: AppColors.greenBg,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: _navItems.map((n) => NavigationDestination(
+              icon: Icon(n.icon), label: n.label)).toList(),
+        ),
       ),
     );
   }

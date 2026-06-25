@@ -124,6 +124,16 @@ class AppUser {
     required this.role, required this.uid, this.childId, this.classeId,
     this.matiere, this.classes = const [], this.estPrincipal = false,
     this.classePrincipale, this.enfantsCount = 1});
+
+  AppUser copyWith({String? childId, String? classeId, int? enfantsCount}) => AppUser(
+        name: name, initials: initials, email: email, school: school,
+        role: role, uid: uid,
+        childId: childId ?? this.childId,
+        classeId: classeId ?? this.classeId,
+        matiere: matiere, classes: classes, estPrincipal: estPrincipal,
+        classePrincipale: classePrincipale,
+        enfantsCount: enfantsCount ?? this.enfantsCount,
+      );
 }
 
 // Calcule la moyenne générale et par matière à partir d'une liste de notes.
@@ -699,6 +709,30 @@ class FirebaseService {
       _db.collection('utilisateurs')
           .where('codeParent', isEqualTo: code.trim().toUpperCase())
           .get();
+
+  // Liste les enfants d'un parent (nom + classe), pour le multi-enfants
+  static Future<List<({String id, String nom, String? classeId})>> getEnfants(String parentId) async {
+    final parent = await _db.collection('utilisateurs').doc(parentId).get();
+    final data = parent.data();
+    final ids = (data?['enfants'] is List)
+        ? List<String>.from((data!['enfants'] as List).map((e) => e.toString()))
+        : <String>[];
+    final out = <({String id, String nom, String? classeId})>[];
+    for (final id in ids) {
+      final d = await _db.collection('utilisateurs').doc(id).get();
+      if (d.exists) {
+        final m = d.data()!;
+        out.add((id: id, nom: (m['nom'] ?? 'Enfant').toString(), classeId: m['classeId'] as String?));
+      }
+    }
+    return out;
+  }
+
+  // Rattache un enfant supplémentaire au compte parent (sans doublon)
+  static Future<void> ajouterEnfant(String parentId, String childId) =>
+      _db.collection('utilisateurs').doc(parentId).update({
+        'enfants': FieldValue.arrayUnion([childId]),
+      });
 
   // Auto-inscription d'un parent (il devient connecté) rattaché à son enfant
   static Future<String?> inscrireParent({
@@ -1323,10 +1357,38 @@ class _MainShellState extends State<MainShell> {
   bool _accesLimite = false;   // parent dont l'abonnement a expiré (au-delà des relances)
   String? _aboLabel;           // statut d'abonnement (parent)
 
+  // Multi-enfants (parent)
+  List<({String id, String nom, String? classeId})> _enfants = [];
+  int _enfantActif = 0;
+
+  // Utilisateur « effectif » : pour un parent, pointe vers l'enfant sélectionné
+  // et reflète le nombre réel d'enfants (réduction famille).
+  AppUser get _userEffectif {
+    if (widget.user.role == UserRole.parent && _enfants.isNotEmpty) {
+      final e = _enfants[_enfantActif.clamp(0, _enfants.length - 1)];
+      return widget.user.copyWith(
+        childId: e.id, classeId: e.classeId, enfantsCount: _enfants.length);
+    }
+    return widget.user;
+  }
+
   @override
   void initState() {
     super.initState();
-    if (widget.user.role == UserRole.parent) _verifierAbonnement();
+    if (widget.user.role == UserRole.parent) {
+      _verifierAbonnement();
+      _chargerEnfants();
+    }
+  }
+
+  Future<void> _chargerEnfants() async {
+    try {
+      final e = await FirebaseService.getEnfants(widget.user.uid);
+      if (mounted) setState(() {
+        _enfants = e;
+        if (_enfantActif >= e.length) _enfantActif = 0;
+      });
+    } catch (_) {}
   }
 
   Future<void> _verifierAbonnement() async {
@@ -1406,15 +1468,17 @@ class _MainShellState extends State<MainShell> {
         AgendaPage(user: widget.user),
       ];
       case UserRole.eleve:
-      case UserRole.parent: return [
-        DashboardPage(user: widget.user),
-        NotesPage(user: widget.user),
-        DevoirsPage(user: widget.user),
-        AbsencesPage(user: widget.user),
-        LeconsPage(user: widget.user),
-        AlertesPage(user: widget.user),
-        AgendaPage(user: widget.user),
-      ];
+      case UserRole.parent:
+        final u = _userEffectif;
+        return [
+          DashboardPage(user: u, onEnfantsMaj: _chargerEnfants),
+          NotesPage(user: u),
+          DevoirsPage(user: u),
+          AbsencesPage(user: u),
+          LeconsPage(user: u),
+          AlertesPage(user: u),
+          AgendaPage(user: u),
+        ];
     }
   }
 
@@ -1489,7 +1553,7 @@ class _MainShellState extends State<MainShell> {
             color: _accesLimite ? AppColors.redBg : AppColors.orangeBg,
             child: InkWell(
               onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (_) => ParentAbonnementPage(user: widget.user))),
+                  builder: (_) => ParentAbonnementPage(user: _userEffectif))),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(children: [
@@ -1507,6 +1571,32 @@ class _MainShellState extends State<MainShell> {
                 ]),
               ),
             ),
+          ),
+        // Sélecteur d'enfant (parent avec 2 enfants ou plus)
+        if (widget.user.role == UserRole.parent && _enfants.length > 1)
+          Container(
+            color: AppColors.greenBg,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(children: [
+              const Icon(Icons.family_restroom_rounded, size: 18, color: AppColors.green),
+              const SizedBox(width: 10),
+              const Text('Enfant :', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.green)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    isExpanded: true,
+                    value: _enfantActif.clamp(0, _enfants.length - 1),
+                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textMain),
+                    items: [
+                      for (int i = 0; i < _enfants.length; i++)
+                        DropdownMenuItem(value: i, child: Text(_enfants[i].nom)),
+                    ],
+                    onChanged: (v) => setState(() => _enfantActif = v ?? 0),
+                  ),
+                ),
+              ),
+            ]),
           ),
         // Contenu : barrière douce sur les onglets sensibles si accès limité (Accueil reste ouvert)
         Expanded(
@@ -1583,7 +1673,8 @@ class _GateAbonnement extends StatelessWidget {
 // ══════════════════════════════════════════
 class DashboardPage extends StatelessWidget {
   final AppUser user;
-  const DashboardPage({super.key, required this.user});
+  final VoidCallback? onEnfantsMaj;
+  const DashboardPage({super.key, required this.user, this.onEnfantsMaj});
 
   @override
   Widget build(BuildContext context) {
@@ -1644,6 +1735,39 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height:20),
+        ],
+
+        // Carte "Mes enfants" (parent)
+        if (user.role == UserRole.parent) ...[
+          InkWell(
+            onTap: () async {
+              await Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => MesEnfantsPage(user: user)));
+              onEnfantsMaj?.call();
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border)),
+              child: Row(children: const [
+                CircleAvatar(radius: 22, backgroundColor: AppColors.greenBg,
+                    child: Icon(Icons.family_restroom_rounded, color: AppColors.green, size: 24)),
+                SizedBox(width: 12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Mes enfants',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textMain)),
+                  Text('Ajouter un enfant et activer la reduction famille',
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                ])),
+                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+              ]),
+            ),
+          ),
+          const SizedBox(height: 12),
         ],
 
         // Carte "Mon abonnement" (parent)
@@ -2812,6 +2936,117 @@ class AbonnementsDirecteurPage extends StatelessWidget {
           ]),
         );
       });
+  }
+}
+
+// ══════════════════════════════════════════
+//  MES ENFANTS (multi-enfants, parent)
+// ══════════════════════════════════════════
+class MesEnfantsPage extends StatefulWidget {
+  final AppUser user;
+  const MesEnfantsPage({super.key, required this.user});
+  @override State<MesEnfantsPage> createState() => _MesEnfantsPageState();
+}
+
+class _MesEnfantsPageState extends State<MesEnfantsPage> {
+  List<({String id, String nom, String? classeId})> _enfants = [];
+  bool _loading = true;
+
+  @override
+  void initState() { super.initState(); _charger(); }
+
+  Future<void> _charger() async {
+    setState(() => _loading = true);
+    final e = await FirebaseService.getEnfants(widget.user.uid);
+    if (mounted) setState(() { _enfants = e; _loading = false; });
+  }
+
+  Future<void> _ajouterDialog() async {
+    final codeCtrl = TextEditingController();
+    Map<String,dynamic>? trouve; String? trouveId;
+    await showDialog(context: context, builder: (ctx) {
+      return StatefulBuilder(builder: (ctx, setD) {
+        Future<void> verifier() async {
+          final snap = await FirebaseService.findEleveParCode(codeCtrl.text);
+          final eleves = snap.docs.where((d) => (d.data() as Map)['role'] == 'eleve').toList();
+          if (eleves.isEmpty) { if (mounted) showSnack(context, 'Code introuvable', error: true); return; }
+          setD(() { trouve = eleves.first.data() as Map<String,dynamic>; trouveId = eleves.first.id; });
+        }
+        return AlertDialog(
+          title: const Text('Ajouter un enfant'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('Saisissez le code que l ecole vous a remis pour cet enfant.',
+                style: TextStyle(fontSize: 13)),
+            const SizedBox(height: 10),
+            TextField(controller: codeCtrl, textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(labelText: 'Code de l enfant')),
+            const SizedBox(height: 8),
+            SizedBox(width: double.infinity, child: OutlinedButton(onPressed: verifier,
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.green, side: const BorderSide(color: AppColors.green)),
+                child: const Text('Verifier le code'))),
+            if (trouve != null) Padding(padding: const EdgeInsets.only(top: 10),
+                child: Row(children: [
+                  const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 18),
+                  const SizedBox(width: 6),
+                  Expanded(child: Text('Enfant : ${trouve!['nom'] ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.green))),
+                ])),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+            ElevatedButton(
+              onPressed: trouve == null ? null : () async {
+                if (_enfants.any((e) => e.id == trouveId)) {
+                  if (mounted) showSnack(context, 'Cet enfant est deja rattache', error: true); return;
+                }
+                await FirebaseService.ajouterEnfant(widget.user.uid, trouveId!);
+                if (!mounted) return;
+                Navigator.pop(ctx);
+                showSnack(context, 'Enfant ajoute ! 🎉');
+                _charger();
+              },
+              child: const Text('Ajouter'),
+            ),
+          ],
+        );
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mes enfants')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _ajouterDialog, backgroundColor: AppColors.green,
+        icon: const Icon(Icons.person_add_rounded), label: const Text('Ajouter')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(padding: const EdgeInsets.all(16), children: [
+              if (_enfants.length >= 2)
+                Container(margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
+                    child: Row(children: const [
+                      Icon(Icons.celebration_rounded, color: AppColors.green, size: 20), SizedBox(width: 8),
+                      Expanded(child: Text('Reduction famille -20% active sur votre abonnement 🎉',
+                          style: TextStyle(color: AppColors.green, fontWeight: FontWeight.w700, fontSize: 12.5))),
+                    ])),
+              ..._enfants.map((e) => Container(
+                    margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+                    child: Row(children: [
+                      CircleAvatar(radius: 18, backgroundColor: AppColors.greenBg,
+                          child: Text(e.nom.isNotEmpty ? e.nom[0].toUpperCase() : '?',
+                              style: const TextStyle(color: AppColors.green, fontWeight: FontWeight.w800))),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(e.nom, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+                      const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20),
+                    ]),
+                  )),
+              if (_enfants.isEmpty) const Text('Aucun enfant rattache.', style: TextStyle(color: AppColors.textMuted)),
+              const SizedBox(height: 80),
+            ]),
+    );
   }
 }
 

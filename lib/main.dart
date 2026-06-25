@@ -723,6 +723,20 @@ class FirebaseService {
     }
   }
 
+  // Réinitialisation du mot de passe par e-mail (lien envoyé par Firebase)
+  static Future<String?> reinitialiserMotDePasse(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-email') return 'Adresse e-mail invalide.';
+      if (e.code == 'user-not-found') return 'Aucun compte avec cet e-mail.';
+      return 'Erreur : ${e.code}';
+    } catch (e) {
+      return 'Erreur : $e';
+    }
+  }
+
   static Future<String?> creerCompte({
     required String nom,
     required String email,
@@ -887,6 +901,39 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading    = false;
   String? _error;
 
+  Future<void> _motDePasseOublie() async {
+    final ctrl = TextEditingController(text: _emailCtrl.text.trim());
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Mot de passe oublie'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Entrez votre e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.',
+              style: TextStyle(fontSize: 13)),
+          const SizedBox(height: 12),
+          TextField(controller: ctrl, keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(labelText: 'E-mail')),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          ElevatedButton(
+            onPressed: () async {
+              final email = ctrl.text.trim();
+              if (email.isEmpty) return;
+              Navigator.pop(ctx);
+              final err = await FirebaseService.reinitialiserMotDePasse(email);
+              if (!mounted) return;
+              showSnack(context,
+                  err ?? 'E-mail envoye ! Verifiez votre boite mail (et les spams).',
+                  error: err != null);
+            },
+            child: const Text('Envoyer'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _login() async {
     setState(() { _loading = true; _error = null; });
 
@@ -981,6 +1028,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height:12),
                   TextField(controller: _pwCtrl, obscureText: true,
                       decoration: const InputDecoration(labelText: 'Mot de passe')),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _motDePasseOublie,
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      child: const Text('Mot de passe oublie ?',
+                          style: TextStyle(fontSize: 12, color: AppColors.green, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
 
                   if (_error != null) ...[
                     const SizedBox(height:10),

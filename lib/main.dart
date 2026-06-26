@@ -811,6 +811,37 @@ class FirebaseService {
       await appSecondaire?.delete();
     }
   }
+
+  // Import en masse : crée des fiches élèves (sans compte de connexion),
+  // chacune avec un code parent automatique. Renvoie le nombre créé.
+  static Future<int> importerEleves({
+    required String ecoleId,
+    required String classeId,
+    required List<String> noms,
+  }) async {
+    final propres = noms.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    int total = 0;
+    for (var i = 0; i < propres.length; i += 400) {
+      final fin = (i + 400) < propres.length ? (i + 400) : propres.length;
+      final lot = propres.sublist(i, fin);
+      final batch = _db.batch();
+      for (final nom in lot) {
+        final ref = _db.collection('utilisateurs').doc();
+        batch.set(ref, {
+          'nom': nom,
+          'email': '',
+          'role': 'eleve',
+          'ecoleId': ecoleId,
+          'classeId': classeId,
+          'codeParent': ref.id.substring(0, 6).toUpperCase(),
+          'importe': true,
+        });
+        total++;
+      }
+      await batch.commit();
+    }
+    return total;
+  }
 }
 
 // Construit l'AppUser à partir d'un profil Firestore (connexion ET inscription).
@@ -3983,6 +4014,108 @@ class _EcolesPageState extends State<EcolesPage> {
 // ══════════════════════════════════════════
 //  UTILISATEURS PAGE (ADMIN)
 // ══════════════════════════════════════════
+class ImportElevesPage extends StatefulWidget {
+  final AppUser user;
+  const ImportElevesPage({super.key, required this.user});
+  @override State<ImportElevesPage> createState() => _ImportElevesPageState();
+}
+
+class _ImportElevesPageState extends State<ImportElevesPage> {
+  String? _classeId;
+  final _noms = TextEditingController();
+  bool _loading = false;
+
+  @override
+  void dispose() { _noms.dispose(); super.dispose(); }
+
+  Future<void> _importer() async {
+    if (_classeId == null) { showSnack(context, 'Choisissez une classe', error: true); return; }
+    final lignes = _noms.text.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    if (lignes.isEmpty) { showSnack(context, 'Collez au moins un nom', error: true); return; }
+    setState(() => _loading = true);
+    try {
+      final n = await FirebaseService.importerEleves(
+          ecoleId: widget.user.school, classeId: _classeId!, noms: lignes);
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showSnack(context, '$n eleve(s) importe(s) avec succes !');
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      showSnack(context, 'Erreur : $e', error: true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final nb = _noms.text.split('\n').where((e) => e.trim().isNotEmpty).length;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Importer des eleves')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SCCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+            Text('Importez toute une classe d un coup',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+            SizedBox(height: 6),
+            Text('Choisissez la classe, puis collez les noms des eleves (un par ligne). '
+                'Chaque eleve recevra automatiquement un code parent, visible dans la liste des utilisateurs.',
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+          ])),
+          const SizedBox(height: 12),
+          SCCard(child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseService.streamClasses(widget.user.school),
+              builder: (ctx, snap) {
+                if (!snap.hasData) {
+                  return const Text('Chargement des classes...',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                final classes = snap.data!.docs;
+                if (classes.isEmpty) {
+                  return const Text('Aucune classe. Creez d abord une classe.',
+                      style: TextStyle(color: AppColors.textMuted));
+                }
+                return DropdownButtonFormField<String>(
+                    value: _classeId, isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Classe de destination'),
+                    hint: const Text('Choisir une classe'),
+                    items: classes.map((doc) {
+                      final d = doc.data() as Map<String, dynamic>;
+                      return DropdownMenuItem(value: doc.id, child: Text(d['nom'] ?? doc.id));
+                    }).toList(),
+                    onChanged: (v) => setState(() => _classeId = v));
+              })),
+          const SizedBox(height: 12),
+          SCCard(child: TextField(
+            controller: _noms,
+            maxLines: 12,
+            onChanged: (_) => setState(() {}),
+            decoration: const InputDecoration(
+              labelText: 'Noms des eleves (un par ligne)',
+              hintText: 'Konan Amani\nYao Marie\nTraore Ibrahim',
+              alignLabelWithHint: true,
+              border: OutlineInputBorder(),
+            ),
+          )),
+          const SizedBox(height: 8),
+          Text('$nb eleve(s) a importer',
+              style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+          const SizedBox(height: 16),
+          SizedBox(width: double.infinity, child: ElevatedButton.icon(
+            onPressed: _loading ? null : _importer,
+            icon: _loading
+                ? const SizedBox(width: 18, height: 18,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Icon(Icons.upload_file_rounded, size: 18),
+            label: Text(_loading ? 'Import en cours...' : 'Importer'),
+          )),
+        ]),
+      ),
+    );
+  }
+}
+
 class UtilisateursPage extends StatelessWidget {
   final AppUser user;
   const UtilisateursPage({super.key, required this.user});
@@ -4032,6 +4165,18 @@ class UtilisateursPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
             )),
           ]),
+          const SizedBox(height: 10),
+          SizedBox(width: double.infinity, child: OutlinedButton.icon(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => ImportElevesPage(user: user))),
+            icon: const Icon(Icons.upload_file_rounded, size: 18),
+            label: const Text('Importer des eleves'),
+            style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.blue,
+                side: const BorderSide(color: AppColors.blue),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+          )),
         ]),
       ),
       Expanded(

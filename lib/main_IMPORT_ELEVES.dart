@@ -370,11 +370,7 @@ class FirebaseService {
               .get(const GetOptions(source: Source.server))
               .timeout(const Duration(seconds: 10));
           if (q.docs.isNotEmpty) {
-            // On garde l'identifiant réel de la fiche (utile pour les élèves
-            // dont le compte de connexion a un UID différent de leur fiche).
-            final m = Map<String, dynamic>.from(q.docs.first.data() as Map);
-            m['_docId'] = q.docs.first.id;
-            return m;
+            return q.docs.first.data();
           }
         }
         lastProfileError = 'Aucun document trouve (UID: $uid / email: $email)';
@@ -846,38 +842,6 @@ class FirebaseService {
     }
     return total;
   }
-
-  // Donne un accès de connexion à un élève importé : crée un compte (e-mail +
-  // mot de passe) et le relie à la fiche existante via l'e-mail (repli de
-  // getUserProfile). La fiche, ses notes et son code parent restent intacts.
-  static Future<String?> creerAccesEleve({
-    required String eleveDocId,
-    required String email,
-    required String motDePasse,
-  }) async {
-    FirebaseApp? appSec;
-    try {
-      appSec = await Firebase.initializeApp(
-        name: 'acces_${DateTime.now().millisecondsSinceEpoch}',
-        options: Firebase.app().options,
-      );
-      await FirebaseAuth.instanceFor(app: appSec)
-          .createUserWithEmailAndPassword(
-              email: email.trim(), password: motDePasse.trim());
-      await _db.collection('utilisateurs').doc(eleveDocId)
-          .update({'email': email.trim()});
-      return null;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') return 'Cet email est deja utilise.';
-      if (e.code == 'weak-password') return 'Mot de passe trop faible (6 caracteres min).';
-      if (e.code == 'invalid-email') return 'Adresse email invalide.';
-      return 'Erreur : ${e.code}';
-    } catch (e) {
-      return 'Erreur : $e';
-    } finally {
-      await appSec?.delete();
-    }
-  }
 }
 
 // Construit l'AppUser à partir d'un profil Firestore (connexion ET inscription).
@@ -903,7 +867,7 @@ Future<AppUser> construireAppUser(Map<String,dynamic> profile, String uid, Strin
     email: email,
     school: profile['ecoleId'] ?? 'sentinel_ci',
     role: roleFromString(profile['role']),
-    uid: (profile['_docId'] as String?) ?? uid,
+    uid: uid,
     childId: childId,
     classeId: classeId,
     matiere: matiere,
@@ -4050,57 +4014,6 @@ class _EcolesPageState extends State<EcolesPage> {
 // ══════════════════════════════════════════
 //  UTILISATEURS PAGE (ADMIN)
 // ══════════════════════════════════════════
-Future<void> dialogCreerAccesEleve(BuildContext context, String eleveDocId, String code) async {
-  final emailCtrl = TextEditingController(
-      text: code.isNotEmpty ? 'eleve.${code.toLowerCase()}@sentinelci.ci' : '');
-  final pwCtrl = TextEditingController(text: code.isNotEmpty ? code : '');
-  bool loading = false;
-  await showDialog(
-    context: context,
-    builder: (ctx) => StatefulBuilder(builder: (ctx, setSt) => AlertDialog(
-      title: const Text('Creer un acces eleve'),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Text(
-            'Donnez a cet eleve un identifiant et un mot de passe pour qu il puisse '
-            'se connecter. Ses notes et son code parent restent inchanges.',
-            style: TextStyle(fontSize: 13)),
-        const SizedBox(height: 12),
-        TextField(controller: emailCtrl, keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'E-mail de connexion')),
-        const SizedBox(height: 8),
-        TextField(controller: pwCtrl,
-            decoration: const InputDecoration(labelText: 'Mot de passe (6 caracteres min)')),
-      ]),
-      actions: [
-        TextButton(onPressed: loading ? null : () => Navigator.pop(ctx),
-            child: const Text('Annuler')),
-        ElevatedButton(
-          onPressed: loading ? null : () async {
-            final email = emailCtrl.text.trim();
-            final pw = pwCtrl.text.trim();
-            if (email.isEmpty || pw.length < 6) {
-              showSnack(context, 'E-mail requis et mot de passe 6 caracteres min', error: true);
-              return;
-            }
-            setSt(() => loading = true);
-            final err = await FirebaseService.creerAccesEleve(
-                eleveDocId: eleveDocId, email: email, motDePasse: pw);
-            if (!ctx.mounted) return;
-            if (err == null) {
-              Navigator.pop(ctx);
-              showSnack(context, 'Acces cree ! L eleve peut se connecter avec cet e-mail.');
-            } else {
-              setSt(() => loading = false);
-              showSnack(context, err, error: true);
-            }
-          },
-          child: Text(loading ? '...' : 'Creer'),
-        ),
-      ],
-    )),
-  );
-}
-
 class ImportElevesPage extends StatefulWidget {
   final AppUser user;
   const ImportElevesPage({super.key, required this.user});
@@ -4323,20 +4236,6 @@ class UtilisateursPage extends StatelessWidget {
                             Padding(padding: const EdgeInsets.only(top:3),
                               child: Text('Code parent : ${data['codeParent']}',
                                   style: const TextStyle(fontSize:11, fontWeight: FontWeight.w800, color: AppColors.green))),
-                          if (role=='eleve' && (data['email']??'').toString().trim().isEmpty)
-                            Padding(padding: const EdgeInsets.only(top:5),
-                              child: OutlinedButton.icon(
-                                onPressed: () => dialogCreerAccesEleve(
-                                    context, docs[i].id, (data['codeParent']??'').toString()),
-                                icon: const Icon(Icons.vpn_key_rounded, size: 13),
-                                label: const Text('Creer un acces', style: TextStyle(fontSize: 11)),
-                                style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppColors.blue,
-                                    side: const BorderSide(color: AppColors.blue),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                                    minimumSize: const Size(0, 30),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                              )),
                         ])),
                         Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
                             decoration:BoxDecoration(color:rc.$2,borderRadius:BorderRadius.circular(8)),

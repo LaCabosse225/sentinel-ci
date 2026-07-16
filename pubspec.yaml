@@ -46,6 +46,11 @@ dependencies:
   # Mémorise l'acceptation de la politique de confidentialité (1er lancement)
   shared_preferences: ^2.2.0
 
+  # Espace Vie Scolaire : héberger, choisir et télécharger les photos
+  firebase_storage: ^13.0.0
+  image_picker: ^1.1.2
+  gal: ^2.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

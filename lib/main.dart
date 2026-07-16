@@ -4,6 +4,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:gal/gal.dart';
 
 
   void main() async {
@@ -993,6 +997,33 @@ class FirebaseService {
   // Supprimer la fiche d'un compte (réservé au super admin)
   static Future<void> supprimerUtilisateur(String userDocId) =>
       _db.collection('utilisateurs').doc(userDocId).delete();
+
+  // ---------- ESPACE VIE SCOLAIRE (blog photos) ----------
+  // Envoie une photo dans Firebase Storage et renvoie son URL de téléchargement.
+  static Future<String> uploadPhotoVieScolaire(String ecoleId, Uint8List bytes, String nom) async {
+    final chemin = 'vieScolaire/$ecoleId/${DateTime.now().millisecondsSinceEpoch}_$nom';
+    final ref = FirebaseStorage.instance.ref(chemin);
+    await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+    return await ref.getDownloadURL();
+  }
+
+  static Future<void> publierArticleVieScolaire(Map<String,dynamic> data) async {
+    await _db.collection('vieScolaire').add({
+      ...data,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Articles d'une école (1 filtre => pas d'index ; tri côté app)
+  static Stream<QuerySnapshot> streamVieScolaireEcole(String ecoleId) =>
+      _db.collection('vieScolaire').where('ecoleId', isEqualTo: ecoleId).snapshots();
+
+  // Tous les articles (pour le super admin qui voit toutes les écoles)
+  static Stream<QuerySnapshot> streamVieScolaireTout() =>
+      _db.collection('vieScolaire').snapshots();
+
+  static Future<void> supprimerArticleVieScolaire(String id) =>
+      _db.collection('vieScolaire').doc(id).delete();
   // chacune avec un code parent automatique. Renvoie le nombre créé.
   static Future<int> importerEleves({
     required String ecoleId,
@@ -2434,6 +2465,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.credit_card_rounded,    'Revenus'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
+        _NavItem(Icons.photo_library_rounded,  'Vie scolaire'),
       ];
       case UserRole.directeur: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
@@ -2441,6 +2473,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.card_membership_rounded,'Abonnements'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
+        _NavItem(Icons.photo_library_rounded,  'Vie scolaire'),
       ];
       case UserRole.prof: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
@@ -2449,6 +2482,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.how_to_reg_rounded,     'Absences'),
         _NavItem(Icons.menu_book_rounded,      'Lecons'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
+        _NavItem(Icons.photo_library_rounded,  'Vie scolaire'),
       ];
       case UserRole.eleve:
       case UserRole.parent: return [
@@ -2459,6 +2493,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.menu_book_rounded,      'Cours'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
+        _NavItem(Icons.photo_library_rounded,  'Vie scolaire'),
       ];
     }
   }
@@ -2472,6 +2507,7 @@ class _MainShellState extends State<MainShell> {
         RevenusPage(user: widget.user),
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
+        VieScolairePage(user: widget.user),
       ];
       case UserRole.directeur: return [
         DashboardPage(user: widget.user),
@@ -2479,6 +2515,7 @@ class _MainShellState extends State<MainShell> {
         AbonnementsDirecteurPage(user: widget.user),
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
+        VieScolairePage(user: widget.user),
       ];
       case UserRole.prof: return [
         DashboardPage(user: widget.user),
@@ -2487,6 +2524,7 @@ class _MainShellState extends State<MainShell> {
         AbsencesPage(user: widget.user),
         LeconsPage(user: widget.user),
         AgendaPage(user: widget.user),
+        VieScolairePage(user: widget.user),
       ];
       case UserRole.eleve:
       case UserRole.parent:
@@ -2499,6 +2537,7 @@ class _MainShellState extends State<MainShell> {
           LeconsPage(user: u),
           AlertesPage(user: u),
           AgendaPage(user: u),
+          VieScolairePage(user: u),
         ];
     }
   }
@@ -6809,6 +6848,234 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
             ])),
       ])),
     ]);
+  }
+}
+
+// ══════════════════════════════════════════
+//  ESPACE VIE SCOLAIRE (blog photos)
+// ══════════════════════════════════════════
+class VieScolairePage extends StatefulWidget {
+  final AppUser user;
+  const VieScolairePage({super.key, required this.user});
+  @override State<VieScolairePage> createState() => _VieScolairePageState();
+}
+
+class _VieScolairePageState extends State<VieScolairePage> {
+  final _titreCtrl = TextEditingController();
+  final _texteCtrl = TextEditingController();
+  final List<XFile> _photos = [];
+  bool _envoi = false;
+
+  // Seuls l'admin et le directeur publient ; suppression : super admin ou directeur
+  bool get _peutPublier =>
+      widget.user.role == UserRole.admin || widget.user.role == UserRole.directeur;
+  bool get _peutSupprimer =>
+      widget.user.estSuperAdmin || widget.user.role == UserRole.directeur;
+
+  @override
+  void dispose() { _titreCtrl.dispose(); _texteCtrl.dispose(); super.dispose(); }
+
+  Future<void> _choisirPhotos() async {
+    try {
+      final imgs = await ImagePicker().pickMultiImage(imageQuality: 70, maxWidth: 1600);
+      if (imgs.isNotEmpty) setState(()=> _photos.addAll(imgs));
+    } catch (_) {
+      if (mounted) showSnack(context, 'Impossible d ouvrir la galerie.', error:true);
+    }
+  }
+
+  Future<void> _publier() async {
+    if (_titreCtrl.text.trim().isEmpty) { showSnack(context, 'Ajoutez un titre', error:true); return; }
+    if (_photos.isEmpty && _texteCtrl.text.trim().isEmpty) {
+      showSnack(context, 'Ajoutez du texte ou des photos', error:true); return;
+    }
+    setState(()=> _envoi = true);
+    try {
+      final urls = <String>[];
+      for (final x in _photos) {
+        final bytes = await x.readAsBytes();
+        final url = await FirebaseService.uploadPhotoVieScolaire(widget.user.school, bytes, x.name);
+        urls.add(url);
+      }
+      await FirebaseService.publierArticleVieScolaire({
+        'titre': _titreCtrl.text.trim(),
+        'texte': _texteCtrl.text.trim(),
+        'images': urls,
+        'ecoleId': widget.user.school,
+        'auteur': widget.user.name,
+        'date': DateTime.now().toString().substring(0,10),
+      });
+      if (!mounted) return;
+      _titreCtrl.clear(); _texteCtrl.clear();
+      setState(() { _photos.clear(); _envoi = false; });
+      showSnack(context, 'Article publie ! 🎉');
+    } catch (_) {
+      if (mounted) { setState(()=> _envoi = false); showSnack(context, 'Erreur lors de la publication.', error:true); }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stream = widget.user.estSuperAdmin
+        ? FirebaseService.streamVieScolaireTout()
+        : FirebaseService.streamVieScolaireEcole(widget.user.school);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+        if (_peutPublier) ...[
+          SectionTitle('Publier un article'),
+          SCCard(child: Column(children:[
+            TextField(controller: _titreCtrl,
+                decoration: const InputDecoration(labelText: 'Titre (ex. Fete de fin d annee)')),
+            const SizedBox(height:10),
+            TextField(controller: _texteCtrl, maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Texte (court)')),
+            const SizedBox(height:10),
+            if (_photos.isNotEmpty)
+              SizedBox(height: 82, child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _photos.length,
+                separatorBuilder: (_,__)=>const SizedBox(width:8),
+                itemBuilder: (_, i) => Stack(children:[
+                  ClipRRect(borderRadius: BorderRadius.circular(8),
+                      child: Image.file(File(_photos[i].path), width:80, height:80, fit: BoxFit.cover)),
+                  Positioned(right:2, top:2, child: GestureDetector(
+                    onTap: ()=>setState(()=>_photos.removeAt(i)),
+                    child: Container(padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                        child: const Icon(Icons.close, size:14, color: Colors.white)))),
+                ]),
+              )),
+            if (_photos.isNotEmpty) const SizedBox(height:10),
+            SizedBox(width: double.infinity, child: OutlinedButton.icon(
+              onPressed: _envoi ? null : _choisirPhotos,
+              icon: const Icon(Icons.add_photo_alternate_rounded, size:18),
+              label: Text(_photos.isEmpty ? 'Ajouter des photos' : 'Ajouter d autres photos'),
+              style: OutlinedButton.styleFrom(foregroundColor: AppColors.green,
+                  side: const BorderSide(color: AppColors.green), padding: const EdgeInsets.symmetric(vertical:12)))),
+            const SizedBox(height:10),
+            SizedBox(width: double.infinity, child: ElevatedButton(
+              onPressed: _envoi ? null : _publier,
+              child: _envoi
+                  ? const SizedBox(height:20,width:20,child: CircularProgressIndicator(strokeWidth:2, color:Colors.white))
+                  : const Text('Publier — Notifier les familles 📲'))),
+          ])),
+          const SizedBox(height:20),
+        ],
+        SectionTitle('Vie scolaire'),
+        StreamBuilder<QuerySnapshot>(
+          stream: stream,
+          builder: (ctx, snap) {
+            if (snap.hasError) {
+              return const Text('Impossible de charger la vie scolaire.', style: TextStyle(color:AppColors.textMuted));
+            }
+            if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+            final docs = snap.data!.docs.toList()
+              ..sort((a,b){
+                final ta=(a.data() as Map)['createdAt']; final tb=(b.data() as Map)['createdAt'];
+                if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
+                return 0;
+              });
+            if (docs.isEmpty) {
+              return const Text('Aucun article pour le moment.', style: TextStyle(color:AppColors.textMuted));
+            }
+            return Column(children: docs.map((d){
+              final data = d.data() as Map<String,dynamic>;
+              final images = (data['images'] is List) ? List<String>.from(data['images']) : <String>[];
+              return Container(
+                margin: const EdgeInsets.only(bottom:16),
+                decoration: BoxDecoration(color: Colors.white,
+                    borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                  if (images.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                      child: SizedBox(height: 210, child: PageView(children: images.map((url)=>
+                        GestureDetector(
+                          onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (_)=> PhotoViewer(url: url))),
+                          child: Image.network(url, fit: BoxFit.cover, width: double.infinity,
+                              loadingBuilder: (c,w,p)=> p==null ? w : const Center(child: CircularProgressIndicator()),
+                              errorBuilder: (c,e,s)=> const Center(child: Icon(Icons.broken_image_rounded, color: AppColors.textMuted))),
+                        )).toList())),
+                    ),
+                  Padding(padding: const EdgeInsets.all(14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                    Row(children:[
+                      Expanded(child: Text(data['titre'] ?? '', style: const TextStyle(fontSize:16, fontWeight: FontWeight.w800))),
+                      if (_peutSupprimer)
+                        GestureDetector(
+                          onTap: () async {
+                            final ok = await showDialog<bool>(context: context, builder: (dctx)=> AlertDialog(
+                              title: const Text('Supprimer cet article ?'),
+                              content: const Text('L article et ses photos ne seront plus visibles.'),
+                              actions: [
+                                TextButton(onPressed: ()=>Navigator.pop(dctx,false), child: const Text('Annuler')),
+                                ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
+                                    onPressed: ()=>Navigator.pop(dctx,true), child: const Text('Supprimer')),
+                              ]));
+                            if (ok==true) { await FirebaseService.supprimerArticleVieScolaire(d.id);
+                              if (context.mounted) showSnack(context, 'Article supprime.'); }
+                          },
+                          child: const Icon(Icons.delete_outline_rounded, color: AppColors.red, size:20)),
+                    ]),
+                    if ((data['texte'] ?? '').toString().isNotEmpty) ...[
+                      const SizedBox(height:6),
+                      Text(data['texte'], style: const TextStyle(fontSize:13, height:1.5, color: AppColors.textMain)),
+                    ],
+                    const SizedBox(height:8),
+                    Text('${data['auteur'] ?? ''} · ${data['date'] ?? ''}'
+                        '${images.isNotEmpty ? ' · ${images.length} photo(s) — touchez pour agrandir' : ''}',
+                        style: const TextStyle(fontSize:11, color: AppColors.textMuted)),
+                  ])),
+                ]),
+              );
+            }).toList());
+          }),
+      ]),
+    );
+  }
+}
+
+// Visionneuse plein écran avec téléchargement dans la galerie
+class PhotoViewer extends StatefulWidget {
+  final String url;
+  const PhotoViewer({super.key, required this.url});
+  @override State<PhotoViewer> createState() => _PhotoViewerState();
+}
+
+class _PhotoViewerState extends State<PhotoViewer> {
+  bool _tel = false;
+  Future<void> _telecharger() async {
+    setState(()=> _tel = true);
+    try {
+      final bytes = await FirebaseStorage.instance.refFromURL(widget.url).getData(20 * 1024 * 1024);
+      if (bytes == null) throw 'vide';
+      final ok = await Gal.hasAccess() || await Gal.requestAccess();
+      if (!ok) {
+        if (mounted) showSnack(context, 'Autorisation refusee.', error:true);
+        setState(()=>_tel=false); return;
+      }
+      await Gal.putImageBytes(bytes);
+      if (mounted) showSnack(context, 'Photo enregistree dans la galerie 📸');
+    } catch (_) {
+      if (mounted) showSnack(context, 'Telechargement impossible.', error:true);
+    }
+    if (mounted) setState(()=> _tel = false);
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(backgroundColor: Colors.black, foregroundColor: Colors.white, elevation: 0),
+      body: Center(child: InteractiveViewer(child: Image.network(widget.url,
+          errorBuilder: (c,e,s)=> const Icon(Icons.broken_image_rounded, color: Colors.white54, size:64)))),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _tel ? null : _telecharger,
+        backgroundColor: AppColors.green,
+        icon: _tel
+            ? const SizedBox(height:18,width:18,child: CircularProgressIndicator(strokeWidth:2, color:Colors.white))
+            : const Icon(Icons.download_rounded),
+        label: const Text('Telecharger')),
+    );
   }
 }
 

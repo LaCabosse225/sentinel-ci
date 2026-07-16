@@ -43,6 +43,9 @@ dependencies:
   pdf: ^3.11.0
   printing: ^5.13.0
 
+  # Mémorise l'acceptation de la politique de confidentialité (1er lancement)
+  shared_preferences: ^2.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -68,6 +71,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/icon/logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -106,7 +112,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/icon.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "#1B9D21"
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
 
 # ── Écran de démarrage (splash) ──

@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
   void main() async {
@@ -27,9 +28,9 @@ import 'package:printing/printing.dart';
   }
 // ══════════════════════════════════════════
 class AppColors {
-  static const green     = Color(0xFF0A7C43);
-  static const green2    = Color(0xFF12A05A);
-  static const greenBg   = Color(0xFFE6F5EE);
+  static const green     = Color(0xFF1B9D21);
+  static const green2    = Color(0xFF1DAC27);
+  static const greenBg   = Color(0xFFE7F6E5);
   static const orange    = Color(0xFFF57C00);
   static const orangeBg  = Color(0xFFFFF3E0);
   static const red       = Color(0xFFD32F2F);
@@ -1146,6 +1147,719 @@ List<({String uid, String nom, UserRole role, String? matiere})> contactsMessage
 // ══════════════════════════════════════════
 //  APP
 // ══════════════════════════════════════════
+const String kPolitiqueTxt = r'''
+Sentinel CI
+POLITIQUE DE CONFIDENTIALITÉ
+Préambule
+
+Chez Sentinel nous considérons que la protection des données personnelles constitue un engagement fondamental.
+
+Notre mission est d'accompagner les établissements scolaires, les enseignants, les parents et les élèves dans un environnement numérique fondé sur la confiance.
+
+Parce que Sentinel traite principalement des informations relatives à des élèves, dont une grande partie sont mineurs, nous appliquons des principes exigeants de confidentialité, de sécurité et de transparence.
+
+Notre philosophie reste la même :
+
+Veiller, pas surveiller
+
+Article 1 – Objet de la présente politique
+
+La présente Politique de confidentialité explique :
+
+quelles données sont collectées ;
+pourquoi elles sont collectées ;
+comment elles sont utilisées ;
+qui peut y accéder ;
+comment elles sont protégées ;
+quels sont les droits des utilisateurs concernant leurs données.
+
+Article 2 – Les données que nous collectons
+
+Selon les services utilisés par l'établissement, Sentinel peut traiter les catégories de données suivantes :
+
+A. Informations relatives à l'élève
+
+nom et prénom ;
+identifiant scolaire ;
+classe ;
+niveau d'études ;
+photographie (si l'établissement choisit de l'utiliser) ;
+date de naissance (si nécessaire au fonctionnement du service).
+
+B. Informations relatives aux parents ou représentants légaux
+
+nom et prénom ;
+numéro de téléphone ;
+adresse électronique ;
+lien avec l'élève ;
+préférences de communication.
+
+C. Informations pédagogiques
+
+notes ;
+appréciations ;
+bulletins ;
+progression scolaire ;
+compétences évaluées ;
+devoirs ;
+travaux remis.
+
+D. Vie scolaire
+
+absences ;
+retards ;
+sanctions disciplinaires ;
+récompenses ;
+observations éducatives.
+
+E. Informations techniques
+
+Lors de l'utilisation de Sentinel, certaines informations techniques peuvent être enregistrées afin d'assurer la sécurité et le bon fonctionnement du service, telles que :
+
+date et heure de connexion ;
+type d'appareil ;
+système d'exploitation ;
+version de l'application ;
+adresse IP ou identifiant technique de connexion lorsque cela est nécessaire pour la sécurité.
+
+Article 3 – Pourquoi utilisons-nous ces données ?
+
+Les données sont utilisées exclusivement afin de :
+
+assurer le suivi pédagogique des élèves ;
+faciliter la communication entre les familles et l'établissement ;
+produire les bulletins et relevés scolaires ;
+envoyer des notifications importantes ;
+améliorer les fonctionnalités de Sentinel ;
+assurer la sécurité des comptes ;
+respecter les obligations légales applicables.
+
+Sentinel n'utilise pas les données des élèves pour des campagnes publicitaires.
+
+Article 4 – Notre engagement
+
+Sentinel s'engage à :
+
+ne jamais vendre les données personnelles ;
+ne jamais louer les données personnelles ;
+ne jamais céder les données à des fins commerciales sans base légale appropriée ou consentement lorsque celui-ci est requis ;
+limiter strictement l'accès aux personnes autorisées.
+
+Article 5 – Qui peut consulter les données ?
+
+L'accès est limité selon le rôle de chaque utilisateur.
+
+Les parents
+
+Accèdent uniquement aux informations concernant leur(s) enfant(s).
+
+Les enseignants
+
+Accèdent uniquement aux élèves des classes dont ils ont la responsabilité.
+
+Les responsables d'établissement
+
+Accèdent uniquement aux informations relevant de leur établissement.
+
+Les administrateurs techniques de Sentinel
+
+Ils n'accèdent aux données que lorsque cela est nécessaire pour :
+
+assurer la maintenance ;
+résoudre un incident technique ;
+sécuriser la plateforme ;
+
+et uniquement selon des procédures internes encadrées.
+
+Article 6 – Sécurité des données
+
+Sentinel met en œuvre des mesures de sécurité adaptées afin de protéger les informations contre :
+
+les accès non autorisés ;
+la perte de données ;
+les modifications frauduleuses ;
+les destructions accidentelles.
+
+Ces mesures peuvent notamment inclure :
+
+le chiffrement des communications ;
+le stockage sécurisé des informations ;
+l'authentification des utilisateurs ;
+des sauvegardes régulières ;
+la journalisation des actions importantes ;
+des mises à jour de sécurité régulières.
+
+Aucun système informatique n'étant infaillible, Sentinel s'engage à améliorer en permanence son niveau de sécurité et à réagir rapidement en cas d'incident.
+
+Article 7 – Durée de conservation
+
+Les données personnelles sont conservées uniquement pendant la durée nécessaire aux finalités pour lesquelles elles ont été collectées, ou conformément aux obligations légales et aux besoins de l'établissement.
+
+À l'issue de cette période, elles sont supprimées, anonymisées ou archivées lorsque la réglementation l'exige.
+
+Article 8 – Intelligence artificielle
+
+Certaines fonctionnalités utilisent une intelligence artificielle afin d'aider les élèves dans leurs apprentissages.
+
+Cette intelligence artificielle :
+
+n'attribue jamais les notes officielles ;
+ne prend aucune décision disciplinaire ;
+ne remplace pas les enseignants ;
+ne se substitue pas aux décisions de l'établissement.
+
+Elle constitue un outil d'accompagnement pédagogique.
+
+---
+
+Article 9 – Vos droits
+
+Les parents, représentants légaux et autres utilisateurs disposent, selon la réglementation applicable, de droits concernant leurs données personnelles.
+
+Ils peuvent notamment demander :
+
+* l'accès aux données les concernant ;
+* la rectification de données inexactes ;
+* la suppression de certaines données lorsque cela est possible ;
+* la limitation de certains traitements ;
+* des informations sur l'utilisation de leurs données.
+
+Les demandes peuvent être adressées à Sentinel ou à l'établissement concerné selon leur nature.
+
+Article 10 – Gestion des incidents de sécurité
+
+En cas d'incident de sécurité susceptible d'affecter les données personnelles, Sentinel s'engage à :
+
+analyser rapidement la situation ;
+mettre en œuvre les mesures correctives nécessaires ;
+informer les établissements concernés lorsque cela est requis ;
+coopérer avec les autorités compétentes conformément à la réglementation applicable.
+
+Article 11 – Cookies et technologies similaires
+
+Lorsque Sentinel est utilisé via un navigateur internet, des cookies ou technologies similaires peuvent être utilisés pour :
+
+maintenir la connexion de l'utilisateur ;
+améliorer l'expérience d'utilisation ;
+assurer la sécurité du service.
+
+Les utilisateurs peuvent gérer leurs préférences conformément aux paramètres proposés par la plateforme.
+
+Article 12 – Évolution de la présente politique
+
+La présente Politique de confidentialité peut être modifiée afin de tenir compte :
+
+des évolutions de Sentinel ;
+des évolutions législatives ;
+des nouvelles exigences de sécurité.
+
+Les utilisateurs seront informés des modifications importantes.
+
+Article 13 – Contact
+
+Pour toute question relative à la protection des données personnelles, les utilisateurs peuvent contacter l'équipe Sentinel par les coordonnées indiquées dans l'application ou sur le site officiel.
+
+Notre engagement envers les familles
+
+Chaque note, chaque appréciation, chaque absence, chaque progrès représente une partie du parcours d'un enfant.
+Ces informations méritent le plus grand respect.
+Chez Sentinel, nous ne considérons jamais les données scolaires comme de simples données informatiques.
+Nous les considérons comme une responsabilité.
+Notre priorité est de protéger la confiance que les familles, les enseignants et les établissements nous accordent chaque jour.
+
+Sentinel CI - Veiller, pas surveiller.
+''';
+
+const String kCguTxt = r'''
+Sentinel CI
+CONDITIONS GÉNÉRALES D'UTILISATION (CGU)
+Préambule
+
+Bienvenue sur Sentinel,
+
+Sentinel est une plateforme numérique dédiée au suivi scolaire et à l'accompagnement des élèves, des familles, des enseignants et des établissements scolaires.
+
+Notre mission est simple :
+
+« Veiller, pas surveiller »
+
+Nous croyons qu'un meilleur suivi favorise la réussite scolaire lorsqu'il est fondé sur la confiance, la bienveillance et la collaboration entre tous les acteurs de l'éducation.
+
+Les présentes Conditions Générales d'Utilisation définissent les règles applicables à l'utilisation de la plateforme Sentinel. Toute utilisation de Sentinel implique l'acceptation des présentes conditions.
+
+Article 1 – Objet
+
+Les présentes Conditions Générales d'Utilisation ont pour objet de définir les conditions dans lesquelles Sentinel met à disposition ses services numériques de suivi scolaire.
+
+Ces services peuvent notamment comprendre :
+
+le suivi des résultats scolaires ;
+le suivi des absences et retards ;
+le suivi du comportement scolaire ;
+la communication entre l'établissement, les enseignants et les familles ;
+la consultation des emplois du temps ;
+les notifications et alertes ;
+les outils pédagogiques et d'accompagnement ;
+Les fonctionnalités reposant sur l'intelligence artificielle destinées à soutenir les apprentissages.
+
+Article 2 – Définitions
+
+Aux fins des présentes Conditions :
+
+Sentinel CI désigne la plateforme numérique.
+
+Établissement désigne toute école, collège, lycée ou structure éducative utilisant Sentinel.
+
+Parent désigne le parent ou représentant légal d'un élève.
+
+Élève désigne toute personne inscrite dans un établissement utilisant Sentinel.
+
+Enseignant désigne toute personne autorisée à assurer un enseignement au sein d'un établissement.
+
+Administrateur désigne toute personne habilitée à gérer les comptes et paramètres de son établissement.
+
+Article 3 – Acceptation des Conditions
+
+L'utilisation de Sentinel vaut acceptation pleine et entière des présentes Conditions Générales d'Utilisation.
+
+Pour les élèves mineurs, cette acceptation est réalisée par le parent ou le représentant légal lorsque cela est requis.
+
+Article 4 – Création des comptes
+
+Les comptes sont créés par l'établissement ou par Sentinel selon les modalités convenues.
+
+Chaque utilisateur reçoit un accès personnel.
+
+Chaque utilisateur s'engage à :
+
+conserver la confidentialité de ses identifiants ;
+choisir un mot de passe robuste lorsqu'il lui appartient d'en créer un ;
+signaler immédiatement toute utilisation suspecte de son compte.
+
+Le prêt ou le partage d'un compte est interdit.
+
+Article 5 – Rôles et droits d'accès
+
+Chaque utilisateur accède uniquement aux informations nécessaires à sa mission.
+
+Parent
+
+Le parent peut notamment :
+
+consulter les informations concernant son ou ses enfants ;
+consulter les informations concernant l’école de son ou ses enfants ;
+recevoir des notifications ;
+communiquer avec l'établissement dans les limites prévues.
+
+Professeur
+
+Le Professeur peut :
+
+saisir les notes, devoirs et informations relatives à sa ou ses classes ;
+enregistrer les retards ou absences ;
+compléter les observations pédagogiques ;
+consulter uniquement la ou les classes dont il a la charge.
+
+Directeur ( Administration )
+
+Le Directeur dispose des droits nécessaires à la gestion de son établissement.
+
+Élève
+
+Lorsque cette fonctionnalité est activée par l'établissement, l'élève peut consulter les informations qui le concernent suite à l’autorisation du parent ou tuteur légal.
+
+Article 6 – Utilisation responsable
+
+Chaque utilisateur s'engage à utiliser Sentinel :
+
+dans le respect des lois applicables ;
+avec honnêteté ;
+dans le respect des autres utilisateurs ;
+sans porter atteinte au fonctionnement de la plateforme.
+
+Sont notamment interdits :
+
+toute tentative d'accès non autorisé ;
+toute modification frauduleuse des données ;
+l'usurpation d'identité ;
+la diffusion de contenus injurieux, diffamatoires ou illicites ;
+toute utilisation visant à perturber le service.
+
+Article 7 – Exactitude des informations
+
+Chaque établissement demeure responsable des informations qu'il saisit dans Sentinel.
+
+Les parents sont invités à signaler toute erreur constatée afin qu'elle puisse être corrigée dans les meilleurs délais.
+
+Article 8 – Intelligence artificielle
+
+Certaines fonctionnalités reposent sur une intelligence artificielle destinée à accompagner les apprentissages.
+
+Ces fonctionnalités ont uniquement un rôle d'assistance.
+
+Les réponses générées ne remplacent ni l'enseignant, ni les décisions pédagogiques de l'établissement.
+
+L'utilisateur demeure libre d'exercer son jugement.
+
+Article 9 – Sécurité des comptes
+
+Chaque utilisateur est responsable de la confidentialité de ses identifiants.
+
+En cas de perte, de vol ou de suspicion d'accès frauduleux, il appartient à l'utilisateur d'en informer rapidement l'établissement ou Sentinel.
+
+Sentinel met en œuvre des mesures techniques destinées à protéger les comptes contre les accès non autorisés.
+
+Article 10 – Disponibilité du service
+
+Sentinel s'efforce d'assurer la disponibilité continue de ses services.
+
+Toutefois, des interruptions temporaires peuvent intervenir notamment pour :
+
+la maintenance ;
+les mises à jour ;
+des incidents techniques ;
+des circonstances indépendantes de sa volonté.
+
+Article 11 – Protection des données
+
+Le traitement des données personnelles est régi par la Politique de Confidentialité de Sentinel, qui fait partie intégrante des présentes Conditions.
+
+Article 12 – Propriété intellectuelle
+
+Les logiciels, textes, illustrations, logos, éléments graphiques, interfaces et contenus composant Sentinel sont protégés par les lois relatives à la propriété intellectuelle.
+
+Toute reproduction ou utilisation non autorisée est interdite.
+
+Article 13 – Suspension ou suppression d'un compte
+
+Sentinel ou l'établissement peuvent suspendre un compte en cas notamment :
+
+d'utilisation frauduleuse ;
+de violation des présentes Conditions ;
+d'atteinte à la sécurité du système ;
+d'obligation légale.
+
+Article 14 – Évolutions de la plateforme
+
+Sentinel pourra faire évoluer ses fonctionnalités afin d'améliorer le service.
+
+Les présentes Conditions pourront être mises à jour. Les utilisateurs seront informés des modifications importantes.
+
+Article 15 – Responsabilité
+
+Sentinel met tout en œuvre pour fournir un service fiable.
+
+Toutefois, Sentinel ne saurait être tenue responsable :
+
+des erreurs de saisie effectuées par les établissements ;
+des décisions pédagogiques prises par les établissements ;
+des interruptions indépendantes de sa volonté ;
+d'une mauvaise utilisation de la plateforme par un utilisateur.
+
+Article 16 – Résiliation
+
+Chaque établissement peut mettre fin à son utilisation de Sentinel conformément au contrat conclu avec Sentinel.
+
+Les comptes utilisateurs seront alors désactivés selon les modalités prévues par ce contrat et la Politique de Confidentialité.
+
+Article 17 – Droit applicable
+
+Les présentes Conditions sont régies par le droit applicable dans le pays où Sentinel est exploité, sous réserve des règles impératives applicables dans les pays où la plateforme est utilisée.
+
+En cas de différend, les parties privilégieront une résolution amiable avant toute procédure judiciaire.
+
+Article 18 – Contact
+
+Pour toute question relative aux présentes Conditions Générales d'Utilisation, les utilisateurs peuvent contacter l'équipe Sentinel par les coordonnées communiquées dans l'application ou sur le site officiel.
+
+Notre engagement
+
+Sentinel est conçu avec une conviction forte :
+
+« Les données scolaires ne sont pas une marchandise »
+
+Elles existent pour accompagner les élèves, renforcer le dialogue entre les familles et les établissements, et contribuer à la réussite éducative.
+
+Notre priorité est de protéger ces informations avec le plus haut niveau d'exigence raisonnablement possible, dans un esprit de transparence, de confiance et de respect des personnes.
+''';
+
+const String kCharteTxt = r'''
+Sentinel CI
+CHARTE DE PROTECTION DES ENFANTS
+Préambule
+
+Chez Sentinel CI, nous sommes convaincus qu'un enfant ne doit jamais être réduit à une note, une moyenne ou une statistique.
+Chaque élève est une personne en devenir, avec son propre rythme, ses forces, ses difficultés et son potentiel.
+Notre mission est d'accompagner cette progression en créant un environnement numérique sûr, bienveillant et respectueux des droits de l'enfant.
+
+Notre engagement est résumé par notre devise :
+
+Veiller, pas surveiller.
+
+Notre vision
+
+Nous croyons qu'une technologie éducative doit servir l'humain avant tout.
+
+Sentinel a été conçu pour renforcer la collaboration entre les familles, les enseignants et les établissements scolaires, sans porter atteinte à la dignité ni à la vie privée des élèves.
+
+Chaque décision prise dans le développement de la plateforme est guidée par une question simple :
+
+Cette fonctionnalité est-elle réellement dans l'intérêt de l'enfant ?
+
+Si la réponse n'est pas clairement oui, nous la repensons.
+
+Nos 10 engagements
+
+1. L'intérêt de l'enfant avant tout
+
+Toutes les fonctionnalités de Sentinel sont conçues pour favoriser la réussite, le bien-être et le développement de l'élève.
+
+2. Le respect de la vie privée
+
+Nous limitons la collecte de données aux informations réellement nécessaires au suivi scolaire.
+Nous refusons toute collecte excessive.
+
+3. La confidentialité des informations
+
+Les données scolaires sont confidentielles.
+Elles ne sont accessibles qu'aux personnes autorisées selon leur rôle.
+
+4. Aucune vente des données
+
+Sentinel ne vend jamais les données personnelles des élèves.
+
+Nous ne les louons pas.
+
+Nous ne les exploitons pas à des fins publicitaires.
+
+Les informations confiées par les familles ne constituent pas une source de revenus.
+
+5. Une IA au service de l'apprentissage
+
+L'intelligence artificielle intégrée à Sentinel est conçue pour :
+
+expliquer ;
+accompagner ;
+encourager ;
+guider.
+
+Elle ne remplace jamais un enseignant et ne prend jamais de décision concernant un élève.
+
+6. Le droit à l'erreur
+
+Un enfant apprend en faisant des erreurs.
+Sentinel encourage une approche éducative qui valorise les progrès plutôt que les échecs.
+
+Les outils proposés visent à identifier les difficultés afin de permettre un accompagnement adapté.
+
+7. Le dialogue avant la sanction
+
+Nous croyons que la communication entre l'école et la famille est essentielle.
+
+Sentinel favorise les échanges constructifs afin de rechercher des solutions avant que les difficultés ne s'aggravent.
+
+8. La transparence
+
+Les familles doivent comprendre :
+
+quelles informations sont enregistrées ;
+pourquoi elles le sont ;
+qui peut y accéder ;
+comment elles sont protégées.
+
+Nous nous engageons à communiquer de manière claire et compréhensible.
+
+---
+
+9. Une sécurité en amélioration continue
+
+La sécurité n'est jamais définitivement acquise.
+Nous améliorons régulièrement nos pratiques afin de protéger les données confiées à Sentinel contre les risques connus et les nouvelles menaces.
+
+10. Une technologie au service de l'humain
+
+Sentinel ne cherche pas à remplacer les relations humaines.
+Au contraire, notre ambition est de faciliter les échanges entre les élèves, les familles, les enseignants et les établissements.
+La technologie doit rapprocher les personnes, jamais les éloigner.
+
+Notre promesse aux familles
+
+Lorsque vous confiez les informations scolaires de votre enfant à Sentinel, vous nous accordez votre confiance.
+
+Nous avons pleinement conscience de cette responsabilité.
+C'est pourquoi nous nous engageons à agir avec intégrité, transparence et respect dans chacune de nos décisions.
+
+Notre promesse aux écoles
+
+Nous aidons les écoles à mieux accompagner leurs élèves.
+Nous ne cherchons jamais à nous substituer à leur mission éducative.
+Sentinel est un outil au service de la communauté éducative.
+
+Notre promesse aux professeurs
+
+Nous savons que rien ne remplace le regard, l'expérience et l'engagement d'un enseignant.
+Sentinel est conçu pour vous faire gagner du temps, améliorer la communication avec les familles et vous fournir des outils utiles, sans remettre en cause votre liberté pédagogique.
+
+Notre promesse aux élèves
+
+Tu n'es pas une moyenne.
+Tu n'es pas une série de notes.
+Tu es une personne avec des talents, des rêves, des difficultés et un avenir.
+Sentinel est là pour t'aider à progresser, à comprendre tes réussites comme tes difficultés, et à te donner les moyens de révéler le meilleur de toi-même.
+
+Notre signature
+
+Chez Sentinel, nous croyons qu'une technologie éducative ne vaut que par la confiance qu'elle inspire.
+C'est pourquoi nous continuerons à développer une plateforme respectueuse des élèves, des familles et des établissements, en plaçant toujours l'humain au cœur de l'innovation.
+
+Sentinel CI - Veiller, pas surveiller.
+''';
+
+// ══════════════════════════════════════════
+//  CONSENTEMENT — 1er lancement
+// ══════════════════════════════════════════
+const String kConsentKey = 'consentement_accepte_v1';
+
+class DemarrageGate extends StatefulWidget {
+  const DemarrageGate({super.key});
+  @override State<DemarrageGate> createState() => _DemarrageGateState();
+}
+
+class _DemarrageGateState extends State<DemarrageGate> {
+  bool? _accepte;   // null = lecture en cours
+
+  @override
+  void initState() {
+    super.initState();
+    _verifier();
+  }
+
+  Future<void> _verifier() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (mounted) setState(()=> _accepte = prefs.getBool(kConsentKey) ?? false);
+    } catch (_) {
+      if (mounted) setState(()=> _accepte = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_accepte == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_accepte == true) return const LoginScreen();
+    return ConsentScreen(onAccept: () async {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(kConsentKey, true);
+      } catch (_) {}
+      if (mounted) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()));
+      }
+    });
+  }
+}
+
+class ConsentScreen extends StatefulWidget {
+  final Future<void> Function() onAccept;
+  const ConsentScreen({super.key, required this.onAccept});
+  @override State<ConsentScreen> createState() => _ConsentScreenState();
+}
+
+class _ConsentScreenState extends State<ConsentScreen> {
+  bool _coche = false;
+  bool _envoi = false;
+
+  void _ouvrir(String titre, String texte) {
+    Navigator.push(context, MaterialPageRoute(
+        builder: (_) => DocumentViewer(titre: titre, texte: texte)));
+  }
+
+  Widget _lienDoc(String titre, IconData icon, VoidCallback onTap) => Card(
+    elevation: 0,
+    color: AppColors.greenBg,
+    margin: const EdgeInsets.only(bottom:8),
+    child: ListTile(
+      leading: Icon(icon, color: AppColors.green),
+      title: Text(titre, style: const TextStyle(fontSize:13, fontWeight:FontWeight.w600)),
+      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+      onTap: onTap,
+    ));
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+          const SizedBox(height: 12),
+          Center(child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image.asset('assets/icon/logo.png', width:96, height:96))),
+          const SizedBox(height: 16),
+          const Center(child: Text('Bienvenue sur Sentinel CI',
+              style: TextStyle(fontSize:22, fontWeight:FontWeight.w800))),
+          const SizedBox(height: 6),
+          const Center(child: Text('Veiller, pas surveiller',
+              style: TextStyle(fontSize:13, color:AppColors.green, fontWeight:FontWeight.w700))),
+          const SizedBox(height: 20),
+          const Text(
+            'Sentinel CI protege les donnees des eleves, des familles et des ecoles. '
+            'Avant de commencer, merci de prendre connaissance de nos documents et de les accepter.',
+            style: TextStyle(fontSize:13.5, height:1.5, color:AppColors.textMain)),
+          const SizedBox(height: 16),
+          _lienDoc('Politique de confidentialite', Icons.privacy_tip_rounded,
+              ()=>_ouvrir('Politique de confidentialite', kPolitiqueTxt)),
+          _lienDoc('Conditions generales d utilisation', Icons.description_rounded,
+              ()=>_ouvrir('Conditions generales d utilisation', kCguTxt)),
+          _lienDoc('Charte de protection des enfants', Icons.shield_rounded,
+              ()=>_ouvrir('Charte de protection des enfants', kCharteTxt)),
+          const SizedBox(height: 10),
+          Row(crossAxisAlignment: CrossAxisAlignment.center, children:[
+            Checkbox(value:_coche, onChanged:(v)=>setState(()=>_coche = v ?? false),
+                activeColor: AppColors.green),
+            Expanded(child: GestureDetector(
+              onTap: ()=>setState(()=>_coche = !_coche),
+              child: const Text(
+                  'J accepte la politique de confidentialite, les conditions generales d utilisation et la charte de protection des enfants.',
+                  style: TextStyle(fontSize:12.5, height:1.4)))),
+          ]),
+          const SizedBox(height: 10),
+          SizedBox(width: double.infinity, child: ElevatedButton(
+            onPressed: (_coche && !_envoi) ? () async {
+              setState(()=>_envoi = true);
+              await widget.onAccept();
+            } : null,
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical:15)),
+            child: _envoi
+                ? const SizedBox(height:20, width:20,
+                    child: CircularProgressIndicator(strokeWidth:2, color:Colors.white))
+                : const Text('Continuer', style: TextStyle(fontSize:15, fontWeight:FontWeight.w700)))),
+          const SizedBox(height: 12),
+        ]),
+      )),
+    );
+  }
+}
+
+class DocumentViewer extends StatelessWidget {
+  final String titre, texte;
+  const DocumentViewer({super.key, required this.titre, required this.texte});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(titre)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Text(texte, style: const TextStyle(fontSize:13, height:1.55, color:AppColors.textMain)),
+      ),
+    );
+  }
+}
+
+
 class SentinelCIApp extends StatelessWidget {
   const SentinelCIApp({super.key});
   @override
@@ -1153,7 +1867,7 @@ class SentinelCIApp extends StatelessWidget {
     title: 'Sentinel CI',
     debugShowCheckedModeBanner: false,
     theme: buildTheme(),
-    home: const LoginScreen(),
+    home: const DemarrageGate(),
   );
 }
 
@@ -1273,10 +1987,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   // Logo
                   Row(children: [
-                    Container(width:50, height:50,
-                        decoration: BoxDecoration(
-                            color: AppColors.green, borderRadius: BorderRadius.circular(14)),
-                        child: const Center(child: Text('🛡️', style: TextStyle(fontSize:26)))),
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset('assets/icon/logo.png', width:50, height:50, fit: BoxFit.cover)),
                     const SizedBox(width:12),
                     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       const Text('Sentinel CI', style: TextStyle(
@@ -1791,7 +2504,7 @@ class _MainShellState extends State<MainShell> {
         title: Row(mainAxisSize: MainAxisSize.min, children:[
           RichText(text: const TextSpan(children:[
             TextSpan(text:'Sentinel', style:TextStyle(color:AppColors.green, fontWeight:FontWeight.w800, fontSize:18)),
-            TextSpan(text:'CI', style:TextStyle(color:AppColors.orange, fontWeight:FontWeight.w800, fontSize:18)),
+            TextSpan(text:'CI', style:TextStyle(color:AppColors.green, fontWeight:FontWeight.w800, fontSize:18)),
           ])),
           const SizedBox(width:8),
           Flexible(child: Container(
@@ -3163,7 +3876,7 @@ class BulletinPage extends StatelessWidget {
               SCCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
                 Row(children:[
                   const Text('SENTINEL ', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.green, fontSize: 16)),
-                  const Text('CI', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.orange, fontSize: 16)),
+                  const Text('CI', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.green, fontSize: 16)),
                   const Spacer(),
                   Text(d['ecoleNom'] ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
                 ]),

@@ -28,6 +28,8 @@ workflows:
         script: flutter pub get
       - name: Build Web
         script: flutter build web --release --no-web-resources-cdn
+      - name: Rendre le site autonome (anti-blocage operateurs)
+        script: python3 web_autonome.py
       - name: Compresser le site
         script: cd build && zip -r web_sentinel_ci.zip web
       - name: Deployer sur Firebase Hosting

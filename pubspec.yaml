@@ -123,8 +123,8 @@ flutter_launcher_icons:
 
 # ── Écran de démarrage (splash) ──
 flutter_native_splash:
-  color: "#FFFFFF"
-  image: "assets/icon/icon.png"
+  color: "#1B9D21"
+  image: "assets/icon/splash_shield.png"
   android_12:
-    color: "#FFFFFF"
-    image: "assets/icon/icon.png"
+    color: "#1B9D21"
+    image: "assets/icon/splash_shield.png"

@@ -21,6 +21,8 @@ workflows:
     max_build_duration: 60
     environment:
       flutter: stable
+      groups:
+        - firebase
     scripts:
       - name: Recuperer les paquets
         script: flutter pub get
@@ -28,5 +30,12 @@ workflows:
         script: flutter build web --release
       - name: Compresser le site
         script: cd build && zip -r web_sentinel_ci.zip web
+      - name: Deployer sur Firebase Hosting
+        script: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$CM_BUILD_DIR/cle_service_firebase.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/cle_service_firebase.json"
+          npm install -g firebase-tools
+          firebase deploy --only hosting --project sentinel-ci-c7592 --non-interactive
+          rm -f "$CM_BUILD_DIR/cle_service_firebase.json"
     artifacts:
       - build/web_sentinel_ci.zip

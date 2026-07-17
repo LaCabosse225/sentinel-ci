@@ -16,6 +16,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gal/gal.dart';
 
@@ -2574,6 +2575,32 @@ class _MainShellState extends State<MainShell> {
     super.initState();
     if (widget.user.role == UserRole.parent) {
       _chargerEnfants();
+    }
+    _initNotificationsPush();
+  }
+
+  // ---------- NOTIFICATIONS PUSH (FCM) ----------
+  // Demande la permission, puis abonne ce téléphone :
+  //  - au canal général "tous" (annonces Sentinel CI)
+  //  - au canal de son école "ecole_<id>" (annonces ciblées)
+  //  - au canal de son rôle "role_<role>" (ex. cibler uniquement les parents)
+  Future<void> _initNotificationsPush() async {
+    try {
+      final fm = FirebaseMessaging.instance;
+      await fm.requestPermission();
+      String propre(String s) => s.replaceAll(RegExp(r'[^A-Za-z0-9_.~%-]'), '_');
+      await fm.subscribeToTopic('tous');
+      await fm.subscribeToTopic('ecole_${propre(widget.user.school)}');
+      await fm.subscribeToTopic('role_${widget.user.role.name}');
+      // App ouverte : on montre la notification en bandeau discret.
+      FirebaseMessaging.onMessage.listen((m) {
+        final n = m.notification;
+        if (n != null && mounted) {
+          showSnack(context, '${n.title ?? 'Notification'}${(n.body ?? '').isNotEmpty ? ' - ${n.body}' : ''}');
+        }
+      });
+    } catch (_) {
+      // Sans permission ou hors ligne : l'app continue normalement.
     }
   }
 

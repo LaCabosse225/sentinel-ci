@@ -15,3 +15,18 @@ workflows:
         script: flutter build apk --debug
     artifacts:
       - build/app/outputs/flutter-apk/app-debug.apk
+
+  web-workflow:
+    name: Version Web
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Recuperer les paquets
+        script: flutter pub get
+      - name: Build Web
+        script: flutter build web --release
+      - name: Compresser le site
+        script: cd build && zip -r web_sentinel_ci.zip web
+    artifacts:
+      - build/web_sentinel_ci.zip

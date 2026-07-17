@@ -4,8 +4,8 @@
 // ============================================================
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,10 +21,30 @@ import 'package:image_picker/image_picker.dart';
 import 'package:gal/gal.dart';
 
 
+// ── Configuration Firebase pour la VERSION WEB (console Firebase, app Web) ──
+// Ces valeurs sont publiques par conception ; la sécurité vient des règles
+// Firestore/Storage déjà déployées.
+const FirebaseOptions kFirebaseWebOptions = FirebaseOptions(
+  apiKey: 'AIzaSyC76Vz7DjxjRKpdQ6thnusgaBZMS9u-_hg',
+  authDomain: 'sentinel-ci-c7592.firebaseapp.com',
+  projectId: 'sentinel-ci-c7592',
+  storageBucket: 'sentinel-ci-c7592.firebasestorage.app',
+  messagingSenderId: '777104094412',
+  appId: '1:777104094412:web:e27ecf7b65e0505081be69',
+  measurementId: 'G-4FJ1WY200C',
+);
+
+
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     try {
-      await Firebase.initializeApp();
+      // Sur le web, la config doit être fournie dans le code ;
+      // sur Android/iOS, elle vient de google-services.json.
+      if (kIsWeb) {
+        await Firebase.initializeApp(options: kFirebaseWebOptions);
+      } else {
+        await Firebase.initializeApp();
+      }
     } catch (e) {
       print('Erreur Firebase: $e');
     }
@@ -2664,6 +2684,8 @@ class _MainShellState extends State<MainShell> {
   //  - au canal de son école "ecole_<id>" (annonces ciblées)
   //  - au canal de son rôle "role_<role>" (ex. cibler uniquement les parents)
   Future<void> _initNotificationsPush() async {
+    // Version web : notifications push réservées à l'app mobile pour l'instant.
+    if (kIsWeb) return;
     try {
       final fm = FirebaseMessaging.instance;
       await fm.requestPermission();
@@ -7255,7 +7277,14 @@ class _VieScolairePageState extends State<VieScolairePage> {
                 separatorBuilder: (_,__)=>const SizedBox(width:8),
                 itemBuilder: (_, i) => Stack(children:[
                   ClipRRect(borderRadius: BorderRadius.circular(8),
-                      child: Image.file(File(_photos[i].path), width:80, height:80, fit: BoxFit.cover)),
+                      child: FutureBuilder<Uint8List>(
+                        future: _photos[i].readAsBytes(),
+                        builder: (c, snap) => snap.hasData
+                            ? Image.memory(snap.data!, width:80, height:80, fit: BoxFit.cover)
+                            : Container(width:80, height:80, color: AppColors.greenBg,
+                                child: const Center(child: SizedBox(width:16, height:16,
+                                    child: CircularProgressIndicator(strokeWidth:2)))),
+                      )),
                   Positioned(right:2, top:2, child: GestureDetector(
                     onTap: ()=>setState(()=>_photos.removeAt(i)),
                     child: Container(padding: const EdgeInsets.all(2),
@@ -7385,7 +7414,7 @@ class _PhotoViewerState extends State<PhotoViewer> {
       appBar: AppBar(backgroundColor: Colors.black, foregroundColor: Colors.white, elevation: 0),
       body: Center(child: InteractiveViewer(child: Image.network(widget.url,
           errorBuilder: (c,e,s)=> const Icon(Icons.broken_image_rounded, color: Colors.white54, size:64)))),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: kIsWeb ? null : FloatingActionButton.extended(
         onPressed: _tel ? null : _telecharger,
         backgroundColor: AppColors.green,
         icon: _tel

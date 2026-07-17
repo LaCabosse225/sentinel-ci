@@ -1,11 +1,11 @@
 {
-    "name": "sentinel_ci",
-    "short_name": "sentinel_ci",
+    "name": "Sentinel CI",
+    "short_name": "Sentinel CI",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1B9D21",
+    "theme_color": "#1B9D21",
+    "description": "Suivi scolaire en Côte d'Ivoire. Veiller, pas surveiller.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

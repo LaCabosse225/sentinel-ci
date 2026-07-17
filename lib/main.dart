@@ -244,6 +244,89 @@ String fmtF(num n) {
   return b.toString();
 }
 
+// ---- SUIVI DES PAIEMENTS (l'école paie son forfait) ----
+const List<String> kMoisFr = ['Janvier','Fevrier','Mars','Avril','Mai','Juin',
+  'Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+
+// Code d'un mois : "2026-07" (sert d'identifiant de paiement).
+String moisCode(DateTime d) => '${d.year}-${d.month.toString().padLeft(2,'0')}';
+
+// Libellé : "Juillet 2026".
+String moisLabelFr(DateTime d) => '${kMoisFr[d.month-1]} ${d.year}';
+
+// Les N derniers mois (mois courant en premier) pour le choix à l'encaissement.
+List<DateTime> derniersMois(int n) {
+  final now = DateTime.now();
+  return List.generate(n, (i) => DateTime(now.year, now.month - i, 1));
+}
+
+// Reçu de paiement officiel (PDF partageable).
+Future<Uint8List> genererRecuPdf(Map<String,dynamic> p) async {
+  final doc = pw.Document();
+  pw.MemoryImage? logo;
+  try {
+    final data = await rootBundle.load('assets/icon/logo.png');
+    logo = pw.MemoryImage(data.buffer.asUint8List());
+  } catch (_) {}
+  final vert = PdfColor.fromInt(0xFF1B9D21);
+  doc.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a5,
+    build: (ctx) => pw.Padding(
+      padding: const pw.EdgeInsets.all(20),
+      child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+        pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+          pw.Row(children: [
+            if (logo != null) pw.Image(logo, width: 34, height: 34),
+            pw.SizedBox(width: 8),
+            pw.Text('SentinelCI', style: pw.TextStyle(
+                fontSize: 18, fontWeight: pw.FontWeight.bold, color: vert)),
+          ]),
+          pw.Text(p['numeroRecu'] ?? '', style: pw.TextStyle(
+              fontSize: 13, fontWeight: pw.FontWeight.bold)),
+        ]),
+        pw.SizedBox(height: 6),
+        pw.Text('Veiller, pas surveiller',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        pw.Divider(color: vert, thickness: 1.5),
+        pw.SizedBox(height: 8),
+        pw.Center(child: pw.Text('RECU DE PAIEMENT',
+            style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold))),
+        pw.SizedBox(height: 14),
+        pw.Text('Ecole : ${p['ecoleNom'] ?? ''}', style: const pw.TextStyle(fontSize: 11)),
+        pw.SizedBox(height: 4),
+        pw.Text('Periode : ${p['moisLabel'] ?? ''}', style: const pw.TextStyle(fontSize: 11)),
+        pw.SizedBox(height: 4),
+        pw.Text('Methode : ${p['methode'] ?? ''}'
+            '${(p['reference'] ?? '').toString().isNotEmpty ? '  (ref. ${p['reference']})' : ''}',
+            style: const pw.TextStyle(fontSize: 11)),
+        pw.SizedBox(height: 4),
+        pw.Text('Date : ${p['dateStr'] ?? ''}', style: const pw.TextStyle(fontSize: 11)),
+        pw.SizedBox(height: 16),
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+              color: PdfColor.fromInt(0xFFE7F6E5),
+              borderRadius: pw.BorderRadius.circular(8)),
+          child: pw.Column(children: [
+            pw.Text('Montant recu', style: const pw.TextStyle(fontSize: 10)),
+            pw.SizedBox(height: 4),
+            pw.Text('${fmtF((p['montant'] as num?) ?? 0)} FCFA',
+                style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: vert)),
+          ]),
+        ),
+        pw.Spacer(),
+        pw.Text('Enregistre par : ${p['saisiPar'] ?? ''}',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        pw.SizedBox(height: 2),
+        pw.Text('Sentinel CI - Forfait de suivi scolaire. Merci de votre confiance.',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+      ]),
+    ),
+  ));
+  return doc.save();
+}
+
 // Libellé du palier tarifaire d'une école.
 String libellePalier(int nb) {
   if (nb <= 200) return '1 a 200 eleves';
@@ -778,6 +861,53 @@ class FirebaseService {
           .orderBy('createdAt', descending: true)
           .limit(50)
           .snapshots();
+
+  // ---- SUIVI DES PAIEMENTS DES ECOLES ----
+  // Enregistre un paiement de forfait : numéro de reçu séquentiel (REC-ANNEE-0001)
+  // via un compteur transactionnel, puis fiche paiement (1 par école et par mois).
+  static Future<String> enregistrerPaiement({
+    required String ecoleId, required String ecoleNom,
+    required String mois, required String moisLabel,
+    required int montant, required String methode,
+    required String reference, required String saisiPar,
+  }) async {
+    final annee = mois.substring(0, 4);
+    final compteurRef = _db.collection('compteurs').doc('recus_$annee');
+    final payRef = _db.collection('paiements').doc('${ecoleId}_$mois');
+    final numero = await _db.runTransaction<String>((tx) async {
+      final c = await tx.get(compteurRef);
+      final n = ((c.data()?['n'] as num?) ?? 0).toInt() + 1;
+      final numeroRecu = 'REC-$annee-${n.toString().padLeft(4, '0')}';
+      tx.set(compteurRef, {'n': n});
+      final now = DateTime.now();
+      tx.set(payRef, {
+        'ecoleId': ecoleId, 'ecoleNom': ecoleNom,
+        'mois': mois, 'moisLabel': moisLabel,
+        'montant': montant, 'methode': methode, 'reference': reference,
+        'numeroRecu': numeroRecu, 'saisiPar': saisiPar,
+        'dateStr': '${now.day.toString().padLeft(2,'0')}/${now.month.toString().padLeft(2,'0')}/${now.year}',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      return numeroRecu;
+    });
+    return numero;
+  }
+
+  // Historique des paiements d'une école (1 filtre => pas d'index ; tri côté app).
+  static Future<List<Map<String,dynamic>>> paiementsEcole(String ecoleId) async {
+    final snap = await _db.collection('paiements')
+        .where('ecoleId', isEqualTo: ecoleId).get();
+    final l = snap.docs.map((d) => d.data()).toList()
+      ..sort((a,b) => (b['mois'] ?? '').toString().compareTo((a['mois'] ?? '').toString()));
+    return l;
+  }
+
+  // Paiements d'un mois donné, indexés par école (badges Payé / En attente).
+  static Future<Map<String, Map<String,dynamic>>> paiementsDuMois(String mois) async {
+    final snap = await _db.collection('paiements')
+        .where('mois', isEqualTo: mois).get();
+    return { for (final d in snap.docs) (d.data()['ecoleId'] ?? '').toString(): d.data() };
+  }
 
   // Stream agenda (1 filtre => pas d'index ; tri côté app)
   static Stream<QuerySnapshot> streamAgenda(String ecoleId) =>
@@ -4186,6 +4316,69 @@ class _AbonnementsDirecteurPageState extends State<AbonnementsDirecteurPage> {
         ])),
         const SizedBox(height:16),
 
+        SectionTitle('Paiements de votre ecole'),
+        FutureBuilder<List<Map<String,dynamic>>>(
+          future: FirebaseService.paiementsEcole(widget.user.school),
+          builder: (ctx, snap) {
+            if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+            final l = snap.data!;
+            final moisNow = moisCode(DateTime.now());
+            final payeCeMois = l.any((p) => p['mois'] == moisNow);
+            return Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom:10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    color: payeCeMois ? AppColors.greenBg : AppColors.goldBg,
+                    borderRadius: BorderRadius.circular(10)),
+                child: Row(children:[
+                  Icon(payeCeMois ? Icons.check_circle_rounded : Icons.hourglass_bottom_rounded,
+                      size: 18, color: payeCeMois ? AppColors.green : AppColors.gold),
+                  const SizedBox(width:8),
+                  Expanded(child: Text(
+                      payeCeMois
+                          ? '${moisLabelFr(DateTime.now())} : paye. Merci ! ✓'
+                          : '${moisLabelFr(DateTime.now())} : en attente de paiement.',
+                      style: TextStyle(fontSize:12.5, fontWeight: FontWeight.w800,
+                          color: payeCeMois ? AppColors.green : AppColors.gold))),
+                ]),
+              ),
+              if (l.isEmpty)
+                SCCard(child: const Text('Aucun paiement enregistre pour le moment.',
+                    style: TextStyle(color: AppColors.textMuted)))
+              else
+                ...l.take(12).map((p) => Container(
+                  margin: const EdgeInsets.only(bottom:8),
+                  padding: const EdgeInsets.symmetric(horizontal:12, vertical:10),
+                  decoration: BoxDecoration(color: Colors.white,
+                      borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
+                  child: Row(children:[
+                    const Icon(Icons.receipt_long_rounded, size:18, color: AppColors.green),
+                    const SizedBox(width:10),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                      Text('${p['moisLabel'] ?? ''}',
+                          style: const TextStyle(fontSize:12.5, fontWeight: FontWeight.w700)),
+                      Text('${p['numeroRecu'] ?? ''} · ${p['methode'] ?? ''} · ${p['dateStr'] ?? ''}',
+                          style: const TextStyle(fontSize:11, color: AppColors.textMuted)),
+                    ])),
+                    Text('${fmtF((p['montant'] as num?) ?? 0)} F',
+                        style: const TextStyle(fontSize:12.5, fontWeight: FontWeight.w800, color: AppColors.green)),
+                    IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Telecharger le recu',
+                        onPressed: () async {
+                          final bytes = await genererRecuPdf(p);
+                          await Printing.sharePdf(bytes: bytes,
+                              filename: '${p['numeroRecu'] ?? 'recu'}.pdf');
+                        },
+                        icon: const Icon(Icons.ios_share_rounded, size:16, color: AppColors.blue)),
+                  ]),
+                )),
+            ]);
+          }),
+        const SizedBox(height:16),
+
         SCCard(child: const Row(children:[
           Icon(Icons.info_outline_rounded, size:18, color: AppColors.blue),
           SizedBox(width:10),
@@ -6245,6 +6438,72 @@ class _RevenusPageState extends State<RevenusPage> {
     if (mounted) setState((){}); // recharge les chiffres
   }
 
+  // Encaisser le forfait d'une école : mois, montant, méthode, référence -> reçu.
+  Future<void> _encaisserDialog(String id, String nom, int montantDefaut) async {
+    final mCtrl = TextEditingController(text: '$montantDefaut');
+    final refCtrl = TextEditingController();
+    final moisChoix = derniersMois(6);
+    DateTime moisSel = moisChoix.first;
+    String methode = 'Mobile Money';
+    bool saving = false;
+    await showDialog(context: context, builder: (dctx) =>
+      StatefulBuilder(builder: (dctx, setSt) => AlertDialog(
+        title: Text('Encaisser - $nom', style: const TextStyle(fontSize: 16.5)),
+        content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          DropdownButtonFormField<DateTime>(
+            value: moisSel, isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Mois concerne',
+                prefixIcon: Icon(Icons.calendar_month_rounded, size: 20)),
+            items: moisChoix.map((d) => DropdownMenuItem(
+                value: d, child: Text(moisLabelFr(d)))).toList(),
+            onChanged: (v) => setSt(() => moisSel = v ?? moisSel)),
+          const SizedBox(height: 10),
+          TextField(controller: mCtrl, keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Montant recu (FCFA)',
+                  prefixIcon: Icon(Icons.payments_rounded, size: 20))),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<String>(
+            value: methode, isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Methode de paiement',
+                prefixIcon: Icon(Icons.account_balance_wallet_rounded, size: 20)),
+            items: const ['Mobile Money','Virement','Especes','Cheque']
+                .map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+            onChanged: (v) => setSt(() => methode = v ?? methode)),
+          const SizedBox(height: 10),
+          TextField(controller: refCtrl,
+              decoration: const InputDecoration(
+                  labelText: 'Reference (n. transaction, cheque...)',
+                  prefixIcon: Icon(Icons.tag_rounded, size: 20))),
+        ])),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dctx), child: const Text('Annuler')),
+          ElevatedButton(
+            onPressed: saving ? null : () async {
+              final montant = int.tryParse(mCtrl.text.trim());
+              if (montant == null || montant <= 0) return;
+              setSt(() => saving = true);
+              try {
+                final numero = await FirebaseService.enregistrerPaiement(
+                  ecoleId: id, ecoleNom: nom,
+                  mois: moisCode(moisSel), moisLabel: moisLabelFr(moisSel),
+                  montant: montant, methode: methode,
+                  reference: refCtrl.text.trim(), saisiPar: user.name);
+                if (dctx.mounted) Navigator.pop(dctx);
+                if (mounted) showSnack(context, 'Paiement enregistre - recu $numero 🧾');
+              } catch (_) {
+                setSt(() => saving = false);
+                if (dctx.mounted) showSnack(dctx, 'Erreur d enregistrement.', error: true);
+              }
+            },
+            child: saving
+                ? const SizedBox(height: 18, width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Text('Enregistrer le paiement')),
+        ],
+      )));
+    if (mounted) setState((){});
+  }
+
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -6268,42 +6527,151 @@ class _RevenusPageState extends State<RevenusPage> {
           }),
         const SizedBox(height:20),
 
-        SectionTitle('Forfait par ecole'),
-        FutureBuilder<List<({String id, String nom, int nb, bool corrige, int prix, int total})>>(
-          future: FirebaseService.forfaitsParEcole(),
+        SectionTitle('Forfait par ecole - ${moisLabelFr(DateTime.now())}'),
+        FutureBuilder<({List<({String id, String nom, int nb, bool corrige, int prix, int total})> forfaits,
+                        Map<String, Map<String,dynamic>> payes})>(
+          future: () async {
+            final f = await FirebaseService.forfaitsParEcole();
+            final p = await FirebaseService.paiementsDuMois(moisCode(DateTime.now()));
+            return (forfaits: f, payes: p);
+          }(),
           builder: (ctx, snap) {
             if (!snap.hasData) return const Center(child:CircularProgressIndicator());
-            final list = snap.data!;
+            final list = snap.data!.forfaits;
+            final payes = snap.data!.payes;
             if (list.isEmpty) {
               return SCCard(child: const Text('Aucune ecole enregistree.',
                   style: TextStyle(color: AppColors.textMuted)));
             }
-            return Column(children: list.map((e)=> Container(
-              margin: const EdgeInsets.only(bottom:10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: Colors.white,
-                  borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
-              child: Row(children:[
-                Container(width:40,height:40,
-                    decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
-                    child: const Center(child: Icon(Icons.school_rounded, color: AppColors.green))),
-                const SizedBox(width:12),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
-                  Text(e.nom, style: const TextStyle(fontSize:13.5, fontWeight: FontWeight.w700)),
-                  const SizedBox(height:2),
-                  Text('${e.nb} eleves${e.corrige ? ' (ajuste)' : ''}  x  ${fmtF(e.prix)} F',
-                      style: const TextStyle(fontSize:12, color: AppColors.textMuted)),
-                ])),
-                Text('${fmtF(e.total)} F',
-                    style: const TextStyle(fontSize:14, fontWeight: FontWeight.w800, color: AppColors.green)),
-                const SizedBox(width:4),
-                IconButton(
-                    visualDensity: VisualDensity.compact,
-                    tooltip: 'Ajuster le nombre d eleves',
-                    onPressed: ()=> _ajusterEcole(e.id, e.nom, e.nb, e.corrige),
-                    icon: const Icon(Icons.edit_rounded, size:18, color: AppColors.textMuted)),
-              ]),
-            )).toList());
+            final attendu = list.fold<int>(0, (s,e)=> s + e.total);
+            final encaisse = payes.values.fold<int>(0, (s,p)=> s + ((p['montant'] as num?)?.toInt() ?? 0));
+            return Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+              // Bandeau encaissé / attendu du mois
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom:12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                    color: encaisse >= attendu && attendu > 0 ? AppColors.greenBg : AppColors.goldBg,
+                    borderRadius: BorderRadius.circular(12)),
+                child: Row(children:[
+                  Icon(encaisse >= attendu && attendu > 0
+                      ? Icons.check_circle_rounded : Icons.hourglass_bottom_rounded,
+                      size: 20,
+                      color: encaisse >= attendu && attendu > 0 ? AppColors.green : AppColors.gold),
+                  const SizedBox(width:10),
+                  Expanded(child: Text(
+                      'Encaisse ce mois : ${fmtF(encaisse)} F  /  ${fmtF(attendu)} F attendus',
+                      style: TextStyle(fontSize:13, fontWeight: FontWeight.w800,
+                          color: encaisse >= attendu && attendu > 0 ? AppColors.green : AppColors.gold))),
+                ]),
+              ),
+              ...list.map((e){
+                final paye = payes[e.id];
+                return Container(
+                  margin: const EdgeInsets.only(bottom:10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(color: Colors.white,
+                      borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+                  child: Column(children:[
+                    Row(children:[
+                      Container(width:40,height:40,
+                          decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
+                          child: const Center(child: Icon(Icons.school_rounded, color: AppColors.green))),
+                      const SizedBox(width:12),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                        Text(e.nom, style: const TextStyle(fontSize:13.5, fontWeight: FontWeight.w700)),
+                        const SizedBox(height:2),
+                        Text('${e.nb} eleves${e.corrige ? ' (ajuste)' : ''}  x  ${fmtF(e.prix)} F',
+                            style: const TextStyle(fontSize:12, color: AppColors.textMuted)),
+                      ])),
+                      Text('${fmtF(e.total)} F',
+                          style: const TextStyle(fontSize:14, fontWeight: FontWeight.w800, color: AppColors.green)),
+                    ]),
+                    const SizedBox(height:10),
+                    Row(children:[
+                      // Badge du mois courant
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal:10, vertical:4),
+                        decoration: BoxDecoration(
+                            color: paye != null ? AppColors.greenBg : AppColors.goldBg,
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Text(paye != null
+                            ? 'Paye ✓  ${paye['numeroRecu'] ?? ''}'
+                            : 'En attente',
+                            style: TextStyle(fontSize:11, fontWeight: FontWeight.w800,
+                                color: paye != null ? AppColors.green : AppColors.gold))),
+                      const Spacer(),
+                      if (paye != null)
+                        TextButton.icon(
+                            style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact, foregroundColor: AppColors.blue),
+                            onPressed: () async {
+                              final bytes = await genererRecuPdf(paye);
+                              await Printing.sharePdf(bytes: bytes,
+                                  filename: '${paye['numeroRecu'] ?? 'recu'}.pdf');
+                            },
+                            icon: const Icon(Icons.receipt_long_rounded, size:16),
+                            label: const Text('Recu', style: TextStyle(fontSize:12))),
+                      TextButton.icon(
+                          style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact, foregroundColor: AppColors.green),
+                          onPressed: ()=> _encaisserDialog(e.id, e.nom, e.total),
+                          icon: const Icon(Icons.point_of_sale_rounded, size:16),
+                          label: const Text('Encaisser', style: TextStyle(fontSize:12))),
+                      IconButton(
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Ajuster le nombre d eleves',
+                          onPressed: ()=> _ajusterEcole(e.id, e.nom, e.nb, e.corrige),
+                          icon: const Icon(Icons.edit_rounded, size:18, color: AppColors.textMuted)),
+                    ]),
+                  ]),
+                );
+              }),
+            ]);
+          }),
+        const SizedBox(height:16),
+
+        SectionTitle('Derniers paiements'),
+        FutureBuilder<QuerySnapshot>(
+          future: FirebaseService.streamPaiements().first,
+          builder: (ctx, snap) {
+            if (!snap.hasData) return const Center(child:CircularProgressIndicator());
+            final docs = snap.data!.docs;
+            if (docs.isEmpty) {
+              return SCCard(child: const Text('Aucun paiement enregistre pour le moment.',
+                  style: TextStyle(color: AppColors.textMuted)));
+            }
+            return Column(children: docs.take(15).map((d){
+              final p = d.data() as Map<String,dynamic>;
+              return Container(
+                margin: const EdgeInsets.only(bottom:8),
+                padding: const EdgeInsets.symmetric(horizontal:12, vertical:10),
+                decoration: BoxDecoration(color: Colors.white,
+                    borderRadius: BorderRadius.circular(10), border: Border.all(color: AppColors.border)),
+                child: Row(children:[
+                  const Icon(Icons.receipt_long_rounded, size:18, color: AppColors.green),
+                  const SizedBox(width:10),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
+                    Text('${p['ecoleNom'] ?? ''} - ${p['moisLabel'] ?? ''}',
+                        style: const TextStyle(fontSize:12.5, fontWeight: FontWeight.w700)),
+                    Text('${p['numeroRecu'] ?? ''} · ${p['methode'] ?? ''} · ${p['dateStr'] ?? ''}',
+                        style: const TextStyle(fontSize:11, color: AppColors.textMuted)),
+                  ])),
+                  Text('${fmtF((p['montant'] as num?) ?? 0)} F',
+                      style: const TextStyle(fontSize:12.5, fontWeight: FontWeight.w800, color: AppColors.green)),
+                  IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Partager le recu',
+                      onPressed: () async {
+                        final bytes = await genererRecuPdf(p);
+                        await Printing.sharePdf(bytes: bytes,
+                            filename: '${p['numeroRecu'] ?? 'recu'}.pdf');
+                      },
+                      icon: const Icon(Icons.ios_share_rounded, size:16, color: AppColors.blue)),
+                ]),
+              );
+            }).toList());
           }),
         const SizedBox(height:16),
 
@@ -6311,8 +6679,8 @@ class _RevenusPageState extends State<RevenusPage> {
           Icon(Icons.info_outline_rounded, size:18, color: AppColors.blue),
           SizedBox(width:10),
           Expanded(child: Text(
-              'Revenu = somme des forfaits mensuels de toutes les ecoles. '
-              'Le paiement en ligne arrive bientot.',
+              'Encaissez le forfait des qu une ecole paie : un recu numerote est genere '
+              'et l historique est conserve. Le paiement en ligne arrive bientot.',
               style: TextStyle(fontSize:12, color: AppColors.textMuted))),
         ])),
       ]));

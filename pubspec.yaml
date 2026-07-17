@@ -51,9 +51,6 @@ dependencies:
   image_picker: ^1.1.2
   gal: ^2.3.0
 
-  # Notifications push (annonces aux familles)
-  firebase_messaging: ^16.0.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

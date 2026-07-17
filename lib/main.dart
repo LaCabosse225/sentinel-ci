@@ -6589,9 +6589,10 @@ class _RevenusPageState extends State<RevenusPage> {
                           style: const TextStyle(fontSize:14, fontWeight: FontWeight.w800, color: AppColors.green)),
                     ]),
                     const SizedBox(height:10),
-                    Row(children:[
-                      // Badge du mois courant
-                      Container(
+                    // Badge du mois courant (ligne 1)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
                         padding: const EdgeInsets.symmetric(horizontal:10, vertical:4),
                         decoration: BoxDecoration(
                             color: paye != null ? AppColors.greenBg : AppColors.goldBg,
@@ -6601,6 +6602,10 @@ class _RevenusPageState extends State<RevenusPage> {
                             : 'En attente',
                             style: TextStyle(fontSize:11, fontWeight: FontWeight.w800,
                                 color: paye != null ? AppColors.green : AppColors.gold))),
+                    ),
+                    const SizedBox(height:6),
+                    // Actions (ligne 2, alignées à droite)
+                    Row(children:[
                       const Spacer(),
                       if (paye != null)
                         TextButton.icon(

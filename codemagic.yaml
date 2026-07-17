@@ -27,7 +27,7 @@ workflows:
       - name: Recuperer les paquets
         script: flutter pub get
       - name: Build Web
-        script: flutter build web --release
+        script: flutter build web --release --no-web-resources-cdn
       - name: Compresser le site
         script: cd build && zip -r web_sentinel_ci.zip web
       - name: Deployer sur Firebase Hosting

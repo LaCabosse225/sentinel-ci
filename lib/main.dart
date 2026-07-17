@@ -218,17 +218,6 @@ String appreciationNote(double note, int sur) {
   return 'Performance remarquable';
 }
 
-// ---- ABONNEMENTS : forfaits & tarifs ----
-const Map<String,int> kForfaitPrix  = {'mensuel':2000, 'trimestriel':5000, 'annuel':10000};
-const Map<String,int> kForfaitJours = {'mensuel':30,   'trimestriel':90,   'annuel':365};
-const Map<String,String> kForfaitLabel = {'mensuel':'Mensuel', 'trimestriel':'Trimestriel', 'annuel':'Annuel'};
-
-// Prix d'un forfait avec réduction famille (-20% dès 2 enfants)
-int prixForfait(String forfait, int nbEnfants) {
-  final base = kForfaitPrix[forfait] ?? 0;
-  return nbEnfants >= 2 ? (base * 0.8).round() : base;
-}
-
 // ---- NOUVEAU MODÈLE : c'est l'ÉCOLE qui paie un forfait selon son nombre d'élèves ----
 // Tarif unique selon la taille (palier), par élève et par mois.
 //   1 à 200 élèves    -> 1000 F / élève
@@ -260,27 +249,6 @@ String libellePalier(int nb) {
   if (nb <= 200) return '1 a 200 eleves';
   if (nb <= 500) return '201 a 500 eleves';
   return 'plus de 500 eleves';
-}
-
-// Statut d'un abonnement (réutilisé : espace parent + tableau de bord directeur)
-({String label, Color color, Color bg, bool aJour}) statutAbo(Map<String,dynamic> abo) {
-  final finTs = abo['dateFin'];
-  if (finTs is! Timestamp) {
-    return (label:'Inconnu', color:AppColors.textMuted, bg:AppColors.bg, aJour:false);
-  }
-  final fin = finTs.toDate();
-  final type = abo['type'];
-  final now = DateTime.now();
-  final grace = fin.add(const Duration(days:14));
-  if (!now.isAfter(fin)) {
-    return type=='essai'
-      ? (label:'Essai gratuit', color:AppColors.blue, bg:AppColors.blueBg, aJour:true)
-      : (label:'Actif', color:AppColors.green, bg:AppColors.greenBg, aJour:true);
-  }
-  if (now.isBefore(grace)) {
-    return (label:'En relance', color:AppColors.orange, bg:AppColors.orangeBg, aJour:false);
-  }
-  return (label:'Acces limite', color:AppColors.red, bg:AppColors.redBg, aJour:false);
 }
 
 // Calcule (une fois) la liste classée des élèves d'une classe avec leur moyenne.
@@ -889,20 +857,6 @@ class FirebaseService {
 
   static Future<void> creerMatiere(Map<String, dynamic> data) =>
       _db.collection('matieres').add(data);
-
-  // ---- ABONNEMENTS ----
-  static Future<DocumentSnapshot> getAbonnement(String parentId) =>
-      _db.collection('abonnements').doc(parentId).get();
-
-  static Future<void> setAbonnement(String parentId, Map<String,dynamic> data) =>
-      _db.collection('abonnements').doc(parentId).set({
-        ...data,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-
-  // Tous les abonnements d'une école (tableau de bord directeur) — 1 filtre, pas d'index
-  static Future<QuerySnapshot> getAbonnementsEcole(String ecoleId) =>
-      _db.collection('abonnements').where('ecoleId', isEqualTo: ecoleId).get();
 
   // Crée un compte (eleve, prof ou parent) : connexion + fiche, SANS déconnecter l'admin.
   // 'champs' contient role, ecoleId et les champs propres au rôle.
@@ -2369,9 +2323,6 @@ class _InscriptionParentPageState extends State<InscriptionParentPage> {
                 ? const SizedBox(width:20, height:20, child: CircularProgressIndicator(color:Colors.white, strokeWidth:2))
                 : const Text('Creer mon compte et demarrer'),
           )),
-          const SizedBox(height: 10),
-          const Center(child: Text('Essai gratuit de 2 semaines inclus 🎁',
-              style: TextStyle(fontSize: 12, color: AppColors.textMuted))),
         ]),
       ),
     );
@@ -2551,8 +2502,6 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _idx = 0;
-  bool _accesLimite = false;   // parent dont l'abonnement a expiré (au-delà des relances)
-  String? _aboLabel;           // statut d'abonnement (parent)
 
   // Multi-enfants (parent)
   List<({String id, String nom, String? classeId})> _enfants = [];
@@ -2614,19 +2563,6 @@ class _MainShellState extends State<MainShell> {
     } catch (_) {}
   }
 
-  Future<void> _verifierAbonnement() async {
-    try {
-      final snap = await FirebaseService.getAbonnement(widget.user.uid);
-      if (snap.exists) {
-        final st = statutAbo(snap.data() as Map<String,dynamic>);
-        if (mounted) setState(() {
-          _aboLabel = st.label;
-          _accesLimite = st.label == 'Acces limite';
-        });
-      }
-    } catch (_) {}
-  }
-
   List<_NavItem> get _navItems {
     switch(widget.user.role){
       case UserRole.admin: return [
@@ -2650,7 +2586,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.edit_rounded,           'Notes'),
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
-        _NavItem(Icons.how_to_reg_rounded,     'Absences'),
+        _NavItem(Icons.how_to_reg_rounded,     'Absence'),
         _NavItem(Icons.menu_book_rounded,      'Lecons'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
@@ -2660,7 +2596,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.bar_chart_rounded,      'Notes'),
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
-        _NavItem(Icons.how_to_reg_rounded,     'Absences'),
+        _NavItem(Icons.how_to_reg_rounded,     'Absence'),
         _NavItem(Icons.menu_book_rounded,      'Cours'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
@@ -2778,31 +2714,6 @@ class _MainShellState extends State<MainShell> {
             child: Container(height:1, color:AppColors.border)),
       ),
       body: Column(children: [
-        // Bandeau de relance / accès limité (parent)
-        if (_aboLabel == 'En relance' || _aboLabel == 'Acces limite')
-          Material(
-            color: _accesLimite ? AppColors.redBg : AppColors.orangeBg,
-            child: InkWell(
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (_) => ParentAbonnementPage(user: _userEffectif))),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(children: [
-                  Icon(_accesLimite ? Icons.lock_outline_rounded : Icons.access_time_rounded,
-                      size: 18, color: _accesLimite ? AppColors.red : AppColors.orange),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(
-                      _accesLimite
-                          ? 'Abonnement expire. Regularisez pour retrouver le suivi de votre enfant.'
-                          : 'Votre abonnement arrive a echeance. Pensez a le renouveler.',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
-                          color: _accesLimite ? AppColors.red : AppColors.orange))),
-                  Icon(Icons.chevron_right_rounded, size: 18,
-                      color: _accesLimite ? AppColors.red : AppColors.orange),
-                ]),
-              ),
-            ),
-          ),
         // Sélecteur d'enfant (parent avec 2 enfants ou plus)
         if (widget.user.role == UserRole.parent && _enfants.length > 1)
           Container(
@@ -2829,11 +2740,9 @@ class _MainShellState extends State<MainShell> {
               ),
             ]),
           ),
-        // Contenu : barrière douce sur les onglets sensibles si accès limité (Accueil reste ouvert)
+        // Contenu
         Expanded(
-          child: (_accesLimite && _idx != 0)
-              ? _GateAbonnement(user: widget.user)
-              : _pages[_idx.clamp(0, _pages.length-1)],
+          child: _pages[_idx.clamp(0, _pages.length-1)],
         ),
       ]),
       bottomNavigationBar: NavigationBarTheme(
@@ -2862,41 +2771,6 @@ class _NavItem {
   final IconData icon;
   final String label;
   const _NavItem(this.icon, this.label);
-}
-
-// Barrière douce affichée au parent dont l'abonnement a expiré
-class _GateAbonnement extends StatelessWidget {
-  final AppUser user;
-  const _GateAbonnement({required this.user});
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 72, height: 72,
-              decoration: BoxDecoration(color: AppColors.redBg, borderRadius: BorderRadius.circular(20)),
-              child: const Icon(Icons.lock_outline_rounded, color: AppColors.red, size: 34)),
-          const SizedBox(height: 18),
-          const Text('Abonnement expire',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800), textAlign: TextAlign.center),
-          const SizedBox(height: 8),
-          const Text(
-              'Pour retrouver les notes, bulletins et le suivi de votre enfant, '
-              'reactivez votre abonnement. Votre enfant, lui, garde son acces.',
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4),
-              textAlign: TextAlign.center),
-          const SizedBox(height: 20),
-          SizedBox(width: double.infinity, child: ElevatedButton.icon(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => ParentAbonnementPage(user: user))),
-            icon: const Icon(Icons.card_membership_rounded, size: 18),
-            label: const Text('Voir mon abonnement'),
-          )),
-        ]),
-      ),
-    );
-  }
 }
 
 // ══════════════════════════════════════════
@@ -4187,176 +4061,6 @@ class BulletinPage extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════
-//  ABONNEMENT (espace parent)
-// ══════════════════════════════════════════
-class ParentAbonnementPage extends StatefulWidget {
-  final AppUser user;
-  const ParentAbonnementPage({super.key, required this.user});
-  @override State<ParentAbonnementPage> createState() => _ParentAbonnementPageState();
-}
-
-class _ParentAbonnementPageState extends State<ParentAbonnementPage> {
-  Map<String,dynamic>? _abo;
-  bool _loading = true;
-
-  @override
-  void initState() { super.initState(); _charger(); }
-
-  Future<void> _charger() async {
-    setState(()=>_loading = true);
-    final id = widget.user.uid;
-    var snap = await FirebaseService.getAbonnement(id);
-    if (!snap.exists) {
-      // Première visite : on démarre l'essai gratuit de 2 semaines
-      final now = DateTime.now();
-      await FirebaseService.setAbonnement(id, {
-        'parentId': id, 'ecoleId': widget.user.school,
-        'type': 'essai', 'forfait': null,
-        'dateDebut': Timestamp.fromDate(now),
-        'dateFin': Timestamp.fromDate(now.add(const Duration(days:14))),
-        'montant': 0, 'nbEnfants': widget.user.enfantsCount,
-      });
-      snap = await FirebaseService.getAbonnement(id);
-    }
-    if (mounted) setState((){ _abo = snap.data() as Map<String,dynamic>?; _loading = false; });
-  }
-
-  Future<void> _souscrire(String forfait) async {
-    final now = DateTime.now();
-    final fin = now.add(Duration(days: kForfaitJours[forfait]!));
-    await FirebaseService.setAbonnement(widget.user.uid, {
-      'parentId': widget.user.uid, 'ecoleId': widget.user.school,
-      'type': 'paye', 'forfait': forfait,
-      'dateDebut': Timestamp.fromDate(now),
-      'dateFin': Timestamp.fromDate(fin),
-      'montant': prixForfait(forfait, widget.user.enfantsCount),
-      'nbEnfants': widget.user.enfantsCount,
-    });
-    if (mounted) { showSnack(context, 'Abonnement ${kForfaitLabel[forfait]} active ! 🎉'); _charger(); }
-  }
-
-  String _d(DateTime x) => '${x.day.toString().padLeft(2,'0')}/${x.month.toString().padLeft(2,'0')}/${x.year}';
-
-  // Statut calculé à partir des dates
-  ({String label, Color color, Color bg, String detail, IconData icon}) _statut() {
-    final fin = (_abo!['dateFin'] as Timestamp).toDate();
-    final type = _abo!['type'];
-    final now = DateTime.now();
-    final grace = fin.add(const Duration(days:14));
-    if (!now.isAfter(fin)) {
-      if (type=='essai') {
-        return (label:'Essai gratuit', color:AppColors.blue, bg:AppColors.blueBg,
-            detail:'Profitez de Sentinel CI jusqu au ${_d(fin)}', icon:Icons.card_giftcard_rounded);
-      }
-      return (label:'Abonnement actif', color:AppColors.green, bg:AppColors.greenBg,
-          detail:'Valable jusqu au ${_d(fin)}', icon:Icons.verified_rounded);
-    }
-    if (now.isBefore(grace)) {
-      return (label:'En relance', color:AppColors.orange, bg:AppColors.orangeBg,
-          detail:'Regularisez avant le ${_d(grace)} pour garder votre acces', icon:Icons.access_time_rounded);
-    }
-    return (label:'Acces limite', color:AppColors.red, bg:AppColors.redBg,
-        detail:'Votre abonnement a expire. Reactivez pour retrouver tout le suivi.', icon:Icons.lock_outline_rounded);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final nb = widget.user.enfantsCount;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mon abonnement')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : (_abo == null
-            ? const Center(child: Text('Indisponible.'))
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  // Carte statut
-                  Builder(builder: (_) {
-                    final s = _statut();
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: s.bg, borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: s.color.withOpacity(0.4))),
-                      child: Row(children:[
-                        Icon(s.icon, color: s.color, size: 30),
-                        const SizedBox(width: 14),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
-                          Text(s.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: s.color)),
-                          const SizedBox(height: 3),
-                          Text(s.detail, style: const TextStyle(fontSize: 12.5, color: AppColors.textMain)),
-                          if (_abo!['type'] == 'paye' && _abo!['forfait'] != null) ...[
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-                              child: Text(
-                                  'Forfait ${kForfaitLabel[_abo!['forfait']] ?? _abo!['forfait']} · ${(_abo!['montant'] as num?)?.round() ?? 0} FCFA',
-                                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: s.color)),
-                            ),
-                          ],
-                        ])),
-                      ]),
-                    );
-                  }),
-                  const SizedBox(height: 20),
-
-                  Row(children:[
-                    const Expanded(child: SectionTitle('Choisir un forfait')),
-                    if (nb >= 2)
-                      Container(padding: const EdgeInsets.symmetric(horizontal:10, vertical:5),
-                          decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(20)),
-                          child: const Text('Famille -20% 🎉',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.green))),
-                  ]),
-                  const SizedBox(height: 4),
-
-                  ...['mensuel','trimestriel','annuel'].map((f){
-                    final prix = prixForfait(f, nb);
-                    final base = kForfaitPrix[f]!;
-                    final remise = nb >= 2;
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.border)),
-                      child: Row(children:[
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
-                          Text(kForfaitLabel[f]!, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 2),
-                          Row(children:[
-                            Text('${fmtF(prix)} FCFA', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.green)),
-                            if (remise) ...[
-                              const SizedBox(width: 8),
-                              Text('$base', style: const TextStyle(fontSize: 12, color: AppColors.textMuted,
-                                  decoration: TextDecoration.lineThrough)),
-                            ],
-                          ]),
-                        ])),
-                        ElevatedButton(
-                          onPressed: () => _souscrire(f),
-                          child: const Text('Souscrire'),
-                        ),
-                      ]),
-                    );
-                  }),
-
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(10)),
-                    child: const Text(
-                      'Le paiement en ligne (mobile money, carte) arrive bientot. '
-                      'Pour l instant, la souscription est activee immediatement (mode demo).',
-                      style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                  ),
-                ]))),
-    );
-  }
-}
-
-// ══════════════════════════════════════════
 //  ABONNEMENTS — TABLEAU DE BORD (directeur)
 // ══════════════════════════════════════════
 class AbonnementsDirecteurPage extends StatefulWidget {
@@ -4590,14 +4294,6 @@ class _MesEnfantsPageState extends State<MesEnfantsPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(padding: const EdgeInsets.all(16), children: [
-              if (_enfants.length >= 2)
-                Container(margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
-                    child: Row(children: const [
-                      Icon(Icons.celebration_rounded, color: AppColors.green, size: 20), SizedBox(width: 8),
-                      Expanded(child: Text('Reduction famille -20% active sur votre abonnement 🎉',
-                          style: TextStyle(color: AppColors.green, fontWeight: FontWeight.w700, fontSize: 12.5))),
-                    ])),
               ..._enfants.map((e) => Container(
                     margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),

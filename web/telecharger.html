@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1B9D21">
+  <meta name="description" content="Sentinel CI — Téléchargez l'application de suivi scolaire. Veiller, pas surveiller.">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Sentinel CI — Télécharger l'application</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(160deg, #1DAC27 0%, #1B9D21 45%, #0E6D14 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; color: #fff;
+    }
+    .carte { max-width: 420px; width: 100%; text-align: center; }
+    .logo { width: 110px; height: auto; filter: drop-shadow(0 6px 18px rgba(0,0,0,.25)); }
+    h1 { margin-top: 18px; font-size: 32px; letter-spacing: .5px; }
+    .slogan { margin-top: 6px; font-size: 15px; opacity: .92; }
+    .intro { margin: 22px 0 26px; font-size: 15px; line-height: 1.5; opacity: .95; }
+    .bouton {
+      display: flex; align-items: center; gap: 14px;
+      width: 100%; padding: 15px 20px; margin-bottom: 14px;
+      border-radius: 16px; text-decoration: none;
+      font-size: 17px; font-weight: bold;
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+      transition: transform .15s ease;
+    }
+    .bouton:active { transform: scale(.98); }
+    .bouton .ico { font-size: 24px; width: 30px; text-align: center; }
+    .bouton .txt { flex: 1; text-align: left; }
+    .bouton .sous { display: block; font-size: 12px; font-weight: normal; opacity: .75; margin-top: 2px; }
+    .web   { background: #ffffff; color: #0E6D14; }
+    .play  { background: #0E6D14; color: #ffffff; border: 1px solid rgba(255,255,255,.35); }
+    .apple { background: #1c1c1e; color: #ffffff; }
+    .bientot { opacity: .55; pointer-events: none; }
+    .badge {
+      font-size: 11px; font-weight: bold; padding: 3px 8px;
+      border-radius: 999px; background: #FFB800; color: #4a3200;
+      white-space: nowrap;
+    }
+    .pied { margin-top: 26px; font-size: 12px; opacity: .8; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="carte">
+    <img class="logo" src="splash_logo.png" alt="Sentinel CI">
+    <h1>Sentinel CI</h1>
+    <div class="slogan">Veiller, pas surveiller</div>
+
+    <p class="intro">
+      Suivez la scolarité de vos enfants en temps réel :
+      notes, devoirs, agenda, messages et alertes — où que vous soyez.
+    </p>
+
+    <a class="bouton web" href="/">
+      <span class="ico">🌐</span>
+      <span class="txt">Ouvrir l'application web
+        <span class="sous">Sans installation — fonctionne partout</span>
+      </span>
+    </a>
+
+    <a class="bouton play bientot" href="#">
+      <span class="ico">▶</span>
+      <span class="txt">Google Play
+        <span class="sous">Application Android</span>
+      </span>
+      <span class="badge">Bientôt</span>
+    </a>
+
+    <a class="bouton apple bientot" href="#">
+      <span class="ico"></span>
+      <span class="txt">App Store
+        <span class="sous">iPhone &amp; iPad</span>
+      </span>
+      <span class="badge">Bientôt</span>
+    </a>
+
+    <div class="pied">
+      Sentinel CI — Suivi scolaire en Côte d'Ivoire 🇨🇮<br>
+      Un seul lien à retenir : <strong>sentinel-ci-c7592.web.app</strong>
+    </div>
+  </div>
+</body>
+</html>

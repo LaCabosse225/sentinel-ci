@@ -19,6 +19,65 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gal/gal.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+
+// ── NOTIFICATIONS SONORES ──
+// Canal Android haute priorité : son, vibration et bannière qui surgit,
+// même quand l'application est ouverte. Les messages FCM reçus en arrière-plan
+// utilisent ce canal grâce au réglage ajouté dans AndroidManifest.xml.
+final FlutterLocalNotificationsPlugin kNotifLocales =
+    FlutterLocalNotificationsPlugin();
+
+const AndroidNotificationChannel kCanalImportant = AndroidNotificationChannel(
+  'sentinel_important',
+  'Alertes Sentinel CI',
+  description: 'Devoirs, notes, agenda, messages : alertes importantes.',
+  importance: Importance.max,
+  playSound: true,
+  enableVibration: true,
+  showBadge: true,
+);
+
+Future<void> initialiserNotificationsSonores() async {
+  if (kIsWeb) return;
+  try {
+    await kNotifLocales.initialize(const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher')));
+    await kNotifLocales
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(kCanalImportant);
+  } catch (e) {
+    print('Canal de notification indisponible : $e');
+  }
+}
+
+// Affiche une vraie notification (son + bannière) quand un message
+// push arrive alors que l'application est ouverte.
+void afficherNotificationSonore(String? titre, String? corps) {
+  if (kIsWeb) return;
+  try {
+    kNotifLocales.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      titre ?? 'Sentinel CI',
+      corps ?? '',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'sentinel_important',
+          'Alertes Sentinel CI',
+          channelDescription:
+              'Devoirs, notes, agenda, messages : alertes importantes.',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
+          icon: '@mipmap/ic_launcher',
+        ),
+      ),
+    );
+  } catch (_) {}
+}
 
 
 // ── Configuration Firebase pour la VERSION WEB (console Firebase, app Web) ──
@@ -48,6 +107,7 @@ const FirebaseOptions kFirebaseWebOptions = FirebaseOptions(
     } catch (e) {
       print('Erreur Firebase: $e');
     }
+    await initialiserNotificationsSonores();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     runApp(const SentinelCIApp());
   }
@@ -2693,11 +2753,11 @@ class _MainShellState extends State<MainShell> {
       await fm.subscribeToTopic('tous');
       await fm.subscribeToTopic('ecole_${propre(widget.user.school)}');
       await fm.subscribeToTopic('role_${widget.user.role.name}');
-      // App ouverte : on montre la notification en bandeau discret.
+      // App ouverte : vraie notification avec son et bannière (plus un simple bandeau).
       FirebaseMessaging.onMessage.listen((m) {
         final n = m.notification;
-        if (n != null && mounted) {
-          showSnack(context, '${n.title ?? 'Notification'}${(n.body ?? '').isNotEmpty ? ' - ${n.body}' : ''}');
+        if (n != null) {
+          afficherNotificationSonore(n.title, n.body);
         }
       });
     } catch (_) {

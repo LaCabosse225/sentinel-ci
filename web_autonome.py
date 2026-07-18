@@ -116,9 +116,16 @@ def principal() -> int:
         js = js.replace(prefixe, "/firebasejs/")
 
     # ---------- 2) POLICES GOOGLE (emojis, symboles) ----------
+    # Les adresses peuvent etre stockees en entier OU en morceaux
+    # (base + chemin relatif assembles au chargement) : on cherche les deux.
     urls_polices = set(
         re.findall(r"https://fonts\.gstatic\.com/s/[A-Za-z0-9/._-]+", js)
     )
+    chemins_relatifs = set(
+        re.findall(r"[a-z0-9]+/v[0-9]+/[A-Za-z0-9_-]+\.(?:woff2|ttf|otf)", js)
+    )
+    for chemin in chemins_relatifs:
+        urls_polices.add("https://fonts.gstatic.com/s/" + chemin)
     embarquees, ignorees = 0, 0
     for url in sorted(urls_polices):
         chemin_relatif = url.split("fonts.gstatic.com/s/", 1)[1]
@@ -130,6 +137,12 @@ def principal() -> int:
         os.makedirs(os.path.dirname(destination), exist_ok=True)
         try:
             donnees = telecharger(url)
+            # Controle d'integrite : etre sur que c'est bien une police.
+            if not (
+                donnees[:4] in (b"wOF2", b"wOFF", b"OTTO", b"true")
+                or donnees[:4] == b"\x00\x01\x00\x00"
+            ):
+                raise ValueError("le fichier recu n'est pas une police valide")
             with open(destination, "wb") as f:
                 f.write(donnees)
             embarquees += 1
@@ -137,7 +150,9 @@ def principal() -> int:
         except Exception as e:  # noqa: BLE001 - on continue, c'est cosmetique
             print(f"  AVERTISSEMENT : echec police {url} : {e}")
     js = js.replace("https://fonts.gstatic.com/s/", "/gfonts/")
-    print(f"Polices embarquees : {embarquees} (autres familles ignorees : {ignorees})")
+    print(f"BILAN POLICES : {embarquees} embarquee(s), {ignorees} famille(s) ignoree(s).")
+    if embarquees == 0:
+        print("ATTENTION : aucune police emoji embarquee — les emojis resteront en carres.")
 
     with open(MAIN, "w", encoding="utf-8") as f:
         f.write(js)

@@ -101,29 +101,12 @@ def principal() -> int:
 
         # Fichiers reellement references, en partant de main.dart.js
         # puis en suivant les imports internes (ex. firestore -> pipelines).
-        motif_fichier = re.compile(r"firebase-[a-z0-9-]+\.js")
-        necessaires = set(motif_fichier.findall(js))
-        # Sécurité : Firestore charge dynamiquement son module "pipelines".
-        if "firebase-firestore.js" in necessaires:
-            necessaires.add("firebase-firestore-pipelines.js")
-        if "firebase-firestore-lite.js" in necessaires:
-            necessaires.add("firebase-firestore-lite-pipelines.js")
-        if not necessaires:
-            # Adresse en morceaux : impossible de deviner les noms — on
-            # heberge TOUS les bundles du paquet npm (quelques Mo, sans danger).
-            necessaires = set(bundles.keys())
-            print("Noms de fichiers introuvables dans le JS : hebergement du jeu complet.")
-        a_examiner = list(necessaires)
-        while a_examiner:
-            fichier = a_examiner.pop()
-            contenu = bundles.get(fichier)
-            if contenu is None:
-                print(f"  AVERTISSEMENT : {fichier} absent du paquet npm.")
-                continue
-            for autre in motif_fichier.findall(contenu):
-                if autre not in necessaires:
-                    necessaires.add(autre)
-                    a_examiner.append(autre)
+        # On heberge TOUJOURS le jeu complet des bundles : les noms de
+        # fichiers peuvent etre ecrits en morceaux dans le JS compile,
+        # impossible de les deviner de facon fiable. Quelques Mo, zero risque.
+        necessaires = set(bundles.keys())
+        reperes = set(re.compile(r"firebase-[a-z0-9-]+\.js").findall(js))
+        print(f"Bundles heberges : {len(necessaires)} (dont {len(reperes)} reperes dans le JS).")
 
         # Hebergement MULTIPLE : /firebasejs/fichier.js ET
         # /firebasejs/<chaque version>/fichier.js — aucune porte ne reste vide.
@@ -146,10 +129,19 @@ def principal() -> int:
         js = js.replace(prefixe, "/firebasejs/")
         js = js.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")
 
-        # GARDE-FOU : si la brique centrale manque, on FAIT ECHOUER le build
+        # GARDE-FOU : si une brique vitale manque, on FAIT ECHOUER le build
         # (build rouge dans Codemagic) plutot que de casser le site en silence.
-        if not os.path.exists(os.path.join(dossier_fb, "firebase-app.js")):
-            print("ERREUR FATALE : firebase-app.js absent de l'hebergement — build stoppe.")
+        vitales = [
+            "firebase-app.js", "firebase-auth.js", "firebase-firestore.js",
+            "firebase-firestore-pipelines.js", "firebase-storage.js",
+            "firebase-messaging.js",
+        ]
+        manquantes = [
+            v for v in vitales
+            if not os.path.exists(os.path.join(dossier_fb, v))
+        ]
+        if manquantes:
+            print(f"ERREUR FATALE : briques manquantes {manquantes} — build stoppe.")
             return 1
 
     # ---------- 2) POLICES GOOGLE (emojis, symboles) ----------

@@ -2753,6 +2753,41 @@ class _MainShellState extends State<MainShell> {
       await fm.subscribeToTopic('tous');
       await fm.subscribeToTopic('ecole_${propre(widget.user.school)}');
       await fm.subscribeToTopic('role_${widget.user.role.name}');
+      // Canaux de classe : élèves et parents reçoivent les devoirs,
+      // cours et événements de LEUR classe uniquement (pas de spam).
+      try {
+        if (widget.user.role == UserRole.eleve &&
+            (widget.user.classeId ?? '').isNotEmpty) {
+          await fm.subscribeToTopic('classe_${propre(widget.user.classeId!)}');
+        }
+        if (widget.user.role == UserRole.parent) {
+          final enfants = await FirebaseService.getEnfants(widget.user.uid);
+          for (final e in enfants) {
+            if ((e.classeId ?? '').isNotEmpty) {
+              await fm.subscribeToTopic('classe_${propre(e.classeId!)}');
+            }
+          }
+        }
+      } catch (_) {}
+      // Carte d'identité push de cet appareil : les robots serveurs (Cloud
+      // Functions) l'utilisent pour les notifications ciblées (messages, notes).
+      try {
+        final token = await fm.getToken();
+        if (token != null && token.isNotEmpty) {
+          await FirebaseFirestore.instance
+              .collection('utilisateurs')
+              .doc(widget.user.uid)
+              .set({'fcmTokens': FieldValue.arrayUnion([token])},
+                  SetOptions(merge: true));
+        }
+        fm.onTokenRefresh.listen((t) {
+          FirebaseFirestore.instance
+              .collection('utilisateurs')
+              .doc(widget.user.uid)
+              .set({'fcmTokens': FieldValue.arrayUnion([t])},
+                  SetOptions(merge: true));
+        });
+      } catch (_) {}
       // App ouverte : vraie notification avec son et bannière (plus un simple bandeau).
       FirebaseMessaging.onMessage.listen((m) {
         final n = m.notification;

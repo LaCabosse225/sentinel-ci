@@ -14,6 +14,7 @@
 #   3. Met à jour l'empreinte de main.dart.js dans le service worker
 #      pour que la mise en cache reste cohérente.
 # ============================================================
+import glob
 import hashlib
 import io
 import json
@@ -55,12 +56,27 @@ def principal() -> int:
 
     # ---------- 1) FIREBASE ----------
     m = re.search(r"gstatic\.com/firebasejs/(\d+\.\d+\.\d+)/", js)
-    if not m:
-        print("Aucune reference Firebase trouvee dans main.dart.js — rien a faire ?")
-        version = None
-    else:
+    if m:
         version = m.group(1)
-        print(f"Version Firebase detectee : {version}")
+        print(f"Version Firebase detectee dans main.dart.js : {version}")
+    else:
+        # Adresse construite en morceaux : retrouver la version dans le
+        # code source du paquet firebase_core_web (pub-cache).
+        version = None
+        candidats = glob.glob(
+            os.path.expanduser(
+                "~/.pub-cache/hosted/*/firebase_core_web-*/lib/src/firebase_sdk_version.dart"
+            )
+        )
+        for c in sorted(candidats, reverse=True):
+            v = re.search(r"['\"](\d+\.\d+\.\d+)['\"]", open(c).read())
+            if v:
+                version = v.group(1)
+                print(f"Version Firebase detectee via pub-cache : {version}")
+                break
+        if not version:
+            print("ERREUR : version Firebase introuvable (ni dans le JS ni dans le pub-cache).")
+            return 1
 
     if version:
         prefixe = f"https://www.gstatic.com/firebasejs/{version}/"
@@ -92,6 +108,11 @@ def principal() -> int:
             necessaires.add("firebase-firestore-pipelines.js")
         if "firebase-firestore-lite.js" in necessaires:
             necessaires.add("firebase-firestore-lite-pipelines.js")
+        if not necessaires:
+            # Adresse en morceaux : impossible de deviner les noms — on
+            # heberge TOUS les bundles du paquet npm (quelques Mo, sans danger).
+            necessaires = set(bundles.keys())
+            print("Noms de fichiers introuvables dans le JS : hebergement du jeu complet.")
         a_examiner = list(necessaires)
         while a_examiner:
             fichier = a_examiner.pop()
@@ -104,16 +125,23 @@ def principal() -> int:
                     necessaires.add(autre)
                     a_examiner.append(autre)
 
+        # Hebergement DOUBLE : /firebasejs/fichier.js ET /firebasejs/<version>/fichier.js
+        # pour couvrir les deux facons dont l'adresse peut etre construite.
+        dossier_fb_v = os.path.join(dossier_fb, version)
+        os.makedirs(dossier_fb_v, exist_ok=True)
         for fichier in sorted(necessaires):
             contenu = bundles.get(fichier)
             if contenu is None:
                 continue
             contenu = contenu.replace(prefixe, "/firebasejs/")
-            with open(os.path.join(dossier_fb, fichier), "w", encoding="utf-8") as f:
-                f.write(contenu)
-            print(f"  Heberge : /firebasejs/{fichier}")
+            contenu = contenu.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")
+            for dossier in (dossier_fb, dossier_fb_v):
+                with open(os.path.join(dossier, fichier), "w", encoding="utf-8") as f:
+                    f.write(contenu)
+            print(f"  Heberge : /firebasejs/{fichier} (+ version {version})")
 
         js = js.replace(prefixe, "/firebasejs/")
+        js = js.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")
 
     # ---------- 2) POLICES GOOGLE (emojis, symboles) ----------
     # Les adresses peuvent etre stockees en entier OU en morceaux
@@ -122,7 +150,7 @@ def principal() -> int:
         re.findall(r"https://fonts\.gstatic\.com/s/[A-Za-z0-9/._-]+", js)
     )
     chemins_relatifs = set(
-        re.findall(r"[a-z0-9]+/v[0-9]+/[A-Za-z0-9_-]+\.(?:woff2|ttf|otf)", js)
+        re.findall(r"[a-z0-9]+/v[0-9]+/[A-Za-z0-9._-]+?\.(?:woff2|ttf|otf)", js)
     )
     for chemin in chemins_relatifs:
         urls_polices.add("https://fonts.gstatic.com/s/" + chemin)
@@ -164,7 +192,7 @@ def principal() -> int:
         with open(SW, encoding="utf-8") as f:
             sw = f.read()
         sw2, n = re.subn(
-            r'("main\.dart\.js"\s*:\s*")[0-9a-f]{32}(")',
+            r'(["\']main\.dart\.js["\']\s*:\s*["\'])[0-9a-f]{32}(["\'])',
             rf"\g<1>{empreinte}\g<2>",
             sw,
         )

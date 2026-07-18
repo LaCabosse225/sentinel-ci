@@ -12,7 +12,14 @@
         "destination": "/index.html"
       }
     ],
-    "cleanUrls": true
+    "cleanUrls": true,
+    "redirects": [
+      {
+        "regex": "^/firebasejs/\\d+\\.\\d+\\.\\d+/(?P<fichier>.+)$",
+        "destination": "/firebasejs/:fichier",
+        "type": 302
+      }
+    ]
   },
   "functions": {
     "source": "functions"

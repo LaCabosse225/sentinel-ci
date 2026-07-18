@@ -55,28 +55,28 @@ def principal() -> int:
         js = f.read()
 
     # ---------- 1) FIREBASE ----------
+    versions = []
     m = re.search(r"gstatic\.com/firebasejs/(\d+\.\d+\.\d+)/", js)
     if m:
-        version = m.group(1)
-        print(f"Version Firebase detectee dans main.dart.js : {version}")
-    else:
-        # Adresse construite en morceaux : retrouver la version dans le
-        # code source du paquet firebase_core_web (pub-cache).
-        version = None
-        candidats = glob.glob(
-            os.path.expanduser(
-                "~/.pub-cache/hosted/*/firebase_core_web-*/lib/src/firebase_sdk_version.dart"
-            )
+        versions.append(m.group(1))
+        print(f"Version Firebase detectee dans main.dart.js : {m.group(1)}")
+    # Toujours completer avec TOUTES les versions presentes dans le pub-cache :
+    # si plusieurs cohabitent, on heberge sous chacune (aucun risque de rater
+    # celle que l'application demandera au chargement).
+    candidats = glob.glob(
+        os.path.expanduser(
+            "~/.pub-cache/hosted/*/firebase_core_web-*/lib/src/firebase_sdk_version.dart"
         )
-        for c in sorted(candidats, reverse=True):
-            v = re.search(r"['\"](\d+\.\d+\.\d+)['\"]", open(c).read())
-            if v:
-                version = v.group(1)
-                print(f"Version Firebase detectee via pub-cache : {version}")
-                break
-        if not version:
-            print("ERREUR : version Firebase introuvable (ni dans le JS ni dans le pub-cache).")
-            return 1
+    )
+    for c in sorted(candidats, reverse=True):
+        v = re.search(r"['\"](\d+\.\d+\.\d+)['\"]", open(c).read())
+        if v and v.group(1) not in versions:
+            versions.append(v.group(1))
+            print(f"Version Firebase detectee via pub-cache : {v.group(1)}")
+    version = versions[0] if versions else None
+    if not version and "firebasejs" in js:
+        print("ERREUR : version Firebase introuvable (ni dans le JS ni dans le pub-cache).")
+        return 1
 
     if version:
         prefixe = f"https://www.gstatic.com/firebasejs/{version}/"
@@ -125,23 +125,32 @@ def principal() -> int:
                     necessaires.add(autre)
                     a_examiner.append(autre)
 
-        # Hebergement DOUBLE : /firebasejs/fichier.js ET /firebasejs/<version>/fichier.js
-        # pour couvrir les deux facons dont l'adresse peut etre construite.
-        dossier_fb_v = os.path.join(dossier_fb, version)
-        os.makedirs(dossier_fb_v, exist_ok=True)
+        # Hebergement MULTIPLE : /firebasejs/fichier.js ET
+        # /firebasejs/<chaque version>/fichier.js — aucune porte ne reste vide.
+        dossiers = [dossier_fb]
+        for v in versions:
+            d = os.path.join(dossier_fb, v)
+            os.makedirs(d, exist_ok=True)
+            dossiers.append(d)
         for fichier in sorted(necessaires):
             contenu = bundles.get(fichier)
             if contenu is None:
                 continue
             contenu = contenu.replace(prefixe, "/firebasejs/")
             contenu = contenu.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")
-            for dossier in (dossier_fb, dossier_fb_v):
+            for dossier in dossiers:
                 with open(os.path.join(dossier, fichier), "w", encoding="utf-8") as f:
                     f.write(contenu)
-            print(f"  Heberge : /firebasejs/{fichier} (+ version {version})")
+            print(f"  Heberge : /firebasejs/{fichier} (+ {len(versions)} version(s))")
 
         js = js.replace(prefixe, "/firebasejs/")
         js = js.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")
+
+        # GARDE-FOU : si la brique centrale manque, on FAIT ECHOUER le build
+        # (build rouge dans Codemagic) plutot que de casser le site en silence.
+        if not os.path.exists(os.path.join(dossier_fb, "firebase-app.js")):
+            print("ERREUR FATALE : firebase-app.js absent de l'hebergement — build stoppe.")
+            return 1
 
     # ---------- 2) POLICES GOOGLE (emojis, symboles) ----------
     # Les adresses peuvent etre stockees en entier OU en morceaux

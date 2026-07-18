@@ -60,4 +60,9 @@ workflows:
         script: |
           export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/cle_service_firebase.json"
           firebase deploy --only functions --project sentinel-ci-c7592 --non-interactive --force
+      - name: Autoriser les photos sur le site (reglage CORS)
+        script: |
+          export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/cle_service_firebase.json"
+          npm install --prefix reglages google-auth-library
+          node reglages/cors_storage.js
           rm -f "$CM_BUILD_DIR/cle_service_firebase.json"

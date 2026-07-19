@@ -596,21 +596,12 @@ Future<Uint8List> buildBulletinPdf({
       pw.Text('Bulletin scolaire', style: const pw.TextStyle(color: PdfColors.grey700)),
       pw.SizedBox(height: 16),
       pw.TableHelper.fromTextArray(
-        headers: ['Matiere', 'Moyenne /20', 'Signature du prof'],
-        data: matieres.map((m)=>[
-          m,
-          parMatiere[m]!.toStringAsFixed(2),
-          '', // case vide pour la signature manuscrite
-        ]).toList(),
+        headers: ['Matiere', 'Moyenne /20'],
+        data: matieres.map((m)=>[m, parMatiere[m]!.toStringAsFixed(2)]).toList(),
         headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
         headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
-        columnWidths: {
-          0: const pw.FlexColumnWidth(3),
-          1: const pw.FlexColumnWidth(2),
-          2: const pw.FlexColumnWidth(3),
-        },
-        cellAlignments: {0: pw.Alignment.centerLeft, 1: pw.Alignment.centerRight, 2: pw.Alignment.centerLeft},
-        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        cellAlignments: {0: pw.Alignment.centerLeft, 1: pw.Alignment.centerRight},
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       ),
       pw.SizedBox(height: 18),
       pw.Container(
@@ -674,15 +665,23 @@ Future<Uint8List> buildClassePdf({
       pw.Text('Classe : $classeNom', style: const pw.TextStyle(color: PdfColors.grey700)),
       pw.SizedBox(height: 14),
       pw.TableHelper.fromTextArray(
-        headers: ['Rang', 'Eleve', 'Moyenne /20'],
+        headers: ['Rang', 'Eleve', 'Moyenne /20', 'Signature du prof'],
         data: List.generate(eleves.length, (i)=>[
           '${i+1}', eleves[i].nom,
           eleves[i].moy > 0 ? eleves[i].moy.toStringAsFixed(2) : '-',
+          '', // case vide pour la signature manuscrite du prof de chaque matiere
         ]),
         headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
         headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
-        cellAlignments: {0: pw.Alignment.center, 1: pw.Alignment.centerLeft, 2: pw.Alignment.centerRight},
-        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        columnWidths: {
+          0: const pw.FlexColumnWidth(1),
+          1: const pw.FlexColumnWidth(3),
+          2: const pw.FlexColumnWidth(2),
+          3: const pw.FlexColumnWidth(3),
+        },
+        cellAlignments: {0: pw.Alignment.center, 1: pw.Alignment.centerLeft,
+            2: pw.Alignment.centerRight, 3: pw.Alignment.centerLeft},
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       ),
       pw.SizedBox(height: 16),
       pw.Text('Genere par Sentinel CI — Veiller, pas surveiller',
@@ -8045,7 +8044,7 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
         pw.Text('Classement general', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 6),
         pw.TableHelper.fromTextArray(
-          headers: ['Rang', 'Eleve', 'Moyenne /20', 'Nb notes', 'Signature du professeur'],
+          headers: ['Rang', 'Eleve', 'Moyenne /20', 'Nb notes'],
           headerStyle: enTete,
           cellAlignments: {0: pw.Alignment.center, 2: pw.Alignment.center, 3: pw.Alignment.center},
           cellHeight: 24,

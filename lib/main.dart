@@ -595,13 +595,27 @@ Future<Uint8List> buildBulletinPdf({
       pw.Text('Classe : $classeNom', style: const pw.TextStyle(color: PdfColors.grey700)),
       pw.Text('Bulletin scolaire', style: const pw.TextStyle(color: PdfColors.grey700)),
       pw.SizedBox(height: 16),
+      // Chaque prof de matiere signe devant sa ligne pour valider la moyenne
       pw.TableHelper.fromTextArray(
-        headers: ['Matiere', 'Moyenne /20'],
-        data: matieres.map((m)=>[m, parMatiere[m]!.toStringAsFixed(2)]).toList(),
+        headers: ['Matiere', 'Moyenne /20', 'Signature du prof de la matiere'],
+        data: matieres.map((m)=>[
+          m,
+          parMatiere[m]!.toStringAsFixed(2),
+          '', // case vide : signature manuscrite du prof
+        ]).toList(),
         headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
         headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
-        cellAlignments: {0: pw.Alignment.centerLeft, 1: pw.Alignment.centerRight},
-        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        columnWidths: {
+          0: const pw.FlexColumnWidth(2.5),
+          1: const pw.FlexColumnWidth(1.8),
+          2: const pw.FlexColumnWidth(3.5),
+        },
+        cellAlignments: {
+          0: pw.Alignment.centerLeft,
+          1: pw.Alignment.centerRight,
+          2: pw.Alignment.centerLeft,
+        },
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       ),
       pw.SizedBox(height: 18),
       pw.Container(
@@ -621,8 +635,17 @@ Future<Uint8List> buildBulletinPdf({
       pw.Text(appreciationDe(generale)),
       pw.Spacer(),
       pw.SizedBox(height: 24),
-      // Zone signature directeur
+      // Signatures : prof principal + directeur
       pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text('Signature du Prof. Principal',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+          pw.SizedBox(height: 40),
+          pw.Container(width: 160, height: 1, color: PdfColors.grey600),
+          pw.SizedBox(height: 4),
+          pw.Text('Date : ____/____/________',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        ]),
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
           pw.Text('Signature et cachet du Directeur',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
@@ -632,17 +655,8 @@ Future<Uint8List> buildBulletinPdf({
           pw.Text('Date : ____/____/________',
               style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
         ]),
-        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-          pw.Text('Vu par le parent / tuteur',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-          pw.SizedBox(height: 40),
-          pw.Container(width: 160, height: 1, color: PdfColors.grey600),
-          pw.SizedBox(height: 4),
-          pw.Text('Date : ____/____/________',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
-        ]),
       ]),
-      pw.Spacer(),
+      pw.SizedBox(height: 10),
       pw.Text('Genere par Sentinel CI - Veiller, pas surveiller',
           style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
     ]),

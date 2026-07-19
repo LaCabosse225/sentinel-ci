@@ -7667,7 +7667,7 @@ class _PhotoViewerState extends State<PhotoViewer> {
 
 
 // ══════════════════════════════════════════
-//  CLASSEMENT DE CLASSE (PROF) — temps reel + export PDF
+//  CLASSEMENT DE CLASSE (PROF) — temps reel + rapport PDF detaille
 // ══════════════════════════════════════════
 class ClassementClassePage extends StatefulWidget {
   final AppUser user;
@@ -7678,7 +7678,10 @@ class ClassementClassePage extends StatefulWidget {
 class _ClassementClassePageState extends State<ClassementClassePage> {
   String? _classe;
   Map<String, String> _nomsEleves = {};
+  final Map<String, String> _nomsClasses = {};
   bool _chargement = true;
+
+  String get _nomClasse => _nomsClasses[_classe] ?? _classe ?? '-';
 
   @override
   void initState() {
@@ -7686,7 +7689,26 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
     _classe = widget.user.classes.isNotEmpty
         ? widget.user.classes.first
         : widget.user.classeId;
+    _chargerNomsClasses();
     _chargerEleves();
+  }
+
+  // Vrais noms des classes (ex. « 6eme A ») a partir de leurs identifiants.
+  Future<void> _chargerNomsClasses() async {
+    final ids = widget.user.classes.isNotEmpty
+        ? widget.user.classes
+        : [if (widget.user.classeId != null) widget.user.classeId!];
+    for (final id in ids) {
+      try {
+        final d = await FirebaseFirestore.instance
+            .collection('classes').doc(id).get();
+        final data = d.data() ?? {};
+        _nomsClasses[id] = (data['nom'] ?? data['name'] ?? data['libelle'] ?? id).toString();
+      } catch (_) {
+        _nomsClasses[id] = id;
+      }
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _chargerEleves() async {
@@ -7706,11 +7728,12 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
     if (mounted) setState(() => _chargement = false);
   }
 
-  // Moyenne ponderee /20 par eleve, puis rang (ex-aequo partages).
+  // Moyenne ponderee /20 par eleve, rang (ex-aequo partages)
+  // + detail des notes de chaque eleve pour le rapport PDF.
   List<Map<String, dynamic>> _calculer(QuerySnapshot s) {
     final somme = <String, double>{};
     final poids = <String, double>{};
-    final nb = <String, int>{};
+    final details = <String, List<Map<String, dynamic>>>{};
     for (final d in s.docs) {
       final n = d.data() as Map<String, dynamic>;
       final id = (n['eleveId'] ?? '').toString();
@@ -7722,15 +7745,26 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
       final coef = (n['coefficient'] as num?)?.toDouble() ?? 1;
       somme[id] = (somme[id] ?? 0) + (note / sur) * 20 * coef;
       poids[id] = (poids[id] ?? 0) + coef;
-      nb[id] = (nb[id] ?? 0) + 1;
+      (details[id] ??= []).add({
+        'type': (n['type'] ?? 'Evaluation').toString(),
+        'note': note,
+        'sur': sur,
+        'coef': coef,
+        'appreciation': (n['appreciation'] ?? '').toString(),
+        'ts': (n['createdAt'] is Timestamp)
+            ? (n['createdAt'] as Timestamp).millisecondsSinceEpoch : 0,
+      });
     }
     final lignes = <Map<String, dynamic>>[];
     _nomsEleves.forEach((id, nom) {
       final p = poids[id] ?? 0;
+      final det = details[id] ?? [];
+      det.sort((a, b) => (a['ts'] as int).compareTo(b['ts'] as int));
       lignes.add({
         'nom': nom,
         'moyenne': p == 0 ? null : (somme[id]! / p),
-        'nb': nb[id] ?? 0,
+        'nb': det.length,
+        'notes': det,
       });
     });
     lignes.sort((a, b) {
@@ -7759,18 +7793,25 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
   Future<void> _exporterPdf(List<Map<String, dynamic>> lignes) async {
     final doc = pw.Document();
     final date = DateTime.now();
+    final enTete = pw.TextStyle(fontWeight: pw.FontWeight.bold);
     doc.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
+      footer: (c) => pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 6),
+          child: pw.Text('Genere par Sentinel CI - Veiller, pas surveiller',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey))),
       build: (c) => [
-        pw.Text('Sentinel CI — Classement de classe',
+        pw.Text('Sentinel CI - Classement de classe',
             style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 4),
-        pw.Text('Classe : ${_classe ?? '-'}    Matiere : ${widget.user.matiere ?? '-'}'),
+        pw.Text('Classe : $_nomClasse    Matiere : ${widget.user.matiere ?? '-'}'),
         pw.Text('Professeur : ${widget.user.name}    Date : ${date.day}/${date.month}/${date.year}'),
         pw.SizedBox(height: 12),
+        pw.Text('Classement general', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 6),
         pw.TableHelper.fromTextArray(
           headers: ['Rang', 'Eleve', 'Moyenne /20', 'Nb notes'],
-          headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          headerStyle: enTete,
           cellAlignments: {0: pw.Alignment.center, 2: pw.Alignment.center, 3: pw.Alignment.center},
           data: lignes.map((l) => [
             l['rang']?.toString() ?? '-',
@@ -7779,9 +7820,39 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
             l['nb'].toString(),
           ]).toList(),
         ),
-        pw.SizedBox(height: 10),
-        pw.Text('Genere par Sentinel CI — Veiller, pas surveiller',
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
+        pw.SizedBox(height: 16),
+        pw.Text('Detail par eleve', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+        for (final l in lignes) ...[
+          pw.SizedBox(height: 10),
+          pw.Text(
+              '${l['rang'] == null ? '-' : '${l['rang']}e'} - ${l['nom']} - Moyenne : ${l['moyenne'] == null ? 'aucune note' : '${(l['moyenne'] as double).toStringAsFixed(2)}/20'}',
+              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          if ((l['notes'] as List).isEmpty)
+            pw.Text('Aucune note enregistree.',
+                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey))
+          else
+            pw.TableHelper.fromTextArray(
+              headers: ['Evaluation', 'Note', 'Coef', 'Appreciation'],
+              headerStyle: enTete.copyWith(fontSize: 9),
+              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellAlignments: {1: pw.Alignment.center, 2: pw.Alignment.center},
+              columnWidths: {
+                0: const pw.FlexColumnWidth(2.2),
+                1: const pw.FlexColumnWidth(1.2),
+                2: const pw.FlexColumnWidth(0.8),
+                3: const pw.FlexColumnWidth(3.8),
+              },
+              data: (l['notes'] as List).map((n) => [
+                n['type'].toString(),
+                '${(n['note'] as double) % 1 == 0 ? (n['note'] as double).toInt() : n['note']}/${(n['sur'] as double) % 1 == 0 ? (n['sur'] as double).toInt() : n['sur']}',
+                (n['coef'] as double) % 1 == 0
+                    ? (n['coef'] as double).toInt().toString()
+                    : n['coef'].toString(),
+                (n['appreciation'] as String).isEmpty ? '-' : n['appreciation'],
+              ]).toList(),
+            ),
+        ],
       ],
     ));
     final bytes = await doc.save();
@@ -7795,7 +7866,7 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
         : [if (widget.user.classeId != null) widget.user.classeId!];
     return Scaffold(
       appBar: AppBar(
-          title: Text('Classement — ${widget.user.matiere ?? 'Ma matiere'}')),
+          title: Text('Classement - ${widget.user.matiere ?? 'Ma matiere'}')),
       body: _chargement
           ? const Center(child: CircularProgressIndicator())
           : Column(children: [
@@ -7807,7 +7878,8 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
                       decoration: const InputDecoration(
                           labelText: 'Classe', border: OutlineInputBorder()),
                       items: classes
-                          .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                          .map((c) => DropdownMenuItem(
+                              value: c, child: Text(_nomsClasses[c] ?? c)))
                           .toList(),
                       onChanged: (v) { _classe = v; _chargerEleves(); },
                     )),
@@ -7831,7 +7903,7 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                         child: Row(children: [
                           Expanded(child: Text(
-                              'Moyenne de classe : ${moyClasse == null ? '-' : moyClasse.toStringAsFixed(2)}/20',
+                              'Classe $_nomClasse - Moyenne : ${moyClasse == null ? '-' : moyClasse.toStringAsFixed(2)}/20',
                               style: const TextStyle(fontWeight: FontWeight.w800))),
                           Text('${_nomsEleves.length} eleve(s)',
                               style: const TextStyle(color: Colors.grey)),
@@ -7901,7 +7973,7 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
                                   ? null
                                   : () => _exporterPdf(lignes),
                               icon: const Icon(Icons.picture_as_pdf_rounded),
-                              label: const Text('Exporter en PDF (imprimer)'),
+                              label: const Text('Exporter le rapport PDF'),
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.green,
                                   foregroundColor: Colors.white,

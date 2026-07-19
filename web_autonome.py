@@ -197,7 +197,7 @@ def principal() -> int:
         with open(SW, encoding="utf-8") as f:
             sw = f.read()
         sw2, n = re.subn(
-            r'(["\']main\.dart\.js["\']\s*:\s*["\'])[0-9a-f]{32}(["\'])',
+            r'(["\']main\.dart\.js["\']\s*:\s*["\'])[^"\']+(["\'])',
             rf"\g<1>{empreinte}\g<2>",
             sw,
         )

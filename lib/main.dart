@@ -93,6 +93,69 @@ const FirebaseOptions kFirebaseWebOptions = FirebaseOptions(
   measurementId: 'G-4FJ1WY200C',
 );
 
+// ── PASTILLES ROUGES « du nouveau » ──
+// Chaque section memorise la derniere consultation ; un point rouge
+// apparait sur l'onglet des qu'un contenu plus recent existe.
+final ValueNotifier<int> kPastillesVersion = ValueNotifier<int>(0);
+
+Future<void> marquerSectionVue(String uid, String section) async {
+  try {
+    final p = await SharedPreferences.getInstance();
+    await p.setInt('vu_${section}_$uid', DateTime.now().millisecondsSinceEpoch);
+    kPastillesVersion.value++;
+  } catch (_) {}
+}
+
+int tsMaxDocs(QuerySnapshot s) {
+  int m = 0;
+  for (final d in s.docs) {
+    final data = d.data() as Map<String, dynamic>? ?? {};
+    for (final k in const ['createdAt', 'dateMAJ', 'updatedAt']) {
+      final v = data[k];
+      if (v is Timestamp) {
+        final t = v.millisecondsSinceEpoch;
+        if (t > m) m = t;
+      }
+    }
+  }
+  return m;
+}
+
+class IconePastille extends StatelessWidget {
+  final IconData icone;
+  final Query? requete;
+  final String uid;
+  final String section;
+  const IconePastille({super.key, required this.icone,
+      required this.requete, required this.uid, required this.section});
+
+  @override
+  Widget build(BuildContext context) {
+    if (requete == null) return Icon(icone);
+    return ValueListenableBuilder<int>(
+      valueListenable: kPastillesVersion,
+      builder: (_, __, ___) => FutureBuilder<SharedPreferences>(
+        future: SharedPreferences.getInstance(),
+        builder: (c, prefsSnap) {
+          final vu = prefsSnap.data?.getInt('vu_${section}_$uid') ?? 0;
+          return StreamBuilder<QuerySnapshot>(
+            stream: requete!.snapshots(),
+            builder: (c, s) {
+              final nouveau = s.hasData && tsMaxDocs(s.data!) > vu;
+              return Stack(clipBehavior: Clip.none, children: [
+                Icon(icone),
+                if (nouveau)
+                  Positioned(right: -2, top: -2,
+                      child: Container(width: 10, height: 10,
+                          decoration: const BoxDecoration(
+                              color: Colors.red, shape: BoxShape.circle))),
+              ]);
+            });
+        }),
+    );
+  }
+}
+
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -2035,7 +2098,7 @@ class _DemarrageGateState extends State<DemarrageGate> {
     if (_accepte == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    if (_accepte == true) return const LoginScreen();
+    if (_accepte == true) return const PorteSession();
     return ConsentScreen(onAccept: () async {
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -2217,6 +2280,49 @@ class SplashScreen extends StatelessWidget {
         )),
       ]),
     );
+  }
+}
+
+
+// ── SESSION PERSISTANTE ──
+// Si un compte est deja connecte sur cet appareil (web comme Android),
+// on entre directement dans l'application, sans re-saisir le mot de passe.
+// La deconnexion se fait par le bouton prevu a cet effet.
+class PorteSession extends StatefulWidget {
+  const PorteSession({super.key});
+  @override State<PorteSession> createState() => _PorteSessionState();
+}
+
+class _PorteSessionState extends State<PorteSession> {
+  AppUser? _user;
+  bool _pret = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _restaurer();
+  }
+
+  Future<void> _restaurer() async {
+    try {
+      final u = FirebaseAuth.instance.currentUser;
+      if (u != null) {
+        final p = await FirebaseService.getUserProfile(u.uid, u.email ?? '');
+        if (p != null) {
+          _user = await construireAppUser(p, u.uid, u.email ?? '');
+        }
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _pret = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_pret) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_user != null) return MainShell(user: _user!);
+    return const LoginScreen();
   }
 }
 
@@ -2810,6 +2916,28 @@ class _MainShellState extends State<MainShell> {
     } catch (_) {}
   }
 
+  // Requete « du nouveau ? » pour la pastille rouge d'un onglet (parents/eleves).
+  Query? _requetePastille(String label) {
+    final r = widget.user.role;
+    if (r != UserRole.parent && r != UserRole.eleve) return null;
+    final db = FirebaseFirestore.instance;
+    switch (label) {
+      case 'Notes':
+        final cible = r == UserRole.eleve ? widget.user.uid : widget.user.childId;
+        if (cible == null) return null;
+        return db.collection('notes').where('eleveId', isEqualTo: cible);
+      case 'Devoirs':
+        if ((widget.user.classeId ?? '').isEmpty) return null;
+        return db.collection('devoirs').where('classeId', isEqualTo: widget.user.classeId);
+      case 'Cours':
+        if ((widget.user.classeId ?? '').isEmpty) return null;
+        return db.collection('lecons').where('classeId', isEqualTo: widget.user.classeId);
+      case 'Agenda':
+        return db.collection('agenda').where('ecoleId', isEqualTo: widget.user.school);
+    }
+    return null;
+  }
+
   List<_NavItem> get _navItems {
     switch(widget.user.role){
       case UserRole.admin: return [
@@ -2945,6 +3073,12 @@ class _MainShellState extends State<MainShell> {
                   radius:16, backgroundColor:AppColors.green,
                   child: Text(widget.user.initials,
                       style:const TextStyle(color:Colors.white, fontSize:11, fontWeight:FontWeight.w800)))),
+          if (widget.user.role == UserRole.prof)
+            IconButton(
+              tooltip: 'Classement de ma classe',
+              icon: const Icon(Icons.leaderboard_rounded, size:20),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => ClassementClassePage(user: widget.user)))),
           IconButton(
               icon: const Icon(Icons.logout_rounded, size:20),
               onPressed: () async {
@@ -3002,12 +3136,19 @@ class _MainShellState extends State<MainShell> {
         ),
         child: NavigationBar(
           selectedIndex: _idx,
-          onDestinationSelected: (i) => setState(() => _idx = i.clamp(0, _pages.length-1)),
+          onDestinationSelected: (i) {
+            final idx = i.clamp(0, _pages.length-1);
+            marquerSectionVue(widget.user.uid, _navItems[idx].label);
+            setState(() => _idx = idx);
+          },
           backgroundColor: Colors.white,
           indicatorColor: AppColors.greenBg,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: _navItems.map((n) => NavigationDestination(
-              icon: Icon(n.icon), label: n.label)).toList(),
+              icon: IconePastille(icone: n.icon,
+                  requete: _requetePastille(n.label),
+                  uid: widget.user.uid, section: n.label),
+              label: n.label)).toList(),
         ),
       ),
     );
@@ -7523,3 +7664,257 @@ class _PhotoViewerState extends State<PhotoViewer> {
 // ══════════════════════════════════════════
 //  FIN DU FICHIER
 // ══════════════════════════════════════════
+
+
+// ══════════════════════════════════════════
+//  CLASSEMENT DE CLASSE (PROF) — temps reel + export PDF
+// ══════════════════════════════════════════
+class ClassementClassePage extends StatefulWidget {
+  final AppUser user;
+  const ClassementClassePage({super.key, required this.user});
+  @override State<ClassementClassePage> createState() => _ClassementClassePageState();
+}
+
+class _ClassementClassePageState extends State<ClassementClassePage> {
+  String? _classe;
+  Map<String, String> _nomsEleves = {};
+  bool _chargement = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _classe = widget.user.classes.isNotEmpty
+        ? widget.user.classes.first
+        : widget.user.classeId;
+    _chargerEleves();
+  }
+
+  Future<void> _chargerEleves() async {
+    setState(() => _chargement = true);
+    try {
+      final q = await FirebaseFirestore.instance.collection('utilisateurs')
+          .where('classeId', isEqualTo: _classe).get();
+      final m = <String, String>{};
+      for (final d in q.docs) {
+        final data = d.data();
+        if ((data['role'] ?? '') == 'eleve') {
+          m[d.id] = (data['nom'] ?? 'Eleve').toString();
+        }
+      }
+      _nomsEleves = m;
+    } catch (_) {}
+    if (mounted) setState(() => _chargement = false);
+  }
+
+  // Moyenne ponderee /20 par eleve, puis rang (ex-aequo partages).
+  List<Map<String, dynamic>> _calculer(QuerySnapshot s) {
+    final somme = <String, double>{};
+    final poids = <String, double>{};
+    final nb = <String, int>{};
+    for (final d in s.docs) {
+      final n = d.data() as Map<String, dynamic>;
+      final id = (n['eleveId'] ?? '').toString();
+      if (!_nomsEleves.containsKey(id)) continue;
+      final note = (n['note'] as num?)?.toDouble();
+      if (note == null) continue;
+      var sur = (n['sur'] as num?)?.toDouble() ?? 20;
+      if (sur <= 0) sur = 20;
+      final coef = (n['coefficient'] as num?)?.toDouble() ?? 1;
+      somme[id] = (somme[id] ?? 0) + (note / sur) * 20 * coef;
+      poids[id] = (poids[id] ?? 0) + coef;
+      nb[id] = (nb[id] ?? 0) + 1;
+    }
+    final lignes = <Map<String, dynamic>>[];
+    _nomsEleves.forEach((id, nom) {
+      final p = poids[id] ?? 0;
+      lignes.add({
+        'nom': nom,
+        'moyenne': p == 0 ? null : (somme[id]! / p),
+        'nb': nb[id] ?? 0,
+      });
+    });
+    lignes.sort((a, b) {
+      final ma = a['moyenne'] as double?;
+      final mb = b['moyenne'] as double?;
+      if (ma == null && mb == null) {
+        return (a['nom'] as String).compareTo(b['nom'] as String);
+      }
+      if (ma == null) return 1;
+      if (mb == null) return -1;
+      return mb.compareTo(ma);
+    });
+    int rang = 0;
+    double? prec;
+    int vus = 0;
+    for (final l in lignes) {
+      final m = l['moyenne'] as double?;
+      if (m == null) { l['rang'] = null; continue; }
+      vus++;
+      if (prec == null || (prec - m).abs() > 0.0001) { rang = vus; prec = m; }
+      l['rang'] = rang;
+    }
+    return lignes;
+  }
+
+  Future<void> _exporterPdf(List<Map<String, dynamic>> lignes) async {
+    final doc = pw.Document();
+    final date = DateTime.now();
+    doc.addPage(pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      build: (c) => [
+        pw.Text('Sentinel CI — Classement de classe',
+            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 4),
+        pw.Text('Classe : ${_classe ?? '-'}    Matiere : ${widget.user.matiere ?? '-'}'),
+        pw.Text('Professeur : ${widget.user.name}    Date : ${date.day}/${date.month}/${date.year}'),
+        pw.SizedBox(height: 12),
+        pw.TableHelper.fromTextArray(
+          headers: ['Rang', 'Eleve', 'Moyenne /20', 'Nb notes'],
+          headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          cellAlignments: {0: pw.Alignment.center, 2: pw.Alignment.center, 3: pw.Alignment.center},
+          data: lignes.map((l) => [
+            l['rang']?.toString() ?? '-',
+            l['nom'].toString(),
+            l['moyenne'] == null ? '-' : (l['moyenne'] as double).toStringAsFixed(2),
+            l['nb'].toString(),
+          ]).toList(),
+        ),
+        pw.SizedBox(height: 10),
+        pw.Text('Genere par Sentinel CI — Veiller, pas surveiller',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
+      ],
+    ));
+    final bytes = await doc.save();
+    await Printing.layoutPdf(onLayout: (_) async => bytes);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final classes = widget.user.classes.isNotEmpty
+        ? widget.user.classes
+        : [if (widget.user.classeId != null) widget.user.classeId!];
+    return Scaffold(
+      appBar: AppBar(
+          title: Text('Classement — ${widget.user.matiere ?? 'Ma matiere'}')),
+      body: _chargement
+          ? const Center(child: CircularProgressIndicator())
+          : Column(children: [
+              if (classes.length > 1)
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: DropdownButtonFormField<String>(
+                      value: _classe,
+                      decoration: const InputDecoration(
+                          labelText: 'Classe', border: OutlineInputBorder()),
+                      items: classes
+                          .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                          .toList(),
+                      onChanged: (v) { _classe = v; _chargerEleves(); },
+                    )),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('notes')
+                      .where('ecoleId', isEqualTo: widget.user.school)
+                      .where('matiere', isEqualTo: widget.user.matiere ?? '')
+                      .snapshots(),
+                  builder: (c, s) {
+                    if (!s.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final lignes = _calculer(s.data!);
+                    final avecMoy = lignes.where((l) => l['moyenne'] != null).toList();
+                    final moyClasse = avecMoy.isEmpty ? null
+                        : avecMoy.map((l) => l['moyenne'] as double)
+                            .reduce((a, b) => a + b) / avecMoy.length;
+                    return Column(children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        child: Row(children: [
+                          Expanded(child: Text(
+                              'Moyenne de classe : ${moyClasse == null ? '-' : moyClasse.toStringAsFixed(2)}/20',
+                              style: const TextStyle(fontWeight: FontWeight.w800))),
+                          Text('${_nomsEleves.length} eleve(s)',
+                              style: const TextStyle(color: Colors.grey)),
+                        ]),
+                      ),
+                      Expanded(
+                        child: lignes.isEmpty
+                            ? const Center(child: Text('Aucun eleve dans cette classe.'))
+                            : ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                                itemCount: lignes.length,
+                                itemBuilder: (c, i) {
+                                  final l = lignes[i];
+                                  final rang = l['rang'] as int?;
+                                  final couleur = rang == 1
+                                      ? const Color(0xFFFFB800)
+                                      : rang == 2
+                                          ? const Color(0xFF9E9E9E)
+                                          : rang == 3
+                                              ? const Color(0xFFB87333)
+                                              : AppColors.green;
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 10),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: AppColors.border)),
+                                    child: Row(children: [
+                                      Container(
+                                        width: 34, height: 34,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                            color: couleur.withOpacity(.15),
+                                            shape: BoxShape.circle),
+                                        child: Text(rang?.toString() ?? '-',
+                                            style: TextStyle(
+                                                color: couleur,
+                                                fontWeight: FontWeight.w800)),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(child: Text(l['nom'].toString(),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w600))),
+                                      Text(
+                                          l['moyenne'] == null
+                                              ? 'Aucune note'
+                                              : '${(l['moyenne'] as double).toStringAsFixed(2)}/20',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              color: l['moyenne'] == null
+                                                  ? Colors.grey
+                                                  : AppColors.green)),
+                                    ]),
+                                  );
+                                }),
+                      ),
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: lignes.isEmpty
+                                  ? null
+                                  : () => _exporterPdf(lignes),
+                              icon: const Icon(Icons.picture_as_pdf_rounded),
+                              label: const Text('Exporter en PDF (imprimer)'),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]);
+                  },
+                ),
+              ),
+            ]),
+    );
+  }
+}

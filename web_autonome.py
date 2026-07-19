@@ -119,12 +119,16 @@ def principal() -> int:
             contenu = bundles.get(fichier)
             if contenu is None:
                 continue
-            contenu = contenu.replace(prefixe, "/firebasejs/")
-            contenu = contenu.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")
+            # Imports RELATIFS ("./") : chaque emplacement (racine ou versionne)
+            # utilise SES propres copies. Plus jamais deux exemplaires du meme
+            # moteur charges en parallele (cause du bug « Component auth has
+            # not been registered yet »).
+            contenu = contenu.replace(prefixe, "./")
+            contenu = contenu.replace("https://www.gstatic.com/firebasejs/", "./")
             for dossier in dossiers:
                 with open(os.path.join(dossier, fichier), "w", encoding="utf-8") as f:
                     f.write(contenu)
-            print(f"  Heberge : /firebasejs/{fichier} (+ {len(versions)} version(s))")
+            print(f"  Heberge : /firebasejs/{fichier} (+ {len(versions)} version(s), imports relatifs)")
 
         js = js.replace(prefixe, "/firebasejs/")
         js = js.replace("https://www.gstatic.com/firebasejs/", "/firebasejs/")

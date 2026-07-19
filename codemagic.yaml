@@ -25,8 +25,9 @@ workflows:
         - firebase
     scripts:
       - name: Recuperer les paquets
-        script: flutter pub get
-      - name: Build Web
+        script: |
+          flutter pub cache repair
+          flutter pub get
         script: flutter build web --release --no-web-resources-cdn
       - name: Rendre le site autonome (anti-blocage operateurs)
         script: python3 web_autonome.py

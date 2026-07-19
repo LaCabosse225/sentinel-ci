@@ -96,6 +96,27 @@ const FirebaseOptions kFirebaseWebOptions = FirebaseOptions(
 // ── PASTILLES ROUGES « du nouveau » ──
 // Chaque section memorise la derniere consultation ; un point rouge
 // apparait sur l'onglet des qu'un contenu plus recent existe.
+// ── ECHEANCES ──
+String dateIsoDuJour() {
+  final n = DateTime.now();
+  return n.year.toString().padLeft(4, '0') + '-' +
+      n.month.toString().padLeft(2, '0') + '-' +
+      n.day.toString().padLeft(2, '0');
+}
+
+// Vrai si la date (format AAAA-MM-JJ) est strictement passee.
+// Les dates libres ('A definir'...) restent toujours visibles.
+bool echeancePassee(String? d) {
+  final t = (d ?? '').trim();
+  if (t.length != 10) return false;
+  return t.compareTo(dateIsoDuJour()) < 0;
+}
+
+// ASSISTANCE SENTINEL CI : remplacez par vos vraies coordonnees pro.
+const String kAssistanceTel = '+2250779546108';
+const String kAssistanceWhatsApp = '+2250779546108';
+const String kAssistanceEmail = 'yvanakre@gmail.com';
+
 final ValueNotifier<int> kPastillesVersion = ValueNotifier<int>(0);
 
 Future<void> marquerSectionVue(String uid, String section) async {
@@ -573,12 +594,21 @@ Future<Uint8List> buildBulletinPdf({
       pw.Text('Bulletin scolaire', style: const pw.TextStyle(color: PdfColors.grey700)),
       pw.SizedBox(height: 16),
       pw.TableHelper.fromTextArray(
-        headers: ['Matiere', 'Moyenne /20'],
-        data: matieres.map((m)=>[m, parMatiere[m]!.toStringAsFixed(2)]).toList(),
+        headers: ['Matiere', 'Moyenne /20', 'Signature du prof'],
+        data: matieres.map((m)=>[
+          m,
+          parMatiere[m]!.toStringAsFixed(2),
+          '', // case vide pour la signature manuscrite
+        ]).toList(),
         headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
         headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
-        cellAlignments: {0: pw.Alignment.centerLeft, 1: pw.Alignment.centerRight},
-        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        columnWidths: {
+          0: const pw.FlexColumnWidth(3),
+          1: const pw.FlexColumnWidth(2),
+          2: const pw.FlexColumnWidth(3),
+        },
+        cellAlignments: {0: pw.Alignment.centerLeft, 1: pw.Alignment.centerRight, 2: pw.Alignment.centerLeft},
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       ),
       pw.SizedBox(height: 18),
       pw.Container(
@@ -597,7 +627,30 @@ Future<Uint8List> buildBulletinPdf({
       pw.SizedBox(height: 4),
       pw.Text(appreciationDe(generale)),
       pw.Spacer(),
-      pw.Text('Genere par Sentinel CI — Veiller, pas surveiller',
+      pw.SizedBox(height: 24),
+      // Zone signature directeur
+      pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text('Signature et cachet du Directeur',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+          pw.SizedBox(height: 40),
+          pw.Container(width: 160, height: 1, color: PdfColors.grey600),
+          pw.SizedBox(height: 4),
+          pw.Text('Date : ____/____/________',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        ]),
+        pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text('Vu par le parent / tuteur',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+          pw.SizedBox(height: 40),
+          pw.Container(width: 160, height: 1, color: PdfColors.grey600),
+          pw.SizedBox(height: 4),
+          pw.Text('Date : ____/____/________',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        ]),
+      ]),
+      pw.Spacer(),
+      pw.Text('Genere par Sentinel CI - Veiller, pas surveiller',
           style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
     ]),
   ));
@@ -635,6 +688,16 @@ Future<Uint8List> buildClassePdf({
     ],
   ));
   return doc.save();
+}
+
+// Helper permettant de reconstruire un QuerySnapshot avec un sous-ensemble de docs.
+class _FakeQuerySnapshot implements QuerySnapshot<Map<String, dynamic>> {
+  final QuerySnapshot<Map<String, dynamic>> _base;
+  @override final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
+  _FakeQuerySnapshot(this._base, this.docs);
+  @override List<DocumentChange<Map<String, dynamic>>> get docChanges => [];
+  @override SnapshotMetadata get metadata => _base.metadata;
+  @override int get size => docs.length;
 }
 
 // ══════════════════════════════════════════
@@ -734,6 +797,10 @@ class FirebaseService {
   }
 
   // Stream devoirs
+  // Retourne la date du jour au format ISO (yyyy-MM-dd) pour les filtres.
+  static String get _aujourdhui =>
+      DateTime.now().toIso8601String().substring(0, 10);
+
   static Stream<QuerySnapshot> streamDevoirs(String ecoleId, String classe) =>
       _db.collection('devoirs')
           .where('ecoleId', isEqualTo: ecoleId)
@@ -745,7 +812,18 @@ class FirebaseService {
   static Stream<QuerySnapshot> streamDevoirsParClasse(String classeId) =>
       _db.collection('devoirs')
           .where('classeId', isEqualTo: classeId)
-          .snapshots();
+          .snapshots()
+          .map((s) {
+            // Filtrage cote client : on retire les devoirs dont l'echeance est depassee.
+            // (Pas de index composé necessaire.)
+            final today = _aujourdhui;
+            final docsFiltres = s.docs.where((d) {
+              final m = d.data() as Map;
+              final dt = (m['date'] ?? '').toString();
+              return dt.length == 10 && dt.compareTo(today) >= 0;
+            }).toList();
+            return _FakeQuerySnapshot(s, docsFiltres);
+          });
 
   // Récupère la classe d'un élève (pour le parent : la classe de son enfant)
   static Future<String?> getClasseIdEleve(String eleveUid) async {
@@ -780,6 +858,32 @@ class FirebaseService {
   static Stream<QuerySnapshot> streamAbsencesClasse(String classeId) =>
       _db.collection('absences')
           .where('classeId', isEqualTo: classeId)
+          .snapshots();
+
+  // ---- JUSTIFICATION D'ABSENCE (parent → école) ----
+  static Future<void> soumettreJustification(
+      String absenceId, String motif, String parentId) async {
+    await _db.collection('absences').doc(absenceId).update({
+      'justificationMotif': motif,
+      'justificationParentId': parentId,
+      'justificationDate': FieldValue.serverTimestamp(),
+      'statutJustif': 'en_attente', // l'admin/directeur/prof valide ensuite
+    });
+  }
+
+  static Future<void> validerJustification(
+      String absenceId, bool valide) async {
+    await _db.collection('absences').doc(absenceId).update({
+      'statutJustif': valide ? 'valide' : 'refuse',
+      'justifie': valide,
+      'validationDate': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Absences de l'enfant visible par le parent
+  static Stream<QuerySnapshot> streamAbsencesEnfant(String eleveId) =>
+      _db.collection('absences')
+          .where('eleveId', isEqualTo: eleveId)
           .snapshots();
 
   // ---- NOTES MANQUANTES : décision (absence justifiée / rattrapage) ----
@@ -1068,6 +1172,19 @@ class FirebaseService {
 
   static Future<void> supprimerEvenement(String id) =>
       _db.collection('agenda').doc(id).delete();
+
+  static Stream<QuerySnapshot> streamAgendaActif(String ecoleId) =>
+      _db.collection('agenda')
+          .where('ecoleId', isEqualTo: ecoleId)
+          .snapshots()
+          .map((s) {
+            final today = _aujourdhui;
+            return _FakeQuerySnapshot(s, s.docs.where((d) {
+              final m = d.data() as Map;
+              final dt = (m['date'] ?? '').toString();
+              return dt.length == 10 && dt.compareTo(today) >= 0;
+            }).toList());
+          });
 
   // Stream emploi du temps
   static Stream<QuerySnapshot> streamEmploiDuTemps(String ecoleId, String classe) =>
@@ -3272,6 +3389,81 @@ class DashboardPage extends StatelessWidget {
           const SizedBox(height: 12),
         ],
 
+        // Alerte "Devoir de maison a faire" (parent, echeance sous 2 jours)
+        if (user.role == UserRole.parent &&
+            (user.classeId ?? '').isNotEmpty && (user.childId ?? '').isNotEmpty)
+          StreamBuilder<QuerySnapshot>(
+              stream: FirebaseService.streamDevoirsParClasse(user.classeId!),
+              builder: (ctx, ds) {
+                if (!ds.hasData) return const SizedBox.shrink();
+                final limite = DateTime.now().add(const Duration(days: 2));
+                final isoLimite = limite.year.toString().padLeft(4, '0') + '-' +
+                    limite.month.toString().padLeft(2, '0') + '-' +
+                    limite.day.toString().padLeft(2, '0');
+                final urgents = ds.data!.docs.where((d) {
+                  final m = d.data() as Map;
+                  if ((m['typeDevoir'] ?? '') != 'Devoir de maison') return false;
+                  final dt = (m['date'] ?? '').toString();
+                  if (dt.length != 10) return false;
+                  if (echeancePassee(dt)) return false;
+                  if (dt.compareTo(isoLimite) > 0) return false;
+                  final faits = m['faits'];
+                  return !(faits is Map && faits[user.childId] == true);
+                }).toList();
+                if (urgents.isEmpty) return const SizedBox.shrink();
+                final premier = urgents.first.data() as Map;
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                      color: AppColors.orangeBg,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.orange)),
+                  child: Row(children: [
+                    const Icon(Icons.assignment_late_rounded, color: AppColors.orange),
+                    const SizedBox(width: 10),
+                    Expanded(
+                        child: Text(
+                            urgents.length == 1
+                                ? 'Devoir de maison a valider : ' +
+                                    (premier['titre'] ?? '').toString() +
+                                    ' (pour le ' + (premier['date'] ?? '').toString() + ')'
+                                : urgents.length.toString() +
+                                    ' devoirs de maison a valider avant leurs echeances',
+                            style: const TextStyle(fontSize: 12.5,
+                                fontWeight: FontWeight.w700, color: AppColors.orange))),
+                  ]),
+                );
+              }),
+
+        // Carte "Assistance" (tous les roles)
+        InkWell(
+          onTap: () => Navigator.push(context, MaterialPageRoute(
+              builder: (_) => const AssistancePage())),
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.border)),
+            child: const Row(children: [
+              Icon(Icons.support_agent_rounded, color: AppColors.green, size: 26),
+              SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Assistance',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+                Text('Un souci ? Notre equipe vous repond',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              ])),
+              Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+            ]),
+          ),
+        ),
+
         // Carte "Messages" (prof, directeur, élève, parent)
         if (user.role == UserRole.prof || user.role == UserRole.directeur ||
             user.role == UserRole.eleve || user.role == UserRole.parent) ...[
@@ -3492,7 +3684,10 @@ class DashboardPage extends StatelessWidget {
                   : StreamBuilder<QuerySnapshot>(
                       stream: FirebaseService.streamDevoirsParClasse(user.classeId!),
                       builder: (ctx, ds){
-                        final n = ds.hasData ? ds.data!.docs.length : null;
+                        final n = ds.hasData
+                            ? ds.data!.docs.where((d) =>
+                                !echeancePassee(((d.data() as Map)['date'])?.toString())).length
+                            : null;
                         return StatCard(value: n==null?'...':'$n', label:'Devoirs', sub:'A faire', icon:Icons.assignment_late_rounded, color:AppColors.orange, iconBg:AppColors.orangeBg);
                       }),
                 StreamBuilder<QuerySnapshot>(
@@ -4917,13 +5112,19 @@ class _DevoirsPageState extends State<DevoirsPage> {
               if (!snap.hasData || snap.data!.docs.isEmpty)
                 return SCCard(child: const Text('Aucun devoir publie.',
                     style:TextStyle(color:AppColors.textMuted)));
-              final docs = snap.data!.docs.toList()
+              // Les devoirs dont l'echeance est passee disparaissent d'eux-memes.
+              final docs = snap.data!.docs
+                  .where((d) => !echeancePassee(((d.data() as Map)['date'])?.toString()))
+                  .toList()
                 ..sort((a,b){
                   final ta = (a.data() as Map)['createdAt'];
                   final tb = (b.data() as Map)['createdAt'];
                   if (ta is Timestamp && tb is Timestamp) return tb.compareTo(ta);
                   return 0;
                 });
+              if (docs.isEmpty)
+                return SCCard(child: const Text('Aucun devoir en cours.',
+                    style:TextStyle(color:AppColors.textMuted)));
               return SCCard(child: Column(
                   children: docs.map((d) {
                     final data = d.data() as Map<String,dynamic>;
@@ -4942,6 +5143,36 @@ class _DevoirsPageState extends State<DevoirsPage> {
                           ])),
                           Text(data['date'] ?? '',
                               style:const TextStyle(fontSize:12, fontWeight:FontWeight.w700, color:AppColors.orange)),
+                          // Le PARENT valide qu'un devoir de maison a ete fait.
+                          if (widget.user.role == UserRole.parent &&
+                              (data['typeDevoir'] ?? '') == 'Devoir de maison' &&
+                              (widget.user.childId ?? '').isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Builder(builder: (ctx) {
+                                final fait = (data['faits'] is Map) &&
+                                    (data['faits'][widget.user.childId] == true);
+                                return InkWell(
+                                  onTap: () => FirebaseFirestore.instance
+                                      .collection('devoirs')
+                                      .doc(d.id)
+                                      .set({'faits': {widget.user.childId!: !fait}},
+                                          SetOptions(merge: true)),
+                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    Icon(
+                                        fait
+                                            ? Icons.check_circle_rounded
+                                            : Icons.radio_button_unchecked_rounded,
+                                        color: fait ? AppColors.green : AppColors.textMuted,
+                                        size: 22),
+                                    Text('Fait',
+                                        style: TextStyle(fontSize: 9.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: fait ? AppColors.green : AppColors.textMuted)),
+                                  ]),
+                                );
+                              }),
+                            ),
                         ]));
                   }).toList()));
             }),
@@ -7324,6 +7555,8 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
                     final estStaff = role==UserRole.admin || role==UserRole.directeur;
                     final visibles = snap.data!.docs.where((d){
                       final m = d.data() as Map;
+                      // Les evenements passes disparaissent d'eux-memes.
+                      if (echeancePassee((m['date'] ?? '').toString())) return false;
                       final portee = (m['portee'] ?? 'ecole').toString();
                       if (portee == 'ecole') return true;
                       if (estStaff) return true;
@@ -7810,14 +8043,23 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
         pw.Text('Classement general', style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 6),
         pw.TableHelper.fromTextArray(
-          headers: ['Rang', 'Eleve', 'Moyenne /20', 'Nb notes'],
+          headers: ['Rang', 'Eleve', 'Moyenne /20', 'Nb notes', 'Signature du professeur'],
           headerStyle: enTete,
           cellAlignments: {0: pw.Alignment.center, 2: pw.Alignment.center, 3: pw.Alignment.center},
+          cellHeight: 24,
+          columnWidths: {
+            0: const pw.FlexColumnWidth(0.8),
+            1: const pw.FlexColumnWidth(2.4),
+            2: const pw.FlexColumnWidth(1.3),
+            3: const pw.FlexColumnWidth(1.0),
+            4: const pw.FlexColumnWidth(2.2),
+          },
           data: lignes.map((l) => [
             l['rang']?.toString() ?? '-',
             l['nom'].toString(),
             l['moyenne'] == null ? '-' : (l['moyenne'] as double).toStringAsFixed(2),
             l['nb'].toString(),
+            '',
           ]).toList(),
         ),
         pw.SizedBox(height: 16),
@@ -7853,6 +8095,21 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
               ]).toList(),
             ),
         ],
+        pw.SizedBox(height: 30),
+        pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+          pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+            pw.Text('Le professeur',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 46),
+            pw.Container(width: 170, height: 0.8, color: PdfColors.grey700),
+          ]),
+          pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+            pw.Text('Le directeur (signature et cachet)',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 46),
+            pw.Container(width: 200, height: 0.8, color: PdfColors.grey700),
+          ]),
+        ]),
       ],
     ));
     final bytes = await doc.save();
@@ -7987,6 +8244,201 @@ class _ClassementClassePageState extends State<ClassementClassePage> {
                 ),
               ),
             ]),
+    );
+  }
+}
+
+
+
+// Marque un devoir de maison comme "fait" pour l'enfant du parent.
+Future<void> marquerDevoirFait(String devoirId, String childId, bool fait) async {
+  await FirebaseFirestore.instance.collection('devoirs').doc(devoirId)
+      .set({'faits': {childId: fait}}, SetOptions(merge: true));
+}
+
+// Carte devoir avec bouton "Fait" pour le parent.
+class ItemDevoirParent extends StatelessWidget {
+  final QueryDocumentSnapshot doc;
+  final String childId;
+  const ItemDevoirParent({super.key, required this.doc, required this.childId});
+
+  @override
+  Widget build(BuildContext context) {
+    final m = doc.data() as Map<String, dynamic>;
+    final fait = (m['faits'] is Map) && (m['faits'] as Map)[childId] == true;
+    final estDM = (m['typeDevoir'] ?? '').toString() == 'Devoir de maison';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+          color: fait ? const Color(0xFFEEFBEE) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+              color: fait ? AppColors.green : AppColors.border,
+              width: fait ? 1.5 : 1)),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                  color: estDM ? AppColors.orangeBg : AppColors.greenBg,
+                  borderRadius: BorderRadius.circular(6)),
+              child: Text(m['typeDevoir']?.toString() ?? 'Devoir',
+                  style: TextStyle(fontSize: 10,
+                      color: estDM ? AppColors.orange : AppColors.green,
+                      fontWeight: FontWeight.w700)),
+            ),
+            const SizedBox(width: 6),
+            Text(m['matiere']?.toString() ?? '',
+                style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+          ]),
+          const SizedBox(height: 6),
+          Text(m['titre']?.toString() ?? '',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text('Pour le ${m['date'] ?? ''}',
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        ])),
+        if (estDM)
+          GestureDetector(
+            onTap: () => marquerDevoirFait(doc.id, childId, !fait),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                  color: fait ? AppColors.green : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(fait ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                    size: 16, color: fait ? Colors.white : Colors.grey),
+                const SizedBox(width: 4),
+                Text(fait ? 'Fait' : 'A faire',
+                    style: TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700,
+                        color: fait ? Colors.white : Colors.grey)),
+              ]),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+
+// ══════════════════════════════════════════
+//  ASSISTANCE : appel, WhatsApp, email pro
+// ══════════════════════════════════════════
+class AssistancePage extends StatelessWidget {
+  const AssistancePage({super.key});
+
+  Future<void> _ouvrir(BuildContext context, Uri uri, String secours) async {
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && context.mounted) showSnack(context, secours);
+    } catch (_) {
+      if (context.mounted) showSnack(context, secours);
+    }
+  }
+
+  Widget _carte(BuildContext context,
+      {required IconData icone, required Color couleur,
+       required String titre, required String sousTitre,
+       required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border)),
+        child: Row(children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+                color: couleur.withOpacity(.12), shape: BoxShape.circle),
+            child: Icon(icone, color: couleur, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(titre, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(sousTitre, style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+          ])),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+        ]),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final numWhatsApp = kAssistanceWhatsApp.replaceAll(RegExp(r'[^0-9]'), '');
+    final messageWhatsApp =
+        Uri.encodeComponent("Bonjour, j'ai besoin d'aide sur Sentinel CI.");
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(title: const Text('Assistance')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+                colors: [Color(0xFF1DAC27), Color(0xFF0E6D14)],
+                begin: Alignment.topLeft, end: Alignment.bottomRight),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Column(children: [
+            Icon(Icons.support_agent_rounded, color: Colors.white, size: 46),
+            SizedBox(height: 8),
+            Text('Nous sommes la pour vous',
+                style: TextStyle(color: Colors.white, fontSize: 17,
+                    fontWeight: FontWeight.w800)),
+            SizedBox(height: 4),
+            Text('Une question, un souci, une suggestion ?',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 12.5, height: 1.4)),
+            Text("Contactez l'equipe Sentinel CI.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 12.5, height: 1.4)),
+          ]),
+        ),
+        _carte(context,
+            icone: Icons.call_rounded,
+            couleur: AppColors.green,
+            titre: "Appeler l'assistance",
+            sousTitre: kAssistanceTel,
+            onTap: () => _ouvrir(context,
+                Uri.parse('tel:' + kAssistanceTel.replaceAll(' ', '')),
+                'Appelez-nous : ' + kAssistanceTel)),
+        _carte(context,
+            icone: Icons.chat_rounded,
+            couleur: const Color(0xFF25D366),
+            titre: 'Ecrire sur WhatsApp',
+            sousTitre: kAssistanceWhatsApp,
+            onTap: () => _ouvrir(context,
+                Uri.parse('https://wa.me/' + numWhatsApp + '?text=' + messageWhatsApp),
+                'WhatsApp : ' + kAssistanceWhatsApp)),
+        _carte(context,
+            icone: Icons.mail_rounded,
+            couleur: const Color(0xFF1565C0),
+            titre: 'Envoyer un email',
+            sousTitre: kAssistanceEmail,
+            onTap: () => _ouvrir(context,
+                Uri(scheme: 'mailto', path: kAssistanceEmail,
+                    query: 'subject=Assistance Sentinel CI'),
+                'Ecrivez-nous : ' + kAssistanceEmail)),
+        const SizedBox(height: 8),
+        const Text('Sentinel CI - Veiller, pas surveiller',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
+      ]),
     );
   }
 }

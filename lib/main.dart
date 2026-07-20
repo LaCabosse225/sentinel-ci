@@ -7,7 +7,10 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html if (dart.library.io) 'dart:io';
+// Ouverture d'URL : implémentation conditionnelle web/mobile
+// (dart:html interdit sur Android, dart:io interdit sur web)
+import 'url_launcher_stub.dart'
+    if (dart.library.html) 'url_launcher_web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8370,22 +8373,9 @@ class AssistancePage extends StatelessWidget {
   const AssistancePage({super.key});
 
   Future<void> _ouvrir(BuildContext context, Uri uri, String secours) async {
-    // Sur le web : ouvre dans un nouvel onglet via javascript.
-    // Sur Android : affiche les coordonnees a copier (sans url_launcher,
-    // l'ouverture directe d'Intent n'est pas disponible en web build).
-    // Pour la V2, url_launcher sera ajoute proprement avec un lock file a jour.
-    if (kIsWeb) {
-      try {
-        // ignore: undefined_prefixed_name
-        // ignore: avoid_web_libraries_in_flutter
-        final ancre = html.AnchorElement(href: uri.toString())
-          ..setAttribute('target', '_blank')
-          ..click();
-      } catch (_) {
-        if (context.mounted) showSnack(context, secours);
-      }
-    } else {
-      // Android : on affiche les coordonnees dans un snackbar a copier
+    try {
+      await ouvrirUrlPlateforme(uri.toString());
+    } catch (_) {
       if (context.mounted) showSnack(context, secours);
     }
   }

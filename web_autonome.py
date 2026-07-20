@@ -191,7 +191,7 @@ def principal() -> int:
         f.write(js)
     print("main.dart.js reecrit : plus aucune adresse gstatic active.")
 
-    # ---------- 3) SERVICE WORKER (empreinte de main.dart.js) ----------
+    # ---------- 3) SERVICE WORKER (empreinte + casse-cache) ----------
     if os.path.exists(SW):
         empreinte = hashlib.md5(js.encode("utf-8")).hexdigest()
         with open(SW, encoding="utf-8") as f:
@@ -202,11 +202,18 @@ def principal() -> int:
             sw,
         )
         if n:
-            with open(SW, "w", encoding="utf-8") as f:
-                f.write(sw2)
             print(f"Service worker mis a jour ({n} empreinte(s) corrigee(s)).")
         else:
-            print("AVERTISSEMENT : empreinte main.dart.js introuvable dans le service worker.")
+            print("Empreinte main.dart.js absente du service worker (format recent).")
+        # CASSE-CACHE : on modifie TOUJOURS le service worker a chaque
+        # publication. Un service worker different force le navigateur a
+        # reinstaller la nouvelle version du site au prochain passage —
+        # fini les visiteurs bloques sur une ancienne version.
+        import time as _t
+        sw2 += "\n// publication sentinel " + str(int(_t.time())) + "\n"
+        with open(SW, "w", encoding="utf-8") as f:
+            f.write(sw2)
+        print("Casse-cache ajoute : les navigateurs se mettront a jour seuls.")
     else:
         print("Pas de flutter_service_worker.js — etape ignoree.")
 

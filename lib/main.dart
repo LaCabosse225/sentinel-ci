@@ -8496,6 +8496,13 @@ class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
   }
 
   Future<void> _basculer() async {
+    // DIAGNOSTIC : affiche l'identifiant utilise et l'issue de l'ecriture.
+    if (widget.childId.isEmpty) {
+      if (mounted) {
+        showSnack(context, 'DIAGNOSTIC : childId VIDE — le parent n a pas d enfant lie');
+      }
+      return;
+    }
     final nouveau = !_fait;
     setState(() {
       _fait = nouveau;
@@ -8505,16 +8512,15 @@ class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
       await FirebaseFirestore.instance
           .collection('devoirs')
           .doc(widget.devoirId)
-          .update({'faits.${widget.childId}': nouveau});
-    } catch (_) {
-      // Le champ 'faits' n'existe pas encore : on le cree.
-      try {
-        await FirebaseFirestore.instance
-            .collection('devoirs')
-            .doc(widget.devoirId)
-            .set({'faits': {widget.childId: nouveau}}, SetOptions(merge: true));
-      } catch (_) {
-        if (mounted) setState(() => _fait = !nouveau); // echec : on annule
+          .set({'faits': {widget.childId: nouveau}}, SetOptions(merge: true));
+      if (mounted) {
+        showSnack(context,
+            'DIAGNOSTIC OK : ecrit faits.${widget.childId} = $nouveau');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _fait = !nouveau);
+        showSnack(context, 'DIAGNOSTIC ECHEC : $e');
       }
     }
     if (mounted) setState(() => _enCours = false);

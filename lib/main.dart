@@ -159,13 +159,11 @@ class IconePastille extends StatelessWidget {
 
   bool _aNouveauDevoir(QuerySnapshot s) {
     // Pour l'onglet Devoirs : pastille rouge si au moins un devoir
-    // (DM ou surveille) n'est pas encore coche par cet enfant.
+    // (quel que soit son type) n'est pas encore coche par cet enfant.
     if (section != 'Devoirs' || childId == null) return false;
     final today = DateTime.now().toIso8601String().substring(0, 10);
     for (final d in s.docs) {
       final m = d.data() as Map<String, dynamic>? ?? {};
-      final type = (m['typeDevoir'] ?? '').toString();
-      if (type != 'Devoir de maison' && type != 'Devoir surveille') continue;
       final dt = (m['date'] ?? '').toString();
       if (dt.length == 10 && dt.compareTo(today) < 0) continue; // expire
       final faits = m['faits'];
@@ -5195,12 +5193,10 @@ class _DevoirsPageState extends State<DevoirsPage> {
                           ])),
                           Text(data['date'] ?? '',
                               style:const TextStyle(fontSize:12, fontWeight:FontWeight.w700, color:AppColors.orange)),
-                          // Le PARENT valide ses devoirs :
-                          // - Devoir de maison    → bouton « Fait »
-                          // - Devoir surveille    → bouton « Révisé »
+                          // Le PARENT valide chaque devoir :
+                          // - Devoir de maison              → bouton « Fait »
+                          // - Devoir programme/Interrogation → bouton « Révisé »
                           if (widget.user.role == UserRole.parent &&
-                              ((data['typeDevoir'] ?? '') == 'Devoir de maison' ||
-                               (data['typeDevoir'] ?? '') == 'Devoir surveille') &&
                               (widget.user.childId ?? '').isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(left: 8),

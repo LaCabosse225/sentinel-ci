@@ -3404,53 +3404,61 @@ class DashboardPage extends StatelessWidget {
           const SizedBox(height: 12),
         ],
 
-        // Alerte "Devoir de maison a faire" (parent, echeance sous 2 jours)
+        // Alerte "Devoir de maison a faire" (parent, echeance sous 3 jours)
         if (user.role == UserRole.parent &&
-            (user.classeId ?? '').isNotEmpty && (user.childId ?? '').isNotEmpty)
-          StreamBuilder<QuerySnapshot>(
-              stream: FirebaseService.streamDevoirsParClasse(user.classeId!),
-              builder: (ctx, ds) {
-                if (!ds.hasData) return const SizedBox.shrink();
-                final limite = DateTime.now().add(const Duration(days: 2));
-                final isoLimite = limite.year.toString().padLeft(4, '0') + '-' +
-                    limite.month.toString().padLeft(2, '0') + '-' +
-                    limite.day.toString().padLeft(2, '0');
-                final urgents = ds.data!.docs.where((d) {
-                  final m = d.data() as Map;
-                  if ((m['typeDevoir'] ?? '') != 'Devoir de maison') return false;
-                  final dt = (m['date'] ?? '').toString();
-                  if (dt.length != 10) return false;
-                  if (echeancePassee(dt)) return false;
-                  if (dt.compareTo(isoLimite) > 0) return false;
-                  final faits = m['faits'];
-                  return !(faits is Map && faits[user.childId] == true);
-                }).toList();
-                if (urgents.isEmpty) return const SizedBox.shrink();
-                final premier = urgents.first.data() as Map;
-                return Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                      color: AppColors.orangeBg,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.orange)),
-                  child: Row(children: [
-                    const Icon(Icons.assignment_late_rounded, color: AppColors.orange),
-                    const SizedBox(width: 10),
-                    Expanded(
-                        child: Text(
-                            urgents.length == 1
-                                ? 'Devoir de maison a valider : ' +
-                                    (premier['titre'] ?? '').toString() +
-                                    ' (pour le ' + (premier['date'] ?? '').toString() + ')'
-                                : urgents.length.toString() +
-                                    ' devoirs de maison a valider avant leurs echeances',
-                            style: const TextStyle(fontSize: 12.5,
-                                fontWeight: FontWeight.w700, color: AppColors.orange))),
-                  ]),
-                );
-              }),
+            (user.childId ?? '').isNotEmpty)
+          FutureBuilder<String?>(
+            future: (user.classeId ?? '').isNotEmpty
+                ? Future.value(user.classeId)
+                : FirebaseService.getClasseIdEleve(user.childId!),
+            builder: (ctx, snapClasse) {
+              final classeId = snapClasse.data;
+              if (classeId == null || classeId.isEmpty) return const SizedBox.shrink();
+              return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseService.streamDevoirsParClasse(classeId),
+                  builder: (ctx, ds) {
+                    if (!ds.hasData) return const SizedBox.shrink();
+                    final limite = DateTime.now().add(const Duration(days: 3));
+                    final isoLimite = limite.year.toString().padLeft(4, '0') + '-' +
+                        limite.month.toString().padLeft(2, '0') + '-' +
+                        limite.day.toString().padLeft(2, '0');
+                    final urgents = ds.data!.docs.where((d) {
+                      final m = d.data() as Map;
+                      if ((m['typeDevoir'] ?? '') != 'Devoir de maison') return false;
+                      final dt = (m['date'] ?? '').toString();
+                      if (dt.length != 10) return false;
+                      if (dt.compareTo(isoLimite) > 0) return false;
+                      final faits = m['faits'];
+                      return !(faits is Map && faits[user.childId] == true);
+                    }).toList();
+                    if (urgents.isEmpty) return const SizedBox.shrink();
+                    final premier = urgents.first.data() as Map;
+                    return Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                          color: AppColors.orangeBg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.orange)),
+                      child: Row(children: [
+                        const Icon(Icons.assignment_late_rounded, color: AppColors.orange),
+                        const SizedBox(width: 10),
+                        Expanded(
+                            child: Text(
+                                urgents.length == 1
+                                    ? '⚠️ Devoir de maison a valider : ' +
+                                        (premier['titre'] ?? '').toString() +
+                                        ' (pour le ' + (premier['date'] ?? '').toString() + ')'
+                                    : '⚠️ ' + urgents.length.toString() +
+                                        ' devoirs de maison a valider avant leurs echeances',
+                                style: const TextStyle(fontSize: 12.5,
+                                    fontWeight: FontWeight.w700, color: AppColors.orange))),
+                      ]),
+                    );
+                  });
+            },
+          ),
 
         // Carte "Assistance" (tous les roles)
         InkWell(
@@ -5164,29 +5172,43 @@ class _DevoirsPageState extends State<DevoirsPage> {
                               (widget.user.childId ?? '').isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
-                              child: Builder(builder: (ctx) {
-                                final fait = (data['faits'] is Map) &&
-                                    (data['faits'][widget.user.childId] == true);
-                                return InkWell(
-                                  onTap: () => FirebaseFirestore.instance
-                                      .collection('devoirs')
-                                      .doc(d.id)
-                                      .set({'faits': {widget.user.childId!: !fait}},
-                                          SetOptions(merge: true)),
-                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                    Icon(
-                                        fait
-                                            ? Icons.check_circle_rounded
-                                            : Icons.radio_button_unchecked_rounded,
-                                        color: fait ? AppColors.green : AppColors.textMuted,
-                                        size: 22),
-                                    Text('Fait',
-                                        style: TextStyle(fontSize: 9.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: fait ? AppColors.green : AppColors.textMuted)),
-                                  ]),
-                                );
-                              }),
+                              child: StreamBuilder<DocumentSnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('devoirs').doc(d.id).snapshots(),
+                                builder: (ctx, snap) {
+                                  final live = snap.data?.data() as Map? ?? data;
+                                  final fait = (live['faits'] is Map) &&
+                                      (live['faits'][widget.user.childId] == true);
+                                  return InkWell(
+                                    onTap: () => FirebaseFirestore.instance
+                                        .collection('devoirs')
+                                        .doc(d.id)
+                                        .set({'faits': {widget.user.childId!: !fait}},
+                                            SetOptions(merge: true)),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                          color: fait ? AppColors.green : Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(8)),
+                                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                        Icon(
+                                            fait
+                                                ? Icons.check_circle_rounded
+                                                : Icons.radio_button_unchecked_rounded,
+                                            color: fait ? Colors.white : Colors.grey,
+                                            size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(fait ? 'Fait' : 'A faire',
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: fait ? Colors.white : Colors.grey)),
+                                      ]),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                         ]));
                   }).toList()));

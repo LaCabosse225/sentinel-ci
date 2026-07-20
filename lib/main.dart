@@ -8496,13 +8496,7 @@ class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
   }
 
   Future<void> _basculer() async {
-    // DIAGNOSTIC : affiche l'identifiant utilise et l'issue de l'ecriture.
-    if (widget.childId.isEmpty) {
-      if (mounted) {
-        showSnack(context, 'DIAGNOSTIC : childId VIDE — le parent n a pas d enfant lie');
-      }
-      return;
-    }
+    if (widget.childId.isEmpty) return;
     final nouveau = !_fait;
     setState(() {
       _fait = nouveau;
@@ -8513,14 +8507,10 @@ class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
           .collection('devoirs')
           .doc(widget.devoirId)
           .set({'faits': {widget.childId: nouveau}}, SetOptions(merge: true));
-      if (mounted) {
-        showSnack(context,
-            'DIAGNOSTIC OK : ecrit faits.${widget.childId} = $nouveau');
-      }
     } catch (e) {
       if (mounted) {
         setState(() => _fait = !nouveau);
-        showSnack(context, 'DIAGNOSTIC ECHEC : $e');
+        showSnack(context, 'Enregistrement impossible, reessayez.');
       }
     }
     if (mounted) setState(() => _enCours = false);

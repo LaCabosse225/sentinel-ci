@@ -8,11 +8,22 @@
     ],
     "rewrites": [
       {
+        "source": "/app",
+        "destination": "/index.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ],
-    "cleanUrls": true
+    "cleanUrls": true,
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/telecharger",
+        "type": 302
+      }
+    ]
   },
   "functions": {
     "source": "functions"

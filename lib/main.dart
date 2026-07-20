@@ -164,8 +164,8 @@ class IconePastille extends StatelessWidget {
     final today = DateTime.now().toIso8601String().substring(0, 10);
     for (final d in s.docs) {
       final m = d.data() as Map<String, dynamic>? ?? {};
-      final dt = (m['date'] ?? '').toString();
-      if (dt.length == 10 && dt.compareTo(today) < 0) continue; // expire
+      final iso = FirebaseService.isoDe((m['date'] ?? '').toString());
+      if (iso.isEmpty || iso.compareTo(today) < 0) continue; // expire/inconnu
       final faits = m['faits'];
       if (!(faits is Map && faits[childId] == true)) return true;
     }
@@ -838,6 +838,17 @@ class FirebaseService {
   static String get _aujourdhui =>
       DateTime.now().toIso8601String().substring(0, 10);
 
+  // Normalise une date 'JJ/MM/AAAA' ou 'AAAA-MM-JJ' en ISO comparable.
+  // Retourne '' si le format est inconnu (la date est alors ignoree).
+  static String isoDe(String d) {
+    if (d.length != 10) return '';
+    if (d[4] == '-') return d;
+    if (d[2] == '/' && d[5] == '/') {
+      return d.substring(6) + '-' + d.substring(3, 5) + '-' + d.substring(0, 2);
+    }
+    return '';
+  }
+
   static Stream<QuerySnapshot> streamDevoirs(String ecoleId, String classe) =>
       _db.collection('devoirs')
           .where('ecoleId', isEqualTo: ecoleId)
@@ -856,8 +867,8 @@ class FirebaseService {
             final today = _aujourdhui;
             final docsFiltres = s.docs.where((d) {
               final m = d.data() as Map;
-              final dt = (m['date'] ?? '').toString();
-              return dt.length == 10 && dt.compareTo(today) >= 0;
+              final iso = isoDe((m['date'] ?? '').toString());
+              return iso.isNotEmpty && iso.compareTo(today) >= 0;
             }).toList();
             return _FakeQuerySnapshot(s, docsFiltres);
           });
@@ -1218,8 +1229,8 @@ class FirebaseService {
             final today = _aujourdhui;
             return _FakeQuerySnapshot(s, s.docs.where((d) {
               final m = d.data() as Map;
-              final dt = (m['date'] ?? '').toString();
-              return dt.length == 10 && dt.compareTo(today) >= 0;
+              final iso = isoDe((m['date'] ?? '').toString());
+              return iso.isNotEmpty && iso.compareTo(today) >= 0;
             }).toList());
           });
 
@@ -3452,9 +3463,9 @@ class DashboardPage extends StatelessWidget {
                     final urgents = ds.data!.docs.where((d) {
                       final m = d.data() as Map;
                       if ((m['typeDevoir'] ?? '') != 'Devoir de maison') return false;
-                      final dt = (m['date'] ?? '').toString();
-                      if (dt.length != 10) return false;
-                      if (dt.compareTo(isoLimite) > 0) return false;
+                      final iso = FirebaseService.isoDe((m['date'] ?? '').toString());
+                      if (iso.isEmpty) return false;
+                      if (iso.compareTo(isoLimite) > 0) return false;
                       final faits = m['faits'];
                       return !(faits is Map && faits[user.childId] == true);
                     }).toList();
@@ -8565,7 +8576,9 @@ class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
               color: _fait ? Colors.white : Colors.grey,
               size: 16),
           const SizedBox(width: 4),
-          Text(_fait ? widget.label : 'A faire',
+          Text(_fait
+              ? widget.label
+              : (widget.label == 'Fait' ? 'A faire' : 'A réviser'),
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,

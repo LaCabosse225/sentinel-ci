@@ -118,9 +118,9 @@ bool echeancePassee(String? d) {
 }
 
 // ASSISTANCE SENTINEL CI : remplacez par vos vraies coordonnees pro.
-const String kAssistanceTel = '+2250779546108';
-const String kAssistanceWhatsApp = '+2250779546108';
-const String kAssistanceEmail = 'yvanakre@gmail.com';
+const String kAssistanceTel = '+2250104965555';
+const String kAssistanceWhatsApp = '+2250104965555';
+const String kAssistanceEmail = 'assistance@sentinel.ci';
 
 final ValueNotifier<int> kPastillesVersion = ValueNotifier<int>(0);
 

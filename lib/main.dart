@@ -5175,42 +5175,11 @@ class _DevoirsPageState extends State<DevoirsPage> {
                               (widget.user.childId ?? '').isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
-                              child: StreamBuilder<DocumentSnapshot>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('devoirs').doc(d.id).snapshots(),
-                                builder: (ctx, snap) {
-                                  final live = snap.data?.data() as Map? ?? data;
-                                  final fait = (live['faits'] is Map) &&
-                                      (live['faits'][widget.user.childId] == true);
-                                  return InkWell(
-                                    onTap: () => FirebaseFirestore.instance
-                                        .collection('devoirs')
-                                        .doc(d.id)
-                                        .set({'faits': {widget.user.childId!: !fait}},
-                                            SetOptions(merge: true)),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                          color: fait ? AppColors.green : Colors.grey.shade100,
-                                          borderRadius: BorderRadius.circular(8)),
-                                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                                        Icon(
-                                            fait
-                                                ? Icons.check_circle_rounded
-                                                : Icons.radio_button_unchecked_rounded,
-                                            color: fait ? Colors.white : Colors.grey,
-                                            size: 16),
-                                        const SizedBox(width: 4),
-                                        Text(fait ? 'Fait' : 'A faire',
-                                            style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: fait ? Colors.white : Colors.grey)),
-                                      ]),
-                                    ),
-                                  );
-                                },
+                              child: BoutonDevoirFait(
+                                devoirId: d.id,
+                                childId: widget.user.childId!,
+                                faitInitial: (data['faits'] is Map) &&
+                                    (data['faits'][widget.user.childId] == true),
                               ),
                             ),
                         ]));
@@ -8478,6 +8447,105 @@ class AssistancePage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
       ]),
+    );
+  }
+}
+
+
+// ══════════════════════════════════════════
+//  BOUTON « FAIT » — devoir de maison (parent)
+//  Etat local optimiste : la coche reste visible immediatement,
+//  meme si la liste parente se reconstruit. L'ecriture Firestore
+//  utilise la notation pointee (faits.<childId>) pour ne toucher
+//  QUE la cle de cet enfant, sans ecraser celles des autres.
+// ══════════════════════════════════════════
+class BoutonDevoirFait extends StatefulWidget {
+  final String devoirId;
+  final String childId;
+  final bool faitInitial;
+  const BoutonDevoirFait({
+    super.key,
+    required this.devoirId,
+    required this.childId,
+    required this.faitInitial,
+  });
+
+  @override
+  State<BoutonDevoirFait> createState() => _BoutonDevoirFaitState();
+}
+
+class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
+  late bool _fait;
+  bool _enCours = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fait = widget.faitInitial;
+  }
+
+  @override
+  void didUpdateWidget(BoutonDevoirFait ancien) {
+    super.didUpdateWidget(ancien);
+    // On ne resynchronise depuis la liste QUE si aucune ecriture
+    // n'est en cours : sinon la valeur serveur (encore ancienne)
+    // effacerait la coche que le parent vient de faire.
+    if (!_enCours && widget.faitInitial != ancien.faitInitial) {
+      _fait = widget.faitInitial;
+    }
+  }
+
+  Future<void> _basculer() async {
+    final nouveau = !_fait;
+    setState(() {
+      _fait = nouveau;
+      _enCours = true;
+    });
+    try {
+      await FirebaseFirestore.instance
+          .collection('devoirs')
+          .doc(widget.devoirId)
+          .update({'faits.${widget.childId}': nouveau});
+    } catch (_) {
+      // Le champ 'faits' n'existe pas encore : on le cree.
+      try {
+        await FirebaseFirestore.instance
+            .collection('devoirs')
+            .doc(widget.devoirId)
+            .set({'faits': {widget.childId: nouveau}}, SetOptions(merge: true));
+      } catch (_) {
+        if (mounted) setState(() => _fait = !nouveau); // echec : on annule
+      }
+    }
+    if (mounted) setState(() => _enCours = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _basculer,
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+            color: _fait ? AppColors.green : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(
+              _fait
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              color: _fait ? Colors.white : Colors.grey,
+              size: 16),
+          const SizedBox(width: 4),
+          Text(_fait ? 'Fait' : 'A faire',
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: _fait ? Colors.white : Colors.grey)),
+        ]),
+      ),
     );
   }
 }

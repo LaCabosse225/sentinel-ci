@@ -152,33 +152,54 @@ class IconePastille extends StatelessWidget {
   final Query? requete;
   final String uid;
   final String section;
+  final String? childId;
   const IconePastille({super.key, required this.icone,
-      required this.requete, required this.uid, required this.section});
+      required this.requete, required this.uid,
+      required this.section, this.childId});
+
+  bool _aNouveauDevoir(QuerySnapshot s) {
+    // Pour l'onglet Devoirs : pastille rouge si au moins un devoir
+    // (DM ou surveille) n'est pas encore coche par cet enfant.
+    if (section != 'Devoirs' || childId == null) return false;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    for (final d in s.docs) {
+      final m = d.data() as Map<String, dynamic>? ?? {};
+      final type = (m['typeDevoir'] ?? '').toString();
+      if (type != 'Devoir de maison' && type != 'Devoir surveille') continue;
+      final dt = (m['date'] ?? '').toString();
+      if (dt.length == 10 && dt.compareTo(today) < 0) continue; // expire
+      final faits = m['faits'];
+      if (!(faits is Map && faits[childId] == true)) return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
     if (requete == null) return Icon(icone);
-    return ValueListenableBuilder<int>(
-      valueListenable: kPastillesVersion,
-      builder: (_, __, ___) => FutureBuilder<SharedPreferences>(
-        future: SharedPreferences.getInstance(),
-        builder: (c, prefsSnap) {
-          final vu = prefsSnap.data?.getInt('vu_${section}_$uid') ?? 0;
-          return StreamBuilder<QuerySnapshot>(
-            stream: requete!.snapshots(),
-            builder: (c, s) {
-              final nouveau = s.hasData && tsMaxDocs(s.data!) > vu;
-              return Stack(clipBehavior: Clip.none, children: [
-                Icon(icone),
-                if (nouveau)
-                  Positioned(right: -2, top: -2,
-                      child: Container(width: 10, height: 10,
-                          decoration: const BoxDecoration(
-                              color: Colors.red, shape: BoxShape.circle))),
-              ]);
-            });
-        }),
-    );
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (_, prefsSnap) {
+        final vu = prefsSnap.data?.getInt('vu_${section}_$uid') ?? 0;
+        return StreamBuilder<QuerySnapshot>(
+          stream: requete!.snapshots(),
+          builder: (c, s) {
+            bool nouveau;
+            if (section == 'Devoirs') {
+              nouveau = s.hasData && _aNouveauDevoir(s.data!);
+            } else {
+              nouveau = s.hasData && tsMaxDocs(s.data!) > vu;
+            }
+            return Stack(clipBehavior: Clip.none, children: [
+              Icon(icone),
+              if (nouveau)
+                Positioned(right: -2, top: -2,
+                    child: Container(width: 10, height: 10,
+                        decoration: const BoxDecoration(
+                            color: Colors.red, shape: BoxShape.circle))),
+            ]);
+          });
+      });
   }
 }
 
@@ -3063,7 +3084,10 @@ class _MainShellState extends State<MainShell> {
         return db.collection('notes').where('eleveId', isEqualTo: cible);
       case 'Devoirs':
         if ((widget.user.classeId ?? '').isEmpty) return null;
-        return db.collection('devoirs').where('classeId', isEqualTo: widget.user.classeId);
+        // Pastille rouge : s'allume si au moins un devoir (DM ou surveille)
+        // n'est pas encore coche par ce parent. S'eteint quand tout est coche.
+        return db.collection('devoirs')
+            .where('classeId', isEqualTo: widget.user.classeId);
       case 'Cours':
         if ((widget.user.classeId ?? '').isEmpty) return null;
         return db.collection('lecons').where('classeId', isEqualTo: widget.user.classeId);
@@ -3282,7 +3306,9 @@ class _MainShellState extends State<MainShell> {
           destinations: _navItems.map((n) => NavigationDestination(
               icon: IconePastille(icone: n.icon,
                   requete: _requetePastille(n.label),
-                  uid: widget.user.uid, section: n.label),
+                  uid: widget.user.uid,
+                  section: n.label,
+                  childId: widget.user.childId),
               label: n.label)).toList(),
         ),
       ),
@@ -5169,9 +5195,12 @@ class _DevoirsPageState extends State<DevoirsPage> {
                           ])),
                           Text(data['date'] ?? '',
                               style:const TextStyle(fontSize:12, fontWeight:FontWeight.w700, color:AppColors.orange)),
-                          // Le PARENT valide qu'un devoir de maison a ete fait.
+                          // Le PARENT valide ses devoirs :
+                          // - Devoir de maison    → bouton « Fait »
+                          // - Devoir surveille    → bouton « Révisé »
                           if (widget.user.role == UserRole.parent &&
-                              (data['typeDevoir'] ?? '') == 'Devoir de maison' &&
+                              ((data['typeDevoir'] ?? '') == 'Devoir de maison' ||
+                               (data['typeDevoir'] ?? '') == 'Devoir surveille') &&
                               (widget.user.childId ?? '').isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
@@ -5180,6 +5209,9 @@ class _DevoirsPageState extends State<DevoirsPage> {
                                 childId: widget.user.childId!,
                                 faitInitial: (data['faits'] is Map) &&
                                     (data['faits'][widget.user.childId] == true),
+                                label: (data['typeDevoir'] ?? '') == 'Devoir de maison'
+                                    ? 'Fait'
+                                    : 'Révisé',
                               ),
                             ),
                         ]));
@@ -8463,11 +8495,13 @@ class BoutonDevoirFait extends StatefulWidget {
   final String devoirId;
   final String childId;
   final bool faitInitial;
+  final String label; // 'Fait' pour DM, 'Révisé' pour devoir surveillé
   const BoutonDevoirFait({
     super.key,
     required this.devoirId,
     required this.childId,
     required this.faitInitial,
+    this.label = 'Fait',
   });
 
   @override
@@ -8535,7 +8569,7 @@ class _BoutonDevoirFaitState extends State<BoutonDevoirFait> {
               color: _fait ? Colors.white : Colors.grey,
               size: 16),
           const SizedBox(width: 4),
-          Text(_fait ? 'Fait' : 'A faire',
+          Text(_fait ? widget.label : 'A faire',
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,

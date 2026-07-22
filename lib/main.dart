@@ -122,6 +122,11 @@ const String kAssistanceTel = '+2250104965555';
 const String kAssistanceWhatsApp = '+2250104965555';
 const String kAssistanceEmail = 'assistance@sentinel.ci';
 
+// Cle VAPID pour les notifications push sur le WEB (PWA).
+// A recuperer dans : Firebase → Parametres du projet → Cloud Messaging →
+// "Certificats push web" → generer une paire de cles → copier la cle publique.
+const String kVapidKeyWeb = 'BP_x1XjH_MqWg8DDpmCiw5VKw5afmOqTeCVe_QBHmTqoR-l1KN2atzhpdCJ3G3QlYiX-O6597Barqg--hiOhFX0';
+
 final ValueNotifier<int> kPastillesVersion = ValueNotifier<int>(0);
 
 Future<void> marquerSectionVue(String uid, String section) async {
@@ -3015,35 +3020,43 @@ class _MainShellState extends State<MainShell> {
   //  - au canal de son école "ecole_<id>" (annonces ciblées)
   //  - au canal de son rôle "role_<role>" (ex. cibler uniquement les parents)
   Future<void> _initNotificationsPush() async {
-    // Version web : notifications push réservées à l'app mobile pour l'instant.
-    if (kIsWeb) return;
     try {
       final fm = FirebaseMessaging.instance;
-      await fm.requestPermission();
+      final perm = await fm.requestPermission();
+      // Web : si le parent refuse la permission, on n'insiste pas.
+      if (kIsWeb &&
+          perm.authorizationStatus == AuthorizationStatus.denied) {
+        return;
+      }
       String propre(String s) => s.replaceAll(RegExp(r'[^A-Za-z0-9_.~%-]'), '_');
-      await fm.subscribeToTopic('tous');
-      await fm.subscribeToTopic('ecole_${propre(widget.user.school)}');
-      await fm.subscribeToTopic('role_${widget.user.role.name}');
-      // Canaux de classe : élèves et parents reçoivent les devoirs,
-      // cours et événements de LEUR classe uniquement (pas de spam).
-      try {
-        if (widget.user.role == UserRole.eleve &&
-            (widget.user.classeId ?? '').isNotEmpty) {
-          await fm.subscribeToTopic('classe_${propre(widget.user.classeId!)}');
-        }
-        if (widget.user.role == UserRole.parent) {
-          final enfants = await FirebaseService.getEnfants(widget.user.uid);
-          for (final e in enfants) {
-            if ((e.classeId ?? '').isNotEmpty) {
-              await fm.subscribeToTopic('classe_${propre(e.classeId!)}');
+      // Les abonnements par "topic" ne fonctionnent que sur mobile.
+      // Sur le web, ces annonces passeront par le token enregistre plus bas.
+      if (!kIsWeb) {
+        await fm.subscribeToTopic('tous');
+        await fm.subscribeToTopic('ecole_${propre(widget.user.school)}');
+        await fm.subscribeToTopic('role_${widget.user.role.name}');
+        try {
+          if (widget.user.role == UserRole.eleve &&
+              (widget.user.classeId ?? '').isNotEmpty) {
+            await fm.subscribeToTopic('classe_${propre(widget.user.classeId!)}');
+          }
+          if (widget.user.role == UserRole.parent) {
+            final enfants = await FirebaseService.getEnfants(widget.user.uid);
+            for (final e in enfants) {
+              if ((e.classeId ?? '').isNotEmpty) {
+                await fm.subscribeToTopic('classe_${propre(e.classeId!)}');
+              }
             }
           }
-        }
-      } catch (_) {}
-      // Carte d'identité push de cet appareil : les robots serveurs (Cloud
-      // Functions) l'utilisent pour les notifications ciblées (messages, notes).
+        } catch (_) {}
+      }
+      // Carte d'identite push de cet appareil (mobile OU web). Les robots
+      // serveurs (Cloud Functions) l'utilisent pour les notifications ciblees
+      // (messages, notes). Sur le web, il faut fournir la cle VAPID.
       try {
-        final token = await fm.getToken();
+        final token = kIsWeb
+            ? await fm.getToken(vapidKey: kVapidKeyWeb)
+            : await fm.getToken();
         if (token != null && token.isNotEmpty) {
           await FirebaseFirestore.instance
               .collection('utilisateurs')
@@ -3059,7 +3072,7 @@ class _MainShellState extends State<MainShell> {
                   SetOptions(merge: true));
         });
       } catch (_) {}
-      // App ouverte : vraie notification avec son et bannière (plus un simple bandeau).
+      // App ouverte : vraie notification avec son et banniere.
       FirebaseMessaging.onMessage.listen((m) {
         final n = m.notification;
         if (n != null) {

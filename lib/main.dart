@@ -1113,6 +1113,45 @@ class FirebaseService {
       _db.collection('ecoles').orderBy('nom').snapshots();
 
   // Ajouter école
+  // Le prof corrige ou retire une note qu'il a saisie.
+  static Future<void> supprimerNote(String noteId) =>
+      _db.collection('notes').doc(noteId).delete();
+
+  static Future<void> modifierNote(String noteId, Map<String, dynamic> champs) =>
+      _db.collection('notes').doc(noteId).update(champs);
+
+  // Suppression COMPLETE d'une ecole : l'ecole et toutes ses donnees liees
+  // (utilisateurs, notes, absences, devoirs, etc.) sont effacees par lots.
+  // Renvoie le nombre total de documents supprimes.
+  static Future<int> supprimerEcoleEtDependances(String ecoleId) async {
+    int total = 0;
+    // Collections dont les documents portent un champ 'ecoleId'.
+    const collections = [
+      'utilisateurs', 'notes', 'absences', 'devoirs', 'lecons', 'agenda',
+      'alertes', 'rattrapages', 'classes', 'matieres', 'emploiDuTemps',
+      'vieScolaire', 'paiements', 'messages',
+    ];
+    for (final col in collections) {
+      // On boucle par paquets de 400 (limite Firestore : 500 par lot).
+      while (true) {
+        final snap = await _db.collection(col)
+            .where('ecoleId', isEqualTo: ecoleId).limit(400).get();
+        if (snap.docs.isEmpty) break;
+        final batch = _db.batch();
+        for (final d in snap.docs) {
+          batch.delete(d.reference);
+        }
+        await batch.commit();
+        total += snap.docs.length;
+        if (snap.docs.length < 400) break;
+      }
+    }
+    // Enfin, l'ecole elle-meme.
+    await _db.collection('ecoles').doc(ecoleId).delete();
+    total += 1;
+    return total;
+  }
+
   static Future<void> ajouterEcole(Map<String,dynamic> ecole) async {
     await _db.collection('ecoles').add({
       ...ecole,
@@ -4127,6 +4166,34 @@ class _NotesPageState extends State<NotesPage> {
                                     style:const TextStyle(fontSize:11, color:AppColors.textMuted)),
                             ])),
                             NotePill(note:note, sur: (data['sur'] as num?)?.toInt() ?? 20),
+                            // Le prof peut corriger ou retirer une note qu'il a saisie.
+                            if (isProf)
+                              PopupMenuButton<String>(
+                                icon: const Icon(Icons.more_vert, size: 18, color: AppColors.textMuted),
+                                onSelected: (choix) async {
+                                  if (choix == 'modifier') {
+                                    await dialogModifierNote(context, e.value.id, data);
+                                  } else if (choix == 'supprimer') {
+                                    final ok = await confirmerDialog(context,
+                                        'Supprimer cette note ?',
+                                        'La note de ${data['matiere'] ?? ''} (${note.toStringAsFixed(2)}) sera definitivement supprimee.');
+                                    if (ok) {
+                                      await FirebaseService.supprimerNote(e.value.id);
+                                      if (context.mounted) showSnack(context, 'Note supprimee.');
+                                    }
+                                  }
+                                },
+                                itemBuilder: (_) => const [
+                                  PopupMenuItem(value: 'modifier', child: Row(children: [
+                                    Icon(Icons.edit_rounded, size: 18, color: AppColors.green),
+                                    SizedBox(width: 8), Text('Modifier'),
+                                  ])),
+                                  PopupMenuItem(value: 'supprimer', child: Row(children: [
+                                    Icon(Icons.delete_rounded, size: 18, color: AppColors.red),
+                                    SizedBox(width: 8), Text('Supprimer'),
+                                  ])),
+                                ],
+                              ),
                           ]));
                     }).toList()));
                 }),
@@ -5899,6 +5966,92 @@ class _ConversationPageState extends State<ConversationPage> {
 // ══════════════════════════════════════════
 //  ECOLES PAGE (ADMIN) — TEMPS REEL
 // ══════════════════════════════════════════
+// Boite de confirmation reutilisable (oui/non). Renvoie true si confirme.
+Future<bool> confirmerDialog(BuildContext context, String titre, String message) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(titre),
+      content: Text(message),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler')),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.red, foregroundColor: Colors.white),
+          child: const Text('Confirmer'),
+        ),
+      ],
+    ),
+  );
+  return ok == true;
+}
+
+// Dialogue de correction d'une note (le prof modifie la valeur, le bareme,
+// le coefficient et l'appreciation).
+Future<void> dialogModifierNote(
+    BuildContext context, String noteId, Map<String, dynamic> data) async {
+  final noteCtrl = TextEditingController(
+      text: (data['note'] as num?)?.toString().replaceAll('.0', '') ?? '');
+  final surCtrl = TextEditingController(
+      text: (data['sur'] as num?)?.toString().replaceAll('.0', '') ?? '20');
+  final coefCtrl = TextEditingController(
+      text: (data['coefficient'] as num?)?.toString().replaceAll('.0', '') ?? '1');
+  final apprCtrl = TextEditingController(text: (data['appreciation'] ?? '').toString());
+  bool loading = false;
+
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(builder: (ctx, setSt) => AlertDialog(
+      title: Text('Modifier la note — ${data['matiere'] ?? ''}'),
+      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Row(children: [
+          Expanded(child: TextField(controller: noteCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Note'))),
+          const SizedBox(width: 10),
+          Expanded(child: TextField(controller: surCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Sur'))),
+        ]),
+        const SizedBox(height: 8),
+        TextField(controller: coefCtrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Coefficient')),
+        const SizedBox(height: 8),
+        TextField(controller: apprCtrl,
+            decoration: const InputDecoration(labelText: 'Appreciation')),
+      ])),
+      actions: [
+        TextButton(onPressed: loading ? null : () => Navigator.pop(ctx),
+            child: const Text('Annuler')),
+        ElevatedButton(
+          onPressed: loading ? null : () async {
+            final note = double.tryParse(noteCtrl.text.replaceAll(',', '.'));
+            final sur = double.tryParse(surCtrl.text.replaceAll(',', '.')) ?? 20;
+            final coef = double.tryParse(coefCtrl.text.replaceAll(',', '.')) ?? 1;
+            if (note == null) {
+              showSnack(context, 'Note invalide', error: true);
+              return;
+            }
+            setSt(() => loading = true);
+            await FirebaseService.modifierNote(noteId, {
+              'note': note, 'sur': sur, 'coefficient': coef,
+              'appreciation': apprCtrl.text.trim(),
+            });
+            if (ctx.mounted) {
+              Navigator.pop(ctx);
+              showSnack(context, 'Note modifiee.');
+            }
+          },
+          child: Text(loading ? '...' : 'Enregistrer'),
+        ),
+      ],
+    )),
+  );
+}
+
 class EcolesPage extends StatefulWidget {
   final AppUser user;
   const EcolesPage({super.key, required this.user});
@@ -5909,6 +6062,67 @@ class _EcolesPageState extends State<EcolesPage> {
   final _nomCtrl  = TextEditingController();
   final _nbCtrl   = TextEditingController();
   String _commune = 'Cocody';
+
+  // Suppression complete d'une ecole : double confirmation puis cascade.
+  Future<void> _supprimerEcole(String ecoleId, String nom) async {
+    // 1re confirmation
+    final ok1 = await confirmerDialog(context,
+        'Supprimer « $nom » ?',
+        'Cette action supprimera DEFINITIVEMENT l ecole ainsi que TOUTES ses '
+        'donnees : comptes des professeurs et eleves, notes, absences, devoirs, '
+        'lecons, paiements et messages. Cette action est irreversible.');
+    if (!ok1 || !mounted) return;
+
+    // 2e confirmation : taper le nom exact pour eviter toute erreur
+    final confirmCtrl = TextEditingController();
+    final ok2 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSt) => AlertDialog(
+        title: const Text('Confirmation finale'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('Pour confirmer, tapez le nom exact de l ecole :\n\n« $nom »',
+              style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 12),
+          TextField(controller: confirmCtrl,
+              decoration: const InputDecoration(
+                  labelText: 'Nom de l ecole', border: OutlineInputBorder())),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, confirmCtrl.text.trim() == nom.trim()),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.red, foregroundColor: Colors.white),
+            child: const Text('Supprimer definitivement'),
+          ),
+        ],
+      )),
+    );
+    if (ok2 != true || !mounted) return;
+
+    // Suppression en cascade avec indicateur de progression.
+    showDialog(context: context, barrierDismissible: false,
+        builder: (_) => const AlertDialog(
+          content: Row(children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Expanded(child: Text('Suppression en cours...')),
+          ]),
+        ));
+    try {
+      final n = await FirebaseService.supprimerEcoleEtDependances(ecoleId);
+      if (mounted) {
+        Navigator.pop(context); // ferme le loader
+        showSnack(context, 'Ecole « $nom » supprimee ($n elements effaces).');
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        showSnack(context, 'Erreur lors de la suppression : $e', error: true);
+      }
+    }
+  }
 
   void _showAdd() {
     showModalBottomSheet(context:context, isScrollControlled:true,
@@ -5994,6 +6208,14 @@ class _EcolesPageState extends State<EcolesPage> {
                         child:Text(actif?'Actif':'Inactif',
                             style:TextStyle(fontSize:11,fontWeight:FontWeight.w800,
                                 color:actif?AppColors.green:AppColors.gold))),
+                    if (widget.user.estSuperAdmin)
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            color: AppColors.red, size: 22),
+                        tooltip: 'Supprimer cette ecole',
+                        onPressed: () => _supprimerEcole(
+                            snap.data!.docs[i].id, data['nom']?.toString() ?? ''),
+                      ),
                   ]),
                 ]));
               });

@@ -141,6 +141,56 @@ exports.notifMessage = onDocumentCreated("messages/{id}", async (evt) => {
   await envoyerAuxUtilisateurs([d.vers], `✉️ ${nom}`, court(d.texte, 110));
 });
 
+// ---------- 🚸 ABSENCE / RETARD -> élève + ses parents ----------
+// L'identifiant du document est déterministe (eleveId_date) : re-signaler
+// le même jour est une mise à jour, donc pas de notification en double.
+exports.notifAbsence = onDocumentCreated("absences/{id}", async (evt) => {
+  const d = evt.data ? evt.data.data() : null;
+  if (!d || !d.eleveId) return;
+  const db = admin.firestore();
+  const cibles = [d.eleveId];
+  try {
+    const parents = await db
+      .collection("utilisateurs")
+      .where("enfants", "array-contains", d.eleveId)
+      .get();
+    parents.forEach((p) => cibles.push(p.id));
+  } catch (e) {
+    console.log("Recherche parents impossible :", e.message);
+  }
+  const retard = d.statut === "retard";
+  await envoyerAuxUtilisateurs(
+    cibles,
+    retard ? "🕐 Retard signalé" : "🚸 Absence signalée",
+    court(`${d.eleveNom || "Votre enfant"} • le ${d.date || "?"}`)
+  );
+});
+
+// ---------- ⚠️ ALERTE DE L'ÉCOLE -> école entière ou classe ----------
+const libelleAlerte = {
+  info: "ℹ️ Information",
+  danger: "⚠️ Sanction",
+  success: "🎉 Félicitations",
+  warn: "🔔 Avertissement",
+};
+
+exports.notifAlerte = onDocumentCreated("alertes/{id}", async (evt) => {
+  const d = evt.data ? evt.data.data() : null;
+  // Seules les alertes publiées à la main sont notifiées ici. Les alertes
+  // créées automatiquement (nouvelle note, nouveau devoir) ont déjà leur
+  // propre robot : sans ce filtre, la famille recevrait deux notifications.
+  if (!d || d.source !== "manuelle") return;
+  if (!d.classeId && !d.ecoleId) return;
+  const canal = d.classeId
+    ? `classe_${propre(d.classeId)}`
+    : `ecole_${propre(d.ecoleId)}`;
+  await envoyerAuCanal(
+    canal,
+    libelleAlerte[d.type] || "🔔 Message de l'école",
+    court(d.corps || "", 110)
+  );
+});
+
 // ---------- 📝 NOUVELLE NOTE -> élève + ses parents ----------
 exports.notifNote = onDocumentCreated("notes/{id}", async (evt) => {
   const d = evt.data ? evt.data.data() : null;

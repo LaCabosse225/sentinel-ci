@@ -1105,6 +1105,19 @@ class FirebaseService {
           .where('ecoleId', isEqualTo: ecoleId)
           .get();
 
+  // Alerte publiée à la main par un professeur ou par la direction.
+  // Le champ 'source' vaut 'manuelle' : c'est lui qui déclenche la
+  // notification push (les alertes automatiques de note et de devoir
+  // sont déjà notifiées par leurs propres robots).
+  static Future<void> ajouterAlerte(Map<String,dynamic> alerte) async {
+    await _db.collection('alertes').add({
+      ...alerte,
+      'source': 'manuelle',
+      'lu': false,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   // Publier devoir
   static Future<void> publierDevoir(Map<String,dynamic> devoir) async {
     await _db.collection('devoirs').add({
@@ -5920,16 +5933,23 @@ class _AlertesPageState extends State<AlertesPage> {
   final _msgCtrl = TextEditingController();
   String _selType = 'info';
 
+  // Libelle lisible affiche dans l'application et dans la notification.
+  static const Map<String,String> _libelleType = {
+    'info':    'Information',
+    'danger':  'Sanction',
+    'success': 'Felicitations',
+    'warn':    'Avertissement',
+  };
+
   Future<void> _publier() async {
-    if (_msgCtrl.text.isEmpty) {
+    if (_msgCtrl.text.trim().isEmpty) {
       showSnack(context, 'Redigez un message', error:true); return;
     }
-    await FirebaseService.ajouterEvenement({
-      'titre':   _selType,
-      'corps':   _msgCtrl.text,
+    await FirebaseService.ajouterAlerte({
+      'titre':   _libelleType[_selType] ?? 'Information',
+      'corps':   _msgCtrl.text.trim(),
       'type':    _selType,
       'ecoleId': widget.user.school,
-      'lu':      false,
     });
     _msgCtrl.clear();
     if (mounted) showSnack(context, 'Alerte envoyee — Notification push 📲');
@@ -5937,7 +5957,10 @@ class _AlertesPageState extends State<AlertesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isProf = widget.user.role==UserRole.prof || widget.user.role==UserRole.admin;
+    // Le directeur doit lui aussi pouvoir communiquer avec ses familles.
+    final isProf = widget.user.role==UserRole.prof
+        || widget.user.role==UserRole.admin
+        || widget.user.role==UserRole.directeur;
     final typeColors = {
       'info':    (AppColors.blue,   AppColors.blueBg),
       'danger':  (AppColors.red,    AppColors.redBg),

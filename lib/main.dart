@@ -4,6 +4,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 // ignore: avoid_web_libraries_in_flutter
@@ -604,6 +605,20 @@ pw.Widget _pdfEntete(String ecoleNom) => pw.Column(children:[
   ]),
   pw.Divider(color: PdfColors.green800),
 ]);
+
+// ---- CODES PARENTS ----
+// Nombre maximum de comptes parents pouvant se relier a un meme eleve
+// (papa, maman, tuteur). Au-dela, l'ecole doit intervenir.
+const int kMaxParentsParEleve = 3;
+
+// Alphabet sans caracteres ambigus : ni 0/O, ni 1/I/L. Evite les erreurs de
+// recopie quand un parent lit le code sur une liste imprimee.
+const String kAlphabetCode = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+String genererCodeParent() {
+  final r = Random.secure();
+  return List.generate(6, (_) => kAlphabetCode[r.nextInt(kAlphabetCode.length)]).join();
+}
 
 // Liste imprimable des élèves avec leur code parent.
 // Sert à l'inscription des familles : le parent retrouve son enfant et son code.
@@ -1494,6 +1509,28 @@ class FirebaseService {
           .where('codeParent', isEqualTo: code.trim().toUpperCase())
           .get();
 
+  // Nombre de comptes parents deja relies a un eleve (1 filtre, pas d'index).
+  static Future<int> nbParentsRelies(String eleveDocId) async {
+    final snap = await _db.collection('utilisateurs')
+        .where('enfants', arrayContains: eleveDocId).get();
+    return snap.docs.where((d) => (d.data()['role'] ?? '') == 'parent').length;
+  }
+
+  // Regenere le code parent d'un eleve (reserve a la direction).
+  // L'ancien code cesse immediatement de fonctionner. Retourne le nouveau code.
+  static Future<String> regenererCodeParent(String eleveDocId) async {
+    String code = genererCodeParent();
+    // On evite (raisonnablement) les collisions avec un code existant.
+    for (int essai = 0; essai < 5; essai++) {
+      final existe = await findEleveParCode(code);
+      if (existe.docs.isEmpty) break;
+      code = genererCodeParent();
+    }
+    await _db.collection('utilisateurs').doc(eleveDocId)
+        .update({'codeParent': code});
+    return code;
+  }
+
   // Liste les enfants d'un parent (nom + classe), pour le multi-enfants
   static Future<List<({String id, String nom, String? classeId})>> getEnfants(String parentId) async {
     final parent = await _db.collection('utilisateurs').doc(parentId).get();
@@ -1513,10 +1550,18 @@ class FirebaseService {
   }
 
   // Rattache un enfant supplémentaire au compte parent (sans doublon)
-  static Future<void> ajouterEnfant(String parentId, String childId) =>
-      _db.collection('utilisateurs').doc(parentId).update({
-        'enfants': FieldValue.arrayUnion([childId]),
-      });
+  // Rattache un enfant supplementaire a un parent existant.
+  // Retourne null si succes, ou un message d'erreur si le plafond est atteint.
+  static Future<String?> ajouterEnfant(String parentId, String childId) async {
+    if (await nbParentsRelies(childId) >= kMaxParentsParEleve) {
+      return 'Cet eleve a deja $kMaxParentsParEleve comptes parents. '
+          'Rapprochez-vous de l ecole.';
+    }
+    await _db.collection('utilisateurs').doc(parentId).update({
+      'enfants': FieldValue.arrayUnion([childId]),
+    });
+    return null;
+  }
 
   // Auto-inscription d'un parent (il devient connecté) rattaché à son enfant
   static Future<String?> inscrireParent({
@@ -1535,6 +1580,12 @@ class FirebaseService {
       }
       final e = eleves.first;
       final data = e.data() as Map<String, dynamic>;
+      // Plafond : papa, maman, tuteur. Au-dela, on refuse et on supprime le compte.
+      if (await nbParentsRelies(e.id) >= kMaxParentsParEleve) {
+        await cred.user?.delete();
+        return 'Cet eleve a deja $kMaxParentsParEleve comptes parents. '
+            'Rapprochez-vous de l ecole.';
+      }
       await _db.collection('utilisateurs').doc(cred.user!.uid).set({
         'nom': nom.trim(), 'email': email.trim(), 'role': 'parent',
         'ecoleId': data['ecoleId'], 'enfants': [e.id], 'lien': lien,
@@ -5202,8 +5253,9 @@ class _MesEnfantsPageState extends State<MesEnfantsPage> {
                 if (_enfants.any((e) => e.id == trouveId)) {
                   if (mounted) showSnack(context, 'Cet enfant est deja rattache', error: true); return;
                 }
-                await FirebaseService.ajouterEnfant(widget.user.uid, trouveId!);
+                final err = await FirebaseService.ajouterEnfant(widget.user.uid, trouveId!);
                 if (!mounted) return;
+                if (err != null) { showSnack(context, err, error: true); return; }
                 Navigator.pop(ctx);
                 showSnack(context, 'Enfant ajoute ! 🎉');
                 _charger();
@@ -6371,6 +6423,70 @@ class _EcolesPageState extends State<EcolesPage> {
 // ══════════════════════════════════════════
 //  UTILISATEURS PAGE (ADMIN)
 // ══════════════════════════════════════════
+// Regeneration du code parent d'un eleve (direction uniquement).
+// L'ancien code cesse immediatement de fonctionner : on demande confirmation.
+Future<void> dialogRegenererCode(
+    BuildContext context, String eleveDocId, String eleveNom) async {
+  bool loading = false;
+  String? nouveau;
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(builder: (ctx, setSt) => AlertDialog(
+      title: Text(nouveau == null ? 'Regenerer le code ?' : 'Nouveau code',
+          style: const TextStyle(fontSize: 17)),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        if (nouveau == null) ...[
+          Text('Un nouveau code sera genere pour $eleveNom.',
+              style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 10),
+          const Text(
+              'L ancien code cessera immediatement de fonctionner. Les comptes '
+              'parents deja crees restent actifs et gardent leur acces.',
+              style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        ] else ...[
+          Text('Nouveau code de $eleveNom :',
+              style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            decoration: BoxDecoration(
+                color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
+            child: Text(nouveau!,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800,
+                    color: AppColors.green, letterSpacing: 3)),
+          ),
+          const SizedBox(height: 10),
+          const Text('Communiquez-le uniquement a la famille de l eleve.',
+              style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        ],
+      ]),
+      actions: nouveau != null
+          ? [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Fermer'))]
+          : [
+              TextButton(onPressed: loading ? null : () => Navigator.pop(ctx),
+                  child: const Text('Annuler')),
+              ElevatedButton(
+                onPressed: loading ? null : () async {
+                  setSt(() => loading = true);
+                  try {
+                    final c = await FirebaseService.regenererCodeParent(eleveDocId);
+                    setSt(() { nouveau = c; loading = false; });
+                  } catch (_) {
+                    setSt(() => loading = false);
+                    if (ctx.mounted) {
+                      showSnack(ctx, 'Regeneration impossible.', error: true);
+                    }
+                  }
+                },
+                child: loading
+                    ? const SizedBox(height: 18, width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Regenerer')),
+            ],
+    )),
+  );
+}
+
 Future<void> dialogCreerAccesEleve(BuildContext context, String eleveDocId, String code) async {
   final emailCtrl = TextEditingController(
       text: code.isNotEmpty ? 'eleve.${code.toLowerCase()}@sentinelci.ci' : '');
@@ -6650,8 +6766,18 @@ class UtilisateursPage extends StatelessWidget {
                                   style: const TextStyle(fontSize:11, fontWeight: FontWeight.w700, color: AppColors.blue))),
                           if (role=='eleve' && (data['codeParent']??'').toString().isNotEmpty)
                             Padding(padding: const EdgeInsets.only(top:3),
-                              child: Text('Code parent : ${data['codeParent']}',
-                                  style: const TextStyle(fontSize:11, fontWeight: FontWeight.w800, color: AppColors.green))),
+                              child: Row(children:[
+                                Text('Code parent : ${data['codeParent']}',
+                                    style: const TextStyle(fontSize:11, fontWeight: FontWeight.w800, color: AppColors.green)),
+                                if (user.role == UserRole.admin || user.role == UserRole.directeur)
+                                  GestureDetector(
+                                    onTap: () => dialogRegenererCode(
+                                        context, docs[i].id, (data['nom']??'').toString()),
+                                    child: const Padding(
+                                      padding: EdgeInsets.only(left:6),
+                                      child: Icon(Icons.autorenew_rounded, size:14, color: AppColors.textMuted)),
+                                  ),
+                              ])),
                           if (role=='eleve' && (data['email']??'').toString().trim().isEmpty)
                             Padding(padding: const EdgeInsets.only(top:5),
                               child: OutlinedButton.icon(

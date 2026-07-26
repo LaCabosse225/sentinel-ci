@@ -625,13 +625,15 @@ String genererCodeParent() {
 Future<Uint8List> buildListeCodesPdf({
   required String ecoleNom,
   required String titreClasse,
-  required List<({String nom, String classe, String code, bool parentInscrit})> eleves,
+  required List<({String nom, String classe, String ecole, String code, bool parentInscrit})> eleves,
 }) async {
   final doc = pw.Document();
   final now = DateTime.now();
   final dateStr = '${now.day.toString().padLeft(2,'0')}/'
       '${now.month.toString().padLeft(2,'0')}/${now.year}';
   final inscrits = eleves.where((e) => e.parentInscrit).length;
+  // La colonne Ecole n'apparait que si l'export couvre plusieurs etablissements.
+  final multiEcoles = eleves.map((e) => e.ecole).toSet().length > 1;
 
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
@@ -673,32 +675,61 @@ Future<Uint8List> buildListeCodesPdf({
       pw.SizedBox(height: 14),
 
       pw.TableHelper.fromTextArray(
-        headers: ['N', 'Nom de l eleve', 'Classe', 'Code parent', 'Compte cree'],
-        data: List.generate(eleves.length, (i) => [
-          '${i + 1}',
-          eleves[i].nom,
-          eleves[i].classe,
-          eleves[i].code.isEmpty ? '-' : eleves[i].code,
-          eleves[i].parentInscrit ? 'Oui' : '',
-        ]),
+        headers: multiEcoles
+            ? ['N', 'Nom de l eleve', 'Ecole', 'Classe', 'Code parent', 'Compte cree']
+            : ['N', 'Nom de l eleve', 'Classe', 'Code parent', 'Compte cree'],
+        data: List.generate(eleves.length, (i) => multiEcoles
+            ? [
+                '${i + 1}',
+                eleves[i].nom,
+                eleves[i].ecole,
+                eleves[i].classe,
+                eleves[i].code.isEmpty ? '-' : eleves[i].code,
+                eleves[i].parentInscrit ? 'Oui' : '',
+              ]
+            : [
+                '${i + 1}',
+                eleves[i].nom,
+                eleves[i].classe,
+                eleves[i].code.isEmpty ? '-' : eleves[i].code,
+                eleves[i].parentInscrit ? 'Oui' : '',
+              ]),
         headerStyle: pw.TextStyle(
             fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 10),
         headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
         cellStyle: const pw.TextStyle(fontSize: 10),
-        columnWidths: {
-          0: const pw.FlexColumnWidth(0.7),
-          1: const pw.FlexColumnWidth(4),
-          2: const pw.FlexColumnWidth(2),
-          3: const pw.FlexColumnWidth(1.8),
-          4: const pw.FlexColumnWidth(1.4),
-        },
-        cellAlignments: {
-          0: pw.Alignment.center,
-          1: pw.Alignment.centerLeft,
-          2: pw.Alignment.centerLeft,
-          3: pw.Alignment.center,
-          4: pw.Alignment.center,
-        },
+        columnWidths: multiEcoles
+            ? {
+                0: const pw.FlexColumnWidth(0.7),
+                1: const pw.FlexColumnWidth(3.4),
+                2: const pw.FlexColumnWidth(2.4),
+                3: const pw.FlexColumnWidth(1.8),
+                4: const pw.FlexColumnWidth(1.7),
+                5: const pw.FlexColumnWidth(1.3),
+              }
+            : {
+                0: const pw.FlexColumnWidth(0.7),
+                1: const pw.FlexColumnWidth(4),
+                2: const pw.FlexColumnWidth(2),
+                3: const pw.FlexColumnWidth(1.8),
+                4: const pw.FlexColumnWidth(1.4),
+              },
+        cellAlignments: multiEcoles
+            ? {
+                0: pw.Alignment.center,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.centerLeft,
+                3: pw.Alignment.centerLeft,
+                4: pw.Alignment.center,
+                5: pw.Alignment.center,
+              }
+            : {
+                0: pw.Alignment.center,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.centerLeft,
+                3: pw.Alignment.center,
+                4: pw.Alignment.center,
+              },
         cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 7),
       ),
       pw.SizedBox(height: 12),
@@ -1439,47 +1470,68 @@ class FirebaseService {
       _db.collection('classes').add(data);
 
   // ---- LISTE DES ELEVES AVEC LEUR CODE PARENT (export PDF) ----
-  // Lecture seule. Si classeId est null, renvoie toute l'école.
-  // 'parentInscrit' indique qu'au moins un parent a déjà relié cet élève.
-  static Future<List<({String nom, String classe, String code, bool parentInscrit})>>
-      elevesEtCodes(String ecoleId, {String? classeId}) async {
-    // 1. Noms des classes (id -> nom)
-    final cls = await _db.collection('classes')
-        .where('ecoleId', isEqualTo: ecoleId).get();
+  // Lecture seule. ecoleId null = toutes les ecoles (super admin / co-admin).
+  // classeId null = toutes les classes. 'parentInscrit' = au moins un parent relie.
+  static Future<List<({String nom, String classe, String ecole, String code, bool parentInscrit})>>
+      elevesEtCodes({String? ecoleId, String? classeId}) async {
+    // 1. Noms des ecoles (id -> nom)
+    final ec = await _db.collection('ecoles').get();
+    final nomsEcoles = <String, String>{
+      for (final d in ec.docs) d.id: ((d.data()['nom'] ?? '').toString())
+    };
+
+    // 2. Noms des classes (id -> nom)
+    final cls = ecoleId == null
+        ? await _db.collection('classes').get()
+        : await _db.collection('classes').where('ecoleId', isEqualTo: ecoleId).get();
     final nomsClasses = <String, String>{
       for (final d in cls.docs) d.id: ((d.data()['nom'] ?? '').toString())
     };
 
-    // 2. Élèves de l'école (1 filtre principal, tri côté app)
-    final snap = await _db.collection('utilisateurs')
-        .where('ecoleId', isEqualTo: ecoleId).get();
+    // 3. Utilisateurs concernes (1 filtre max => pas d'index composite)
+    final snap = ecoleId == null
+        ? await _db.collection('utilisateurs').get()
+        : await _db.collection('utilisateurs').where('ecoleId', isEqualTo: ecoleId).get();
     final eleves = snap.docs.where((d) => (d.data()['role'] ?? '') == 'eleve').toList();
 
-    // 3. Enfants déjà reliés à un parent
-    final parents = snap.docs.where((d) => (d.data()['role'] ?? '') == 'parent');
+    // 4. Enfants deja relies a un parent
     final relies = <String>{};
-    for (final p in parents) {
+    for (final p in snap.docs.where((d) => (d.data()['role'] ?? '') == 'parent')) {
       final enfants = p.data()['enfants'];
       if (enfants is List) relies.addAll(enfants.map((e) => e.toString()));
     }
 
-    final liste = <({String nom, String classe, String code, bool parentInscrit})>[];
+    final liste = <({String nom, String classe, String ecole, String code, bool parentInscrit})>[];
     for (final d in eleves) {
       final data = d.data();
       final cId = (data['classeId'] ?? '').toString();
       if (classeId != null && cId != classeId) continue;
+      final eId = (data['ecoleId'] ?? '').toString();
       liste.add((
         nom: (data['nom'] ?? '').toString(),
         classe: nomsClasses[cId] ?? '-',
+        ecole: nomsEcoles[eId] ?? eId,
         code: (data['codeParent'] ?? '').toString(),
         parentInscrit: relies.contains(d.id),
       ));
     }
     liste.sort((a, b) {
+      final e = a.ecole.compareTo(b.ecole);
+      if (e != 0) return e;
       final c = a.classe.compareTo(b.classe);
       return c != 0 ? c : a.nom.toLowerCase().compareTo(b.nom.toLowerCase());
     });
     return liste;
+  }
+
+  // Toutes les classes de la plateforme (super admin / co-admin)
+  static Stream<QuerySnapshot> streamToutesClasses() =>
+      _db.collection('classes').snapshots();
+
+  // Noms de toutes les ecoles (id -> nom), pour l'affichage cote super admin
+  static Future<Map<String, String>> nomsDesEcoles() async {
+    final snap = await _db.collection('ecoles').get();
+    return { for (final d in snap.docs) d.id: ((d.data()['nom'] ?? d.id).toString()) };
   }
 
   // Nom lisible d'une école (en-tête des PDF)
@@ -6861,6 +6913,11 @@ class _ClassesPageState extends State<ClassesPage> {
   final _annee = TextEditingController(text: '2025-2026');
 
   bool _export = false;
+  Map<String, String> _nomsEcoles = {};
+
+  // Le super admin et les co-admins pilotent toutes les ecoles ;
+  // le directeur ne voit que la sienne.
+  bool get _estAdmin => widget.user.role == UserRole.admin;
 
   // Les codes parents sont des donnees sensibles : l'export est reserve
   // au super admin, aux co-admins (role admin) et au directeur.
@@ -6868,10 +6925,23 @@ class _ClassesPageState extends State<ClassesPage> {
       widget.user.role == UserRole.admin || widget.user.role == UserRole.directeur;
 
   @override
+  void initState() {
+    super.initState();
+    if (_estAdmin) _chargerNomsEcoles();
+  }
+
+  Future<void> _chargerNomsEcoles() async {
+    try {
+      final m = await FirebaseService.nomsDesEcoles();
+      if (mounted) setState(() => _nomsEcoles = m);
+    } catch (_) {}
+  }
+
+  @override
   void dispose() { _nom.dispose(); _niveau.dispose(); _annee.dispose(); super.dispose(); }
 
   // Export PDF de la liste des eleves avec leur code parent.
-  // classeId null = toutes les classes de l'ecole.
+  // Admin : toute la plateforme (ou une classe precise). Directeur : son ecole.
   Future<void> _exporterCodes({String? classeId, required String titre}) async {
     if (_export) return;
     if (!_peutExporter) {
@@ -6881,12 +6951,14 @@ class _ClassesPageState extends State<ClassesPage> {
     setState(() => _export = true);
     try {
       final eleves = await FirebaseService.elevesEtCodes(
-          widget.user.school, classeId: classeId);
+          ecoleId: _estAdmin ? null : widget.user.school, classeId: classeId);
       if (eleves.isEmpty) {
         if (mounted) showSnack(context, 'Aucun eleve dans cette selection.', error: true);
         return;
       }
-      final ecoleNom = await FirebaseService.nomEcole(widget.user.school);
+      final ecoleNom = _estAdmin
+          ? 'Toutes les ecoles'
+          : await FirebaseService.nomEcole(widget.user.school);
       final bytes = await buildListeCodesPdf(
           ecoleNom: ecoleNom, titreClasse: titre, eleves: eleves);
       final fichier = 'codes_${titre.replaceAll(RegExp(r'[^A-Za-z0-9]'), '_')}.pdf';
@@ -6968,18 +7040,33 @@ class _ClassesPageState extends State<ClassesPage> {
             )),
           ),
         Expanded(child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseService.streamClasses(widget.user.school),
+          stream: _estAdmin
+              ? FirebaseService.streamToutesClasses()
+              : FirebaseService.streamClasses(widget.user.school),
           builder: (ctx, snap) {
             if (snap.connectionState == ConnectionState.waiting)
               return const Center(child: CircularProgressIndicator());
             if (!snap.hasData || snap.data!.docs.isEmpty)
               return const Center(child: Text('Aucune classe. Ajoutez-en une.'));
+            // Cote super admin, on regroupe visuellement par ecole (tri stable).
+            final docs = snap.data!.docs.toList();
+            if (_estAdmin) {
+              docs.sort((a, b) {
+                final ea = _nomsEcoles[((a.data() as Map)['ecoleId'] ?? '').toString()] ?? '';
+                final eb = _nomsEcoles[((b.data() as Map)['ecoleId'] ?? '').toString()] ?? '';
+                final c = ea.compareTo(eb);
+                if (c != 0) return c;
+                return ((a.data() as Map)['nom'] ?? '').toString()
+                    .compareTo(((b.data() as Map)['nom'] ?? '').toString());
+              });
+            }
             return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                itemCount: snap.data!.docs.length,
+                itemCount: docs.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, i) {
-                  final d = snap.data!.docs[i].data() as Map<String, dynamic>;
+                  final d = docs[i].data() as Map<String, dynamic>;
+                  final ecoleNom = _nomsEcoles[(d['ecoleId'] ?? '').toString()] ?? '';
                   return SCCard(child: Row(children: [
                     Container(width: 40, height: 40,
                         decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(10)),
@@ -6989,13 +7076,18 @@ class _ClassesPageState extends State<ClassesPage> {
                       Text(d['nom'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                       Text('${d['niveau'] ?? ''}  •  ${d['anneeScolaire'] ?? ''}',
                           style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                      if (_estAdmin && ecoleNom.isNotEmpty)
+                        Padding(padding: const EdgeInsets.only(top: 3),
+                          child: Text(ecoleNom, maxLines: 1, overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
+                                  color: AppColors.orange))),
                     ])),
                     if (_peutExporter)
                       IconButton(
                         visualDensity: VisualDensity.compact,
                         tooltip: 'Exporter les codes parents de cette classe',
                         onPressed: _export ? null : () => _exporterCodes(
-                            classeId: snap.data!.docs[i].id,
+                            classeId: docs[i].id,
                             titre: (d['nom'] ?? 'Classe').toString()),
                         icon: const Icon(Icons.picture_as_pdf_rounded,
                             size: 20, color: AppColors.green)),

@@ -4,82 +4,270 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1B9D21">
-  <meta name="description" content="Sentinel CI — Téléchargez l'application de suivi scolaire. Veiller, pas surveiller.">
+  <meta name="description" content="Sentinel CI — L'application qui rapproche les parents de la vie scolaire de leurs enfants. Veiller, pas surveiller.">
   <link rel="icon" type="image/png" href="favicon.png"/>
-  <title>Sentinel CI — Télécharger l'application</title>
+  <title>Sentinel CI — Veiller, pas surveiller</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(160deg, #1DAC27 0%, #1B9D21 45%, #0E6D14 100%);
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px; color: #fff;
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --vert:#1B9D21; --vert-clair:#1DAC27; --vert-fonce:#0E6D14;
+      --vert-bg:#E7F6E5; --or:#FFB800; --texte:#1a1a1a; --gris:#666;
     }
-    .carte { max-width: 420px; width: 100%; text-align: center; }
-    .logo { width: 110px; height: auto; filter: drop-shadow(0 6px 18px rgba(0,0,0,.25)); }
-    h1 { margin-top: 18px; font-size: 32px; letter-spacing: .5px; }
-    .slogan { margin-top: 6px; font-size: 15px; opacity: .92; }
-    .intro { margin: 22px 0 26px; font-size: 15px; line-height: 1.5; opacity: .95; }
-    .bouton {
-      display: flex; align-items: center; gap: 14px;
-      width: 100%; padding: 15px 20px; margin-bottom: 14px;
-      border-radius: 16px; text-decoration: none;
-      font-size: 17px; font-weight: bold;
-      box-shadow: 0 4px 14px rgba(0,0,0,.18);
-      transition: transform .15s ease;
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif;
+      color:var(--texte); background:#fff; line-height:1.55;
     }
-    .bouton:active { transform: scale(.98); }
-    .bouton svg { width: 28px; height: 28px; flex-shrink: 0; fill: currentColor; }
-    .bouton .txt { flex: 1; text-align: left; }
-    .bouton .sous { display: block; font-size: 12px; font-weight: normal; opacity: .75; margin-top: 2px; }
-    .web   { background: #ffffff; color: #0E6D14; }
-    .play  { background: #0E6D14; color: #ffffff; border: 1px solid rgba(255,255,255,.35); }
-    .apple { background: #1c1c1e; color: #ffffff; }
-    .bientot { opacity: .55; pointer-events: none; }
-    .badge {
-      font-size: 11px; font-weight: bold; padding: 3px 8px;
-      border-radius: 999px; background: #FFB800; color: #4a3200;
-      white-space: nowrap;
+    .contenu{max-width:760px;margin:0 auto;padding:0 22px}
+
+    /* ---------- HERO ---------- */
+    .hero{
+      background:linear-gradient(160deg,#1DAC27 0%,#1B9D21 45%,#0E6D14 100%);
+      color:#fff;text-align:center;padding:52px 22px 58px;
     }
-    .pied { margin-top: 26px; font-size: 12px; opacity: .8; }
+    .hero img{width:96px;height:auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,.25))}
+    .hero h1{font-size:34px;margin-top:16px;letter-spacing:.5px}
+    .hero .slogan{font-size:16px;opacity:.92;margin-top:4px}
+    .hero p{font-size:16px;opacity:.95;margin:20px auto 26px;max-width:440px}
+    .cta{
+      display:inline-block;background:#fff;color:var(--vert-fonce);
+      padding:15px 44px;border-radius:14px;text-decoration:none;
+      font-size:17px;font-weight:bold;box-shadow:0 4px 16px rgba(0,0,0,.18);
+      transition:transform .15s ease;
+    }
+    .cta:active{transform:scale(.97)}
+
+    /* ---------- SECTIONS ---------- */
+    section{padding:46px 0}
+    section.alt{background:#F7FAF7}
+    h2{font-size:23px;text-align:center;color:var(--vert-fonce);margin-bottom:8px}
+    .sous-titre{text-align:center;color:var(--gris);font-size:14px;margin-bottom:28px}
+
+    /* ---------- FONCTIONNALITES ---------- */
+    .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+    .fonc{
+      background:#fff;border:1px solid #e3e8e3;border-radius:12px;
+      padding:14px 14px;display:flex;align-items:flex-start;gap:10px;
+    }
+    .fonc .pastille{
+      width:30px;height:30px;border-radius:9px;background:var(--vert-bg);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;
+    }
+    .fonc b{display:block;font-size:14px}
+    .fonc span{font-size:12px;color:var(--gris);display:block;margin-top:1px}
+    .badge{
+      display:inline-block;font-size:10px;font-weight:bold;padding:2px 7px;
+      border-radius:999px;background:var(--or);color:#4a3200;margin-left:5px;
+      vertical-align:middle;
+    }
+
+    /* ---------- INSTALLATION ---------- */
+    .onglets{display:flex;gap:8px;justify-content:center;margin-bottom:24px}
+    .onglet{
+      padding:10px 26px;border-radius:11px;border:1.5px solid var(--vert);
+      background:#fff;color:var(--vert);font-size:15px;font-weight:bold;cursor:pointer;
+    }
+    .onglet.actif{background:var(--vert);color:#fff}
+    .etapes{display:none}
+    .etapes.visible{display:block}
+    .etape{
+      display:flex;gap:14px;align-items:flex-start;
+      background:#fff;border:1px solid #e3e8e3;border-radius:13px;
+      padding:14px;margin-bottom:12px;
+    }
+    .num{
+      width:28px;height:28px;border-radius:50%;background:var(--vert);color:#fff;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      font-size:14px;font-weight:bold;
+    }
+    .etape .txt{flex:1;font-size:14.5px;padding-top:3px}
+    .capture{
+      width:78px;height:132px;border-radius:9px;flex-shrink:0;
+      border:1.5px dashed #c8d4c8;background:#fafcfa;
+      display:flex;align-items:center;justify-content:center;
+      font-size:9.5px;color:#9aa89a;text-align:center;padding:5px;
+    }
+    .capture img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+
+    /* ---------- NOTIFICATIONS ---------- */
+    .notif-liste{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:18px}
+    .puce{
+      background:var(--vert-bg);color:var(--vert-fonce);
+      padding:8px 16px;border-radius:999px;font-size:13.5px;font-weight:600;
+    }
+
+    /* ---------- TELECHARGEMENT ---------- */
+    .bouton{
+      display:flex;align-items:center;gap:14px;width:100%;
+      padding:15px 20px;margin-bottom:12px;border-radius:15px;
+      text-decoration:none;font-size:16.5px;font-weight:bold;
+      box-shadow:0 3px 12px rgba(0,0,0,.12);transition:transform .15s ease;
+    }
+    .bouton:active{transform:scale(.98)}
+    .bouton svg{width:26px;height:26px;flex-shrink:0;fill:currentColor}
+    .bouton .txt{flex:1;text-align:left}
+    .bouton .sous{display:block;font-size:12px;font-weight:normal;opacity:.75;margin-top:2px}
+    .web{background:var(--vert);color:#fff}
+    .play{background:var(--vert-fonce);color:#fff}
+    .apple{background:#1c1c1e;color:#fff}
+    .bientot{opacity:.55;pointer-events:none}
+
+    /* ---------- PIED ---------- */
+    footer{background:var(--vert-fonce);color:#fff;text-align:center;padding:30px 22px;font-size:13.5px}
+    footer a{color:#fff;text-decoration:none;font-weight:bold}
+    footer .fin{opacity:.7;font-size:12px;margin-top:14px}
+
+    @media(max-width:520px){
+      .hero h1{font-size:29px}
+      h2{font-size:20px}
+      .grille{grid-template-columns:1fr 1fr}
+    }
   </style>
 </head>
 <body>
-  <div class="carte">
-    <img class="logo" src="splash_logo.png" alt="Sentinel CI">
-    <h1>Sentinel CI</h1>
+
+  <!-- ===== HERO ===== -->
+  <div class="hero">
+    <img src="splash_logo.png" alt="Sentinel CI">
+    <h1>Bienvenue sur Sentinel</h1>
     <div class="slogan">Veiller, pas surveiller</div>
-
-    <p class="intro">
-      Suivez la scolarité de vos enfants en temps réel :
-      notes, devoirs, agenda, messages et alertes — où que vous soyez.
-    </p>
-
-    <a class="bouton web" href="/app">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-      <span class="txt">Ouvrir l'application web
-        <span class="sous">Sans installation — fonctionne partout</span>
-      </span>
-    </a>
-
-    <a class="bouton play bientot" href="#">
-      <svg viewBox="0 0 512 512" aria-hidden="true"><path d="M325.3 234.3 104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
-      <span class="txt">Google Play
-        <span class="sous">Application Android</span>
-      </span>
-      <span class="badge">Bientôt</span>
-    </a>
-
-    <a class="bouton apple bientot" href="#">
-      <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 140.3 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-      <span class="txt">App Store
-        <span class="sous">iPhone &amp; iPad</span>
-      </span>
-      <span class="badge">Bientôt</span>
-    </a>
-
-    <div class="pied">Sentinel CI — Suivi scolaire en Côte d'Ivoire</div>
+    <p>L'application qui rapproche les parents de la vie scolaire de leurs enfants.</p>
+    <a class="cta" href="/app">Commencer</a>
   </div>
+
+  <!-- ===== FONCTIONNALITES ===== -->
+  <section>
+    <div class="contenu">
+      <h2>Ce que vous pouvez suivre</h2>
+      <div class="sous-titre">Tout le quotidien scolaire, en temps réel</div>
+      <div class="grille">
+        <div class="fonc"><div class="pastille">📊</div><div><b>Notes</b><span>Dès la saisie du professeur</span></div></div>
+        <div class="fonc"><div class="pastille">📈</div><div><b>Moyennes</b><span>Par matière et générale</span></div></div>
+        <div class="fonc"><div class="pastille">🚸</div><div><b>Absences</b><span>Signalées et justifiables</span></div></div>
+        <div class="fonc"><div class="pastille">⚠️</div><div><b>Sanctions</b><span>Informé immédiatement</span></div></div>
+        <div class="fonc"><div class="pastille">📚</div><div><b>Devoirs</b><span>À valider « Fait » ou « Révisé »</span></div></div>
+        <div class="fonc"><div class="pastille">🕐</div><div><b>Emploi du temps</b><span>La semaine de votre enfant</span></div></div>
+        <div class="fonc"><div class="pastille">📅</div><div><b>Agenda</b><span>Événements de l'école</span></div></div>
+        <div class="fonc"><div class="pastille">💬</div><div><b>Messages</b><span>Échanger avec l'école</span></div></div>
+        <div class="fonc"><div class="pastille">🔔</div><div><b>Notifications</b><span>24h/24, même app fermée</span></div></div>
+        <div class="fonc"><div class="pastille">📄</div><div><b>Bulletins PDF</b><span>À télécharger et imprimer</span></div></div>
+        <div class="fonc"><div class="pastille">💳</div><div><b>Paiements</b><span>Suivi et reçus pour l'école</span></div></div>
+        <div class="fonc"><div class="pastille">🤖</div><div><b>IA scolaire<span class="badge">Bientôt</span></b><span>Assistant pour les familles</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INSTALLATION ===== -->
+  <section class="alt">
+    <div class="contenu">
+      <h2>Comment installer Sentinel</h2>
+      <div class="sous-titre">Aucun téléchargement : l'application s'ajoute à votre écran d'accueil</div>
+
+      <div class="onglets">
+        <button class="onglet actif" onclick="ongletVers('android',this)">Android</button>
+        <button class="onglet" onclick="ongletVers('iphone',this)">iPhone</button>
+      </div>
+
+      <div id="android" class="etapes visible">
+        <div class="etape"><div class="num">1</div><div class="txt">Ouvrez le lien Sentinel dans <b>Chrome</b>.</div>
+          <div class="capture"><img src="aide/android-1.png" alt="" onerror="this.remove()">Capture 1</div></div>
+        <div class="etape"><div class="num">2</div><div class="txt">Appuyez sur les <b>trois points</b> en haut à droite.</div>
+          <div class="capture"><img src="aide/android-2.png" alt="" onerror="this.remove()">Capture 2</div></div>
+        <div class="etape"><div class="num">3</div><div class="txt">Choisissez <b>Ajouter à l'écran d'accueil</b>.</div>
+          <div class="capture"><img src="aide/android-3.png" alt="" onerror="this.remove()">Capture 3</div></div>
+        <div class="etape"><div class="num">4</div><div class="txt">Validez.</div>
+          <div class="capture"><img src="aide/android-4.png" alt="" onerror="this.remove()">Capture 4</div></div>
+        <div class="etape"><div class="num">5</div><div class="txt">L'application apparaît comme une <b>vraie application</b>. 🎉</div>
+          <div class="capture"><img src="aide/android-5.png" alt="" onerror="this.remove()">Capture 5</div></div>
+      </div>
+
+      <div id="iphone" class="etapes">
+        <div class="etape"><div class="num">1</div><div class="txt">Ouvrez Sentinel dans <b>Safari</b>.</div>
+          <div class="capture"><img src="aide/iphone-1.png" alt="" onerror="this.remove()">Capture 1</div></div>
+        <div class="etape"><div class="num">2</div><div class="txt">Appuyez sur le bouton <b>Partager</b>.</div>
+          <div class="capture"><img src="aide/iphone-2.png" alt="" onerror="this.remove()">Capture 2</div></div>
+        <div class="etape"><div class="num">3</div><div class="txt">Choisissez <b>Ajouter à l'écran d'accueil</b>.</div>
+          <div class="capture"><img src="aide/iphone-3.png" alt="" onerror="this.remove()">Capture 3</div></div>
+        <div class="etape"><div class="num">4</div><div class="txt">Appuyez sur <b>Ajouter</b>.</div>
+          <div class="capture"><img src="aide/iphone-4.png" alt="" onerror="this.remove()">Capture 4</div></div>
+        <div class="etape"><div class="num">5</div><div class="txt">L'application est installée. 🎉</div>
+          <div class="capture"><img src="aide/iphone-5.png" alt="" onerror="this.remove()">Capture 5</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NOTIFICATIONS ===== -->
+  <section>
+    <div class="contenu" style="text-align:center">
+      <h2>Autorisez les notifications</h2>
+      <div class="sous-titre">C'est ce qui rend Sentinel utile au quotidien</div>
+      <div class="etape" style="text-align:left">
+        <div class="num">1</div>
+        <div class="txt">À la première ouverture, Sentinel demande l'autorisation d'envoyer des notifications.</div>
+        <div class="capture"><img src="aide/notif-1.png" alt="" onerror="this.remove()">Capture 1</div>
+      </div>
+      <div class="etape" style="text-align:left">
+        <div class="num">2</div>
+        <div class="txt">Appuyez sur <b>Autoriser</b>.</div>
+        <div class="capture"><img src="aide/notif-2.png" alt="" onerror="this.remove()">Capture 2</div>
+      </div>
+      <p style="margin-top:20px;font-size:15px">Vous serez alors prévenu pour :</p>
+      <div class="notif-liste">
+        <span class="puce">Absences</span><span class="puce">Notes</span>
+        <span class="puce">Sanctions</span><span class="puce">Messages</span>
+        <span class="puce">Annonces</span><span class="puce">Devoirs</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TELECHARGEMENT ===== -->
+  <section class="alt">
+    <div class="contenu">
+      <h2>Accéder à Sentinel</h2>
+      <div class="sous-titre">Choisissez votre façon d'ouvrir l'application</div>
+
+      <a class="bouton web" href="/app">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <span class="txt">Ouvrir l'application web
+          <span class="sous">Sans installation — fonctionne partout</span>
+        </span>
+      </a>
+
+      <a class="bouton play bientot" href="#">
+        <svg viewBox="0 0 512 512" aria-hidden="true"><path d="M325.3 234.3 104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
+        <span class="txt">Google Play
+          <span class="sous">Application Android</span>
+        </span>
+        <span class="badge">Bientôt</span>
+      </a>
+
+      <a class="bouton apple bientot" href="#">
+        <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 140.3 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+        <span class="txt">App Store
+          <span class="sous">iPhone &amp; iPad</span>
+        </span>
+        <span class="badge">Bientôt</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== PIED ===== -->
+  <footer>
+    <div>Une question ? Nous sommes là.</div>
+    <div style="margin-top:10px">
+      <a href="tel:+2250104965555">+225 01 04 96 55 55</a> &nbsp;·&nbsp;
+      <a href="https://wa.me/2250104965555">WhatsApp</a> &nbsp;·&nbsp;
+      <a href="mailto:assistance@sentinel.ci">assistance@sentinel.ci</a>
+    </div>
+    <div class="fin">Sentinel CI — Suivi scolaire en Côte d'Ivoire</div>
+  </footer>
+
+  <script>
+    function ongletVers(id, btn){
+      document.querySelectorAll('.etapes').forEach(function(e){ e.classList.remove('visible'); });
+      document.querySelectorAll('.onglet').forEach(function(o){ o.classList.remove('actif'); });
+      document.getElementById(id).classList.add('visible');
+      btn.classList.add('actif');
+    }
+  </script>
 </body>
 </html>

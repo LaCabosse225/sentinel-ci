@@ -81,12 +81,20 @@
     }
     .etape .txt{flex:1;font-size:14.5px;padding-top:3px}
     .capture{
-      width:78px;height:132px;border-radius:9px;flex-shrink:0;
+      width:86px;height:160px;border-radius:9px;flex-shrink:0;
       border:1.5px dashed #c8d4c8;background:#fafcfa;
-      display:flex;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;
+    }
+    /* Le texte de remplacement reste DERRIERE la capture : il n'apparait
+       que si l'image est absente (l'image est alors retiree par onerror). */
+    .capture .ph{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
       font-size:9.5px;color:#9aa89a;text-align:center;padding:5px;
     }
-    .capture img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+    .capture img{
+      position:relative;z-index:1;width:100%;height:100%;
+      object-fit:contain;background:#fff;border-radius:8px;display:block;
+    }
 
     /* ---------- NOTIFICATIONS ---------- */
     .notif-liste{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:18px}
@@ -169,30 +177,30 @@
 
       <div id="android" class="etapes visible">
         <div class="etape"><div class="num">1</div><div class="txt">Ouvrez le lien Sentinel dans <b>Chrome</b>.</div>
-          <div class="capture"><img src="aide/android-1.png" alt="" loading="lazy" onerror="this.remove()">Capture 1</div></div>
+          <div class="capture"><img src="aide/android-1.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 1</span></div></div>
         <div class="etape"><div class="num">2</div><div class="txt">Appuyez sur les <b>trois points</b> en haut à droite.</div>
-          <div class="capture"><img src="aide/android-2.png" alt="" loading="lazy" onerror="this.remove()">Capture 2</div></div>
+          <div class="capture"><img src="aide/android-2.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 2</span></div></div>
         <div class="etape"><div class="num">3</div><div class="txt">Choisissez <b>Ajouter à l'écran d'accueil</b>. Sur certains téléphones, c'est écrit <b>Installer</b> ou <b>Créer un raccourci</b>.</div>
-          <div class="capture"><img src="aide/android-3.png" alt="" loading="lazy" onerror="this.remove()">Capture 3</div></div>
+          <div class="capture"><img src="aide/android-3.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 3</span></div></div>
         <div class="etape"><div class="num">4</div><div class="txt">Validez.</div>
-          <div class="capture"><img src="aide/android-4.png" alt="" loading="lazy" onerror="this.remove()">Capture 4</div></div>
+          <div class="capture"><img src="aide/android-4.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 4</span></div></div>
         <div class="etape"><div class="num">5</div><div class="txt">L'application apparaît comme une <b>vraie application</b>. 🎉</div>
-          <div class="capture"><img src="aide/android-5.png" alt="" loading="lazy" onerror="this.remove()">Capture 5</div></div>
+          <div class="capture"><img src="aide/android-5.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 5</span></div></div>
       </div>
 
       <div id="iphone" class="etapes">
         <div class="etape"><div class="num">1</div><div class="txt">Ouvrez Sentinel dans <b>Safari</b>.</div>
-          <div class="capture"><img src="aide/iphone-1.png" alt="" loading="lazy" onerror="this.remove()">Capture 1</div></div>
+          <div class="capture"><img src="aide/iphone-1.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 1</span></div></div>
         <div class="etape"><div class="num">2</div><div class="txt">Appuyez sur les <b>trois petits points</b> en bas à droite.</div>
-          <div class="capture"><img src="aide/iphone-2.png" alt="" loading="lazy" onerror="this.remove()">Capture 2</div></div>
+          <div class="capture"><img src="aide/iphone-2.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 2</span></div></div>
         <div class="etape"><div class="num">3</div><div class="txt">Appuyez sur le bouton <b>Partager</b>.</div>
-          <div class="capture"><img src="aide/iphone-3.png" alt="" loading="lazy" onerror="this.remove()">Capture 3</div></div>
+          <div class="capture"><img src="aide/iphone-3.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 3</span></div></div>
         <div class="etape"><div class="num">4</div><div class="txt">Choisissez <b>Ajouter à l'écran d'accueil</b>.</div>
-          <div class="capture"><img src="aide/iphone-4.png" alt="" loading="lazy" onerror="this.remove()">Capture 4</div></div>
+          <div class="capture"><img src="aide/iphone-4.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 4</span></div></div>
         <div class="etape"><div class="num">5</div><div class="txt">Appuyez sur <b>Ajouter</b>.</div>
-          <div class="capture"><img src="aide/iphone-5.png" alt="" loading="lazy" onerror="this.remove()">Capture 5</div></div>
+          <div class="capture"><img src="aide/iphone-5.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 5</span></div></div>
         <div class="etape"><div class="num">6</div><div class="txt">L'application est installée. 🎉</div>
-          <div class="capture"><img src="aide/iphone-6.png" alt="" loading="lazy" onerror="this.remove()">Capture 6</div></div>
+          <div class="capture"><img src="aide/iphone-6.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 6</span></div></div>
       </div>
     </div>
   </section>
@@ -205,12 +213,12 @@
       <div class="etape" style="text-align:left">
         <div class="num">1</div>
         <div class="txt">À la première ouverture, Sentinel demande l'autorisation d'envoyer des notifications.</div>
-        <div class="capture"><img src="aide/notif-1.png" alt="" loading="lazy" onerror="this.remove()">Capture 1</div>
+        <div class="capture"><img src="aide/notif-1.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 1</span></div>
       </div>
       <div class="etape" style="text-align:left">
         <div class="num">2</div>
         <div class="txt">Appuyez sur <b>Autoriser</b>.</div>
-        <div class="capture"><img src="aide/notif-2.png" alt="" loading="lazy" onerror="this.remove()">Capture 2</div>
+        <div class="capture"><img src="aide/notif-2.png" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Capture 2</span></div>
       </div>
       <p style="margin-top:20px;font-size:15px">Vous serez alors prévenu pour :</p>
       <div class="notif-liste">

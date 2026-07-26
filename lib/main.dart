@@ -605,6 +605,98 @@ pw.Widget _pdfEntete(String ecoleNom) => pw.Column(children:[
   pw.Divider(color: PdfColors.green800),
 ]);
 
+// Liste imprimable des élèves avec leur code parent.
+// Sert à l'inscription des familles : le parent retrouve son enfant et son code.
+Future<Uint8List> buildListeCodesPdf({
+  required String ecoleNom,
+  required String titreClasse,
+  required List<({String nom, String classe, String code, bool parentInscrit})> eleves,
+}) async {
+  final doc = pw.Document();
+  final now = DateTime.now();
+  final dateStr = '${now.day.toString().padLeft(2,'0')}/'
+      '${now.month.toString().padLeft(2,'0')}/${now.year}';
+  final inscrits = eleves.where((e) => e.parentInscrit).length;
+
+  doc.addPage(pw.MultiPage(
+    pageFormat: PdfPageFormat.a4,
+    margin: const pw.EdgeInsets.all(28),
+    footer: (c) => pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 6),
+        child: pw.Text('Sentinel CI - Veiller, pas surveiller   -   page ${c.pageNumber}',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey))),
+    build: (ctx) => [
+      _pdfEntete(ecoleNom),
+      pw.SizedBox(height: 10),
+      pw.Text('Liste des eleves et codes parents',
+          style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+      pw.Text('$titreClasse   -   Edite le $dateStr',
+          style: const pw.TextStyle(color: PdfColors.grey700)),
+      pw.SizedBox(height: 12),
+
+      // Encadré d'explication pour les familles
+      pw.Container(
+        width: double.infinity,
+        padding: const pw.EdgeInsets.all(10),
+        decoration: pw.BoxDecoration(
+            color: PdfColors.grey100, borderRadius: pw.BorderRadius.circular(6)),
+        child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Text('Aux parents : comment creer votre compte',
+              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          pw.Text('1. Ouvrez l application Sentinel CI, puis "Creer un compte parent".',
+              style: const pw.TextStyle(fontSize: 10)),
+          pw.Text('2. Saisissez le code a 6 caracteres figurant en face du nom de votre enfant.',
+              style: const pw.TextStyle(fontSize: 10)),
+          pw.Text('3. Renseignez votre nom, votre email et votre mot de passe. C est termine.',
+              style: const pw.TextStyle(fontSize: 10)),
+          pw.SizedBox(height: 4),
+          pw.Text('Ce code est personnel : ne le communiquez qu a la famille de l eleve.',
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+        ]),
+      ),
+      pw.SizedBox(height: 14),
+
+      pw.TableHelper.fromTextArray(
+        headers: ['N', 'Nom de l eleve', 'Classe', 'Code parent', 'Compte cree'],
+        data: List.generate(eleves.length, (i) => [
+          '${i + 1}',
+          eleves[i].nom,
+          eleves[i].classe,
+          eleves[i].code.isEmpty ? '-' : eleves[i].code,
+          eleves[i].parentInscrit ? 'Oui' : '',
+        ]),
+        headerStyle: pw.TextStyle(
+            fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 10),
+        headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
+        cellStyle: const pw.TextStyle(fontSize: 10),
+        columnWidths: {
+          0: const pw.FlexColumnWidth(0.7),
+          1: const pw.FlexColumnWidth(4),
+          2: const pw.FlexColumnWidth(2),
+          3: const pw.FlexColumnWidth(1.8),
+          4: const pw.FlexColumnWidth(1.4),
+        },
+        cellAlignments: {
+          0: pw.Alignment.center,
+          1: pw.Alignment.centerLeft,
+          2: pw.Alignment.centerLeft,
+          3: pw.Alignment.center,
+          4: pw.Alignment.center,
+        },
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 7),
+      ),
+      pw.SizedBox(height: 12),
+      pw.Text('${eleves.length} eleve(s)   -   $inscrits compte(s) parent deja cree(s)',
+          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+      pw.SizedBox(height: 6),
+      pw.Text('Assistance : +225 01 04 96 55 55  -  assistance@sentinel.ci  -  sentinel.ci',
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+    ],
+  ));
+  return doc.save();
+}
+
 Future<Uint8List> buildBulletinPdf({
   required String ecoleNom, required String classeNom, required String eleveNom,
   required double generale, required Map<String,double> parMatiere,
@@ -1330,6 +1422,59 @@ class FirebaseService {
   // Crée une classe (écrite par l'app => collection propre)
   static Future<void> creerClasse(Map<String, dynamic> data) =>
       _db.collection('classes').add(data);
+
+  // ---- LISTE DES ELEVES AVEC LEUR CODE PARENT (export PDF) ----
+  // Lecture seule. Si classeId est null, renvoie toute l'école.
+  // 'parentInscrit' indique qu'au moins un parent a déjà relié cet élève.
+  static Future<List<({String nom, String classe, String code, bool parentInscrit})>>
+      elevesEtCodes(String ecoleId, {String? classeId}) async {
+    // 1. Noms des classes (id -> nom)
+    final cls = await _db.collection('classes')
+        .where('ecoleId', isEqualTo: ecoleId).get();
+    final nomsClasses = <String, String>{
+      for (final d in cls.docs) d.id: ((d.data()['nom'] ?? '').toString())
+    };
+
+    // 2. Élèves de l'école (1 filtre principal, tri côté app)
+    final snap = await _db.collection('utilisateurs')
+        .where('ecoleId', isEqualTo: ecoleId).get();
+    final eleves = snap.docs.where((d) => (d.data()['role'] ?? '') == 'eleve').toList();
+
+    // 3. Enfants déjà reliés à un parent
+    final parents = snap.docs.where((d) => (d.data()['role'] ?? '') == 'parent');
+    final relies = <String>{};
+    for (final p in parents) {
+      final enfants = p.data()['enfants'];
+      if (enfants is List) relies.addAll(enfants.map((e) => e.toString()));
+    }
+
+    final liste = <({String nom, String classe, String code, bool parentInscrit})>[];
+    for (final d in eleves) {
+      final data = d.data();
+      final cId = (data['classeId'] ?? '').toString();
+      if (classeId != null && cId != classeId) continue;
+      liste.add((
+        nom: (data['nom'] ?? '').toString(),
+        classe: nomsClasses[cId] ?? '-',
+        code: (data['codeParent'] ?? '').toString(),
+        parentInscrit: relies.contains(d.id),
+      ));
+    }
+    liste.sort((a, b) {
+      final c = a.classe.compareTo(b.classe);
+      return c != 0 ? c : a.nom.toLowerCase().compareTo(b.nom.toLowerCase());
+    });
+    return liste;
+  }
+
+  // Nom lisible d'une école (en-tête des PDF)
+  static Future<String> nomEcole(String ecoleId) async {
+    try {
+      final d = await _db.collection('ecoles').doc(ecoleId).get();
+      final n = (d.data()?['nom'] ?? '').toString();
+      return n.isEmpty ? ecoleId : n;
+    } catch (_) { return ecoleId; }
+  }
 
   // Matières d'une école (1 filtre => pas d'index)
   static Stream<QuerySnapshot> streamMatieres(String ecoleId) =>
@@ -6589,8 +6734,43 @@ class _ClassesPageState extends State<ClassesPage> {
   final _niveau = TextEditingController();
   final _annee = TextEditingController(text: '2025-2026');
 
+  bool _export = false;
+
+  // Les codes parents sont des donnees sensibles : l'export est reserve
+  // au super admin, aux co-admins (role admin) et au directeur.
+  bool get _peutExporter =>
+      widget.user.role == UserRole.admin || widget.user.role == UserRole.directeur;
+
   @override
   void dispose() { _nom.dispose(); _niveau.dispose(); _annee.dispose(); super.dispose(); }
+
+  // Export PDF de la liste des eleves avec leur code parent.
+  // classeId null = toutes les classes de l'ecole.
+  Future<void> _exporterCodes({String? classeId, required String titre}) async {
+    if (_export) return;
+    if (!_peutExporter) {
+      showSnack(context, 'Action reservee a la direction.', error: true);
+      return;
+    }
+    setState(() => _export = true);
+    try {
+      final eleves = await FirebaseService.elevesEtCodes(
+          widget.user.school, classeId: classeId);
+      if (eleves.isEmpty) {
+        if (mounted) showSnack(context, 'Aucun eleve dans cette selection.', error: true);
+        return;
+      }
+      final ecoleNom = await FirebaseService.nomEcole(widget.user.school);
+      final bytes = await buildListeCodesPdf(
+          ecoleNom: ecoleNom, titreClasse: titre, eleves: eleves);
+      final fichier = 'codes_${titre.replaceAll(RegExp(r'[^A-Za-z0-9]'), '_')}.pdf';
+      await Printing.sharePdf(bytes: bytes, filename: fichier);
+    } catch (_) {
+      if (mounted) showSnack(context, 'Export impossible. Reessayez.', error: true);
+    } finally {
+      if (mounted) setState(() => _export = false);
+    }
+  }
 
   void _showAdd() {
     showModalBottomSheet(context: context, isScrollControlled: true,
@@ -6638,13 +6818,29 @@ class _ClassesPageState extends State<ClassesPage> {
       appBar: AppBar(title: const Text('Classes')),
       body: Column(children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: SizedBox(width: double.infinity, child: ElevatedButton.icon(
             onPressed: _showAdd,
             icon: const Icon(Icons.add, size: 18),
             label: const Text('Ajouter une classe'),
           )),
         ),
+        if (_peutExporter)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: SizedBox(width: double.infinity, child: OutlinedButton.icon(
+              onPressed: _export ? null : () => _exporterCodes(titre: 'Toutes les classes'),
+              icon: _export
+                  ? const SizedBox(height: 16, width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.green))
+                  : const Icon(Icons.picture_as_pdf_rounded, size: 18),
+              label: const Text('Exporter tous les codes parents (PDF)'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.green,
+                  side: const BorderSide(color: AppColors.green),
+                  padding: const EdgeInsets.symmetric(vertical: 12)),
+            )),
+          ),
         Expanded(child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseService.streamClasses(widget.user.school),
           builder: (ctx, snap) {
@@ -6668,6 +6864,15 @@ class _ClassesPageState extends State<ClassesPage> {
                       Text('${d['niveau'] ?? ''}  •  ${d['anneeScolaire'] ?? ''}',
                           style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
                     ])),
+                    if (_peutExporter)
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Exporter les codes parents de cette classe',
+                        onPressed: _export ? null : () => _exporterCodes(
+                            classeId: snap.data!.docs[i].id,
+                            titre: (d['nom'] ?? 'Classe').toString()),
+                        icon: const Icon(Icons.picture_as_pdf_rounded,
+                            size: 20, color: AppColors.green)),
                   ]));
                 });
           })),

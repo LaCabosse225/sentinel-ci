@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1B9D21">
+  <meta name="description" content="Diagnostic gratuit : évaluez en 4 minutes la circulation de l'information entre votre établissement et les familles.">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Diagnostic de votre établissement — Sentinel CI</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --vert:#1B9D21; --vert-clair:#1DAC27; --vert-fonce:#0E6D14; --vert-bg:#E7F6E5;
+      --rouge:#C62828; --rouge-bg:#FDECEA; --or:#B37A00; --or-bg:#FFF6E0;
+      --texte:#1a1a1a; --gris:#666; --bord:#e3e8e3;
+    }
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif;
+      color:var(--texte); line-height:1.55; padding-bottom:40px;
+      /* Fond a motifs education, tres discret, facon papier peint */
+      background-color:#F7FAF7;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 300 300%22%3E%3Cg fill=%22none%22 stroke=%22%231B9D21%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 opacity=%220.12%22%3E%3Cg transform=%22translate(42,38) rotate(-12) scale(1.05)%22%3E%3Cpath d=%22M -11 -2 L 0 -7 L 11 -2 L 0 3 Z M 7 0 L 7 6 M 7 6 Q 0 9 -7 6 L -7 1%22/%3E%3C/g%3E%3Cg transform=%22translate(152,22) rotate(8) scale(1.0)%22%3E%3Cpath d=%22M -10 -6 Q -5 -8 0 -6 Q 5 -8 10 -6 L 10 6 Q 5 4 0 6 Q -5 4 -10 6 Z M 0 -6 L 0 6%22/%3E%3C/g%3E%3Cg transform=%22translate(252,50) rotate(15) scale(1.0)%22%3E%3Cpath d=%22M -8 8 L -6 2 L 6 -10 L 9 -7 L -3 5 Z M -6 2 L -3 5%22/%3E%3C/g%3E%3Cg transform=%22translate(95,100) rotate(-5) scale(0.75)%22%3E%3Cpath d=%22M 0 -9 L 2.6 -2.8 L 9 -2.8 L 4 1.2 L 6 8 L 0 4 L -6 8 L -4 1.2 L -9 -2.8 L -2.6 -2.8 Z%22/%3E%3C/g%3E%3Cg transform=%22translate(205,118) rotate(0) scale(0.9)%22%3E%3Cpath d=%22M 0 -9 A 9 9 0 1 0 0 9 A 9 9 0 1 0 0 -9 M -9 0 L 9 0 M 0 -9 Q 4 0 0 9 Q -4 0 0 -9%22/%3E%3C/g%3E%3Cg transform=%22translate(32,140) rotate(-20) scale(1.0)%22%3E%3Cpath d=%22M -11 -4 L 11 -4 L 11 4 L -11 4 Z M -6 -4 L -6 -1 M -1 -4 L -1 -1 M 4 -4 L 4 -1%22/%3E%3C/g%3E%3Cg transform=%22translate(268,158) rotate(10) scale(0.95)%22%3E%3Cpath d=%22M -7 -9 L 7 -9 L 7 9 L -7 9 Z M -4 -5 L 4 -5 M -4 -1 L 4 -1 M -4 3 L 1 3%22/%3E%3C/g%3E%3Cg transform=%22translate(130,178) rotate(-8) scale(1.0)%22%3E%3Cpath d=%22M 0 -9 Q 6 -9 6 -3 Q 6 0 3 3 L 3 6 L -3 6 L -3 3 Q -6 0 -6 -3 Q -6 -9 0 -9 Z M -3 8 L 3 8%22/%3E%3C/g%3E%3Cg transform=%22translate(58,226) rotate(12) scale(0.9)%22%3E%3Cpath d=%22M 0 0 m -2.5 0 a 2.5 2.5 0 1 0 5 0 a 2.5 2.5 0 1 0 -5 0 M 0 0 m -10 0 a 10 4 0 1 0 20 0 a 10 4 0 1 0 -20 0%22/%3E%3C/g%3E%3Cg transform=%22translate(192,232) rotate(-6) scale(0.95)%22%3E%3Cpath d=%22M -9 7 L 9 7 L -9 -7 Z%22/%3E%3C/g%3E%3Cg transform=%22translate(272,252) rotate(9) scale(0.95)%22%3E%3Cpath d=%22M -7 -3 Q -7 -9 0 -9 Q 7 -9 7 -3 L 7 8 L -7 8 Z M -3 -6 L 3 -6 M -4 2 L 4 2%22/%3E%3C/g%3E%3Cg transform=%22translate(118,272) rotate(-4) scale(0.9)%22%3E%3Cpath d=%22M 0 -9 L -6 8 M 0 -9 L 6 8 M -3 1 L 3 1%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-size:300px 300px;
+      background-repeat:repeat;
+    }
+    .zone{max-width:640px;margin:0 auto;padding:0 20px}
+
+    /* bandeau */
+    .bandeau{
+      background:linear-gradient(160deg,#1DAC27 0%,#1B9D21 50%,#0E6D14 100%);
+      color:#fff;text-align:center;padding:30px 20px 26px;margin-bottom:26px;
+    }
+    .bandeau .marque{font-size:23px;font-weight:bold;letter-spacing:.5px}
+    .bandeau .slogan{font-size:12.5px;opacity:.9;margin-top:2px}
+
+    .carte{
+      background:#fff;border:1px solid var(--bord);border-radius:16px;
+      padding:24px 22px;margin-bottom:16px;
+    }
+    h1{font-size:26px;line-height:1.3;margin-bottom:12px}
+    h2{font-size:19px;color:var(--vert-fonce);margin-bottom:10px}
+    p{font-size:15px;margin-bottom:12px}
+    .discret{color:var(--gris);font-size:13.5px}
+
+    .bouton{
+      display:block;width:100%;padding:15px;border:none;border-radius:13px;
+      background:var(--vert);color:#fff;font-size:16.5px;font-weight:bold;
+      cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;
+    }
+    .bouton:active{transform:scale(.99)}
+    .bouton.creux{background:#fff;color:var(--vert-fonce);border:1.5px solid var(--vert)}
+    .bouton.whatsapp{background:#25D366}
+    .bouton:disabled{opacity:.4;cursor:not-allowed}
+
+    /* progression */
+    .prog{height:6px;background:#e6ece6;border-radius:99px;overflow:hidden;margin-bottom:6px}
+    .prog i{display:block;height:100%;background:var(--vert);transition:width .3s ease}
+    .compteur{font-size:12.5px;color:var(--gris);margin-bottom:18px;text-align:right}
+
+    /* domaine en cours */
+    .etiquette{
+      display:inline-block;font-size:11px;font-weight:bold;letter-spacing:.4px;
+      text-transform:uppercase;color:var(--vert-fonce);background:var(--vert-bg);
+      padding:4px 11px;border-radius:99px;margin-bottom:12px;
+    }
+    .question{font-size:18.5px;font-weight:bold;line-height:1.4;margin-bottom:18px}
+
+    .choix{
+      display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:9px;
+      border:1.5px solid var(--bord);border-radius:12px;background:#fff;
+      font-size:15px;font-family:inherit;color:var(--texte);cursor:pointer;line-height:1.4;
+    }
+    .choix:hover{border-color:var(--vert)}
+    .choix.actif{border-color:var(--vert);background:var(--vert-bg);font-weight:600}
+
+    .nav{display:flex;gap:10px;margin-top:16px}
+    .nav .bouton{flex:1}
+
+    /* resultat */
+    .jauge{text-align:center;padding:8px 0 4px}
+    .jauge .chiffre{font-size:52px;font-weight:bold;line-height:1}
+    .jauge .sur{font-size:16px;color:var(--gris)}
+    .niveau{
+      display:inline-block;padding:7px 18px;border-radius:99px;
+      font-size:14px;font-weight:bold;margin-top:10px;
+    }
+    .n-critique{background:var(--rouge-bg);color:var(--rouge)}
+    .n-moyen{background:var(--or-bg);color:var(--or)}
+    .n-bon{background:var(--vert-bg);color:var(--vert-fonce)}
+
+    .dom{border-top:1px solid var(--bord);padding:14px 0}
+    .dom:first-of-type{border-top:none}
+    .dom .ligne{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:7px}
+    .dom .nom{font-size:15px;font-weight:bold}
+    .barre{height:7px;background:#eef2ee;border-radius:99px;overflow:hidden;margin-bottom:8px}
+    .barre i{display:block;height:100%;border-radius:99px}
+    .b-critique{background:var(--rouge)} .b-moyen{background:#E8A317} .b-bon{background:var(--vert)}
+    .reponse{
+      font-size:13.5px;color:var(--vert-fonce);background:var(--vert-bg);
+      padding:9px 12px;border-radius:9px;
+    }
+    .reponse b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.3px;opacity:.75;margin-bottom:2px}
+
+    .contraste{
+      background:var(--or-bg);border-left:4px solid var(--or);
+      padding:14px 16px;border-radius:9px;margin:14px 0;font-size:14.5px;
+    }
+    .champ{
+      width:100%;padding:13px 14px;border:1.5px solid var(--bord);border-radius:11px;
+      font-size:15px;font-family:inherit;margin-bottom:12px;
+    }
+    .cache{display:none}
+    footer{text-align:center;padding:24px 20px;font-size:13px;color:var(--gris)}
+    footer a{color:var(--vert-fonce);font-weight:bold;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="bandeau">
+    <div class="marque">SENTINEL CI</div>
+    <div class="slogan">Veiller, pas surveiller</div>
+  </div>
+  <div class="zone">
+    <!-- ===== ACCUEIL ===== -->
+    <div id="ecran-intro">
+      <div class="carte">
+        <h1>Où en est vraiment votre établissement ?</h1>
+        <p>Ce diagnostic mesure la circulation de l'information entre votre école et les familles : absences, notes, devoirs, discipline, charge administrative.</p>
+        <p>Quatorze questions, environ quatre minutes. Vous obtenez immédiatement un état des lieux, domaine par domaine.</p>
+        <p class="discret">Aucune inscription. Aucune donnée enregistrée : tout se calcule sur votre appareil.</p>
+      </div>
+      <button class="bouton" onclick="demarrer()">Commencer le diagnostic</button>
+    </div>
+
+    <!-- ===== QUESTIONS ===== -->
+    <div id="ecran-questions" class="cache">
+      <div class="prog"><i id="prog-barre" style="width:0%"></i></div>
+      <div class="compteur" id="compteur"></div>
+      <div class="carte">
+        <span class="etiquette" id="etiquette"></span>
+        <div class="question" id="question"></div>
+        <div id="choix"></div>
+      </div>
+      <div class="nav">
+        <button class="bouton creux" id="btn-retour" onclick="reculer()">Retour</button>
+      </div>
+    </div>
+
+    <!-- ===== RESULTAT ===== -->
+    <div id="ecran-resultat" class="cache">
+      <div class="carte">
+        <h2>Votre diagnostic</h2>
+        <div class="jauge">
+          <div><span class="chiffre" id="score-chiffre">0</span><span class="sur"> / 42</span></div>
+          <div class="niveau" id="score-niveau"></div>
+        </div>
+        <div id="contraste-zone"></div>
+        <p class="discret" style="margin-top:14px">Plus le score est bas, plus l'information circule difficilement entre votre école et les familles.</p>
+      </div>
+
+      <div class="carte">
+        <h2>Domaine par domaine</h2>
+        <p class="discret" style="margin-bottom:14px">Classés du plus urgent au plus solide.</p>
+        <div id="domaines"></div>
+      </div>
+
+      <div class="carte" id="carte-priorites"></div>
+
+      <div class="carte">
+        <h2>Et maintenant ?</h2>
+        <p>Ce diagnostic n'a de valeur que s'il débouche sur quelque chose. Envoyez-nous votre résultat : nous vous rappellerons pour en parler concrètement, sans engagement.</p>
+        <input class="champ" id="nom-ecole" placeholder="Nom de votre établissement (facultatif)">
+        <a class="bouton whatsapp" id="lien-whatsapp" href="#" target="_blank">Envoyer mon résultat sur WhatsApp</a>
+        <div style="height:10px"></div>
+        <a class="bouton creux" href="tel:+2250104965555">Nous appeler — +225 01 04 96 55 55</a>
+        <div style="height:10px"></div>
+        <a class="bouton creux" href="/telecharger">Découvrir Sentinel CI</a>
+      </div>
+
+      <div class="carte">
+        <p style="font-size:15.5px;font-style:italic;color:#333;margin:0">« Si vous pouviez informer instantanément chaque parent d'une absence, d'une note, d'un devoir ou d'une sanction — qu'est-ce que cela changerait dans votre établissement ? »</p>
+      </div>
+
+      <button class="bouton creux" onclick="recommencer()">Refaire le diagnostic</button>
+    </div>
+  </div>
+
+  <footer>
+    Sentinel CI — <a href="https://sentinel.ci">sentinel.ci</a> · <a href="mailto:admin@sentinel.ci">admin@sentinel.ci</a><br>
+    <span style="font-size:12px">Suivi scolaire pour les établissements de Côte d'Ivoire</span>
+  </footer>
+  <script>
+  // ================= DONNEES =================
+  const DOMAINES = {
+    info:    { nom:"Information des familles", fonction:"Notifications automatiques : une annonce publiée arrive sur le téléphone de chaque parent, sans appel ni papier." },
+    absence: { nom:"Absences et retards",      fonction:"Le professeur signale en un geste, le parent est prévenu dans la seconde et peut justifier depuis l'application." },
+    notes:   { nom:"Notes et bulletins",       fonction:"La note est visible dès sa saisie. Les bulletins PDF, avec moyennes, rang et mention, sont générés automatiquement." },
+    devoirs: { nom:"Devoirs et travail",       fonction:"Chaque devoir est consultable par le parent, qui confirme d'un bouton que le travail a été fait ou révisé." },
+    disc:    { nom:"Discipline",               fonction:"Sanctions, avertissements et félicitations parviennent aux familles immédiatement, avec une trace écrite." },
+    admin:   { nom:"Charge administrative",    fonction:"Listes d'élèves centralisées, import en masse, moins d'appels, moins d'impressions, suivi des règlements." },
+    num:     { nom:"Maturité numérique",       fonction:"Sentinel s'installe sans magasin d'applications, fonctionne sur un simple smartphone et consomme très peu de données." },
+  };
+
+  const QUESTIONS = [
+    ["info","Aujourd'hui, comment prévenez-vous les familles d'une information importante (réunion, changement d'horaire) ?",
+     [["Un mot dans le cahier de correspondance, remis à l'élève",0],["Des appels téléphoniques, un parent après l'autre",1],["Un groupe WhatsApp ou des SMS",2],["Une plateforme dédiée à l'établissement",3]]],
+    ["info","Quand vous diffusez une information, quelle proportion de familles la reçoit réellement ?",
+     [["Moins de la moitié",0],["Environ la moitié",1],["La plupart, mais sans certitude",2],["La totalité, et vous pouvez le vérifier",3]]],
+    ["absence","Lorsqu'un élève est absent, au bout de combien de temps son parent l'apprend-il ?",
+     [["Souvent le soir, par l'élève — ou parfois jamais",0],["Dans la journée, si quelqu'un a le temps d'appeler",1],["Dans l'heure, par appel ou message",2],["Immédiatement, sans intervention humaine",3]]],
+    ["absence","Comment les absences sont-elles enregistrées ?",
+     [["Sur un cahier papier",0],["Sur des feuilles, recopiées ensuite à la main",1],["Dans un fichier informatique tenu par le secrétariat",2],["Dans une application, en temps réel",3]]],
+    ["notes","Comment un parent découvre-t-il la note d'un devoir ?",
+     [["Au bulletin, à la fin du trimestre",0],["Par son enfant, s'il montre son cahier",1],["Par un message ponctuel du professeur",2],["Dès que le professeur la saisit",3]]],
+    ["notes","Combien de temps la préparation des bulletins mobilise-t-elle votre équipe ?",
+     [["Plus d'une semaine de travail",0],["Plusieurs jours",1],["Un à deux jours",2],["Ils sont générés automatiquement",3]]],
+    ["devoirs","Un parent qui veut vérifier le travail à faire ce soir, comment fait-il ?",
+     [["Il fait confiance à ce que dit l'enfant",0],["Il regarde le cahier de textes, s'il est à jour",1],["Il demande dans un groupe WhatsApp de parents",2],["Il le consulte directement, toujours à jour",3]]],
+    ["devoirs","Selon vous, combien d'élèves annoncent « je n'ai pas de devoirs » alors qu'ils en ont ?",
+     [["Beaucoup — c'est un problème courant",0],["Un certain nombre",1],["Quelques-uns",2],["Très peu : les parents ont l'information par ailleurs",3]]],
+    ["disc","Quand un élève reçoit un avertissement ou une sanction, son parent l'apprend :",
+     [["Parfois jamais",0],["Lors d'une convocation, plus tard",1],["Par un mot ou un appel, dans les jours qui suivent",2],["Immédiatement",3]]],
+    ["disc","Un parent vous a-t-il déjà dit : « si j'avais été informé plus tôt, les choses auraient été différentes » ?",
+     [["Oui, plusieurs fois",0],["Oui, une fois",1],["Non, mais cela pourrait arriver",2],["Non : nos familles sont informées en temps réel",3]]],
+    ["admin","Combien de temps votre équipe passe-t-elle chaque semaine à appeler des parents ?",
+     [["Plus de cinq heures",0],["Entre deux et cinq heures",1],["Moins de deux heures",2],["Presque rien : l'information part toute seule",3]]],
+    ["admin","Vos listes d'élèves et vos dossiers se trouvent :",
+     [["Sur papier uniquement",0],["Sur papier, plus quelques fichiers dispersés",1],["Dans des fichiers informatiques centralisés",2],["Dans une base consultable par toute l'équipe",3]]],
+    ["num","De quel équipement disposez-vous dans l'établissement ?",
+     [["Ni connexion internet ni ordinateur",0],["Un ordinateur, avec une connexion irrégulière",1],["Des ordinateurs et une connexion stable",2],["Des ordinateurs, une connexion stable et du wifi",3]]],
+    ["num","Parmi les parents de votre école, combien possèdent un smartphone ?",
+     [["Une minorité",0],["Environ la moitié",1],["La grande majorité",2],["La quasi-totalité",3]]],
+  ];
+
+  // Questions non notees, posees a la fin
+  const PRIORITES = ["Prévenir immédiatement des absences","Notes visibles en temps réel",
+    "Devoirs consultables par les parents","Emploi du temps","Agenda et événements",
+    "Messagerie école-familles","Bulletins automatiques","Statistiques et classements"];
+
+  const SATISFACTION = [["Très insatisfait",1],["Plutôt insatisfait",2],["Correct",3],["Plutôt satisfait",4],["Très satisfait",5]];
+
+  const TOTAL = QUESTIONS.length + 2;   // 14 notees + priorites + satisfaction
+
+  // ================= ETAT =================
+  let idx = 0;
+  let reponses = new Array(QUESTIONS.length).fill(null);
+  let priorites = [];
+  let satisfaction = null;
+
+  const $ = (id) => document.getElementById(id);
+  const montrer = (id) => {
+    ["ecran-intro","ecran-questions","ecran-resultat"].forEach(e => $(e).classList.add("cache"));
+    $(id).classList.remove("cache");
+    window.scrollTo(0,0);
+  };
+
+  function demarrer(){ idx = 0; montrer("ecran-questions"); afficher(); }
+  function recommencer(){
+    idx = 0; reponses = new Array(QUESTIONS.length).fill(null);
+    priorites = []; satisfaction = null; montrer("ecran-intro");
+  }
+
+  // ================= AFFICHAGE =================
+  function afficher(){
+    $("prog-barre").style.width = Math.round((idx / TOTAL) * 100) + "%";
+    $("compteur").textContent = "Question " + (idx+1) + " sur " + TOTAL;
+    $("btn-retour").style.visibility = idx === 0 ? "hidden" : "visible";
+    const c = $("choix");
+    c.innerHTML = "";
+
+    // --- questions notees ---
+    if (idx < QUESTIONS.length){
+      const [dom, texte, options] = QUESTIONS[idx];
+      $("etiquette").textContent = DOMAINES[dom].nom;
+      $("question").textContent = texte;
+      options.forEach(([label, pts], i) => {
+        const b = document.createElement("button");
+        b.className = "choix" + (reponses[idx] === i ? " actif" : "");
+        b.textContent = label;
+        b.onclick = () => { reponses[idx] = i; suivant(); };
+        c.appendChild(b);
+      });
+      return;
+    }
+
+    // --- priorites (choix multiple, 3 max) ---
+    if (idx === QUESTIONS.length){
+      $("etiquette").textContent = "Vos priorités";
+      $("question").textContent = "Si vous deviez améliorer trois choses en premier, lesquelles ?";
+      PRIORITES.forEach((label) => {
+        const b = document.createElement("button");
+        b.className = "choix" + (priorites.includes(label) ? " actif" : "");
+        b.textContent = label;
+        b.onclick = () => {
+          if (priorites.includes(label)) priorites = priorites.filter(x => x !== label);
+          else if (priorites.length < 3) priorites.push(label);
+          afficher();
+        };
+        c.appendChild(b);
+      });
+      const suite = document.createElement("button");
+      suite.className = "bouton";
+      suite.style.marginTop = "14px";
+      suite.disabled = priorites.length === 0;
+      suite.textContent = priorites.length === 0
+        ? "Choisissez au moins une priorité"
+        : "Continuer (" + priorites.length + " sur 3)";
+      suite.onclick = () => suivant();
+      c.appendChild(suite);
+      return;
+    }
+
+    // --- satisfaction (non notee) ---
+    $("etiquette").textContent = "Votre ressenti";
+    $("question").textContent = "Globalement, êtes-vous satisfait de la communication entre votre école et les familles ?";
+    SATISFACTION.forEach(([label, val]) => {
+      const b = document.createElement("button");
+      b.className = "choix" + (satisfaction === val ? " actif" : "");
+      b.textContent = label;
+      b.onclick = () => { satisfaction = val; calculer(); };
+      c.appendChild(b);
+    });
+  }
+
+  function suivant(){ if (idx < TOTAL - 1){ idx++; afficher(); } }
+  function reculer(){ if (idx > 0){ idx--; afficher(); } }
+
+  // ================= CALCUL =================
+  function niveau(pct){
+    if (pct < 40) return ["critique","n-critique","b-critique","Critique"];
+    if (pct < 70) return ["moyen","n-moyen","b-moyen","À améliorer"];
+    return ["bon","n-bon","b-bon","Satisfaisant"];
+  }
+
+  function calculer(){
+    // score par domaine
+    const parDom = {};
+    Object.keys(DOMAINES).forEach(d => parDom[d] = { obtenu:0, max:0 });
+    QUESTIONS.forEach(([dom,, options], i) => {
+      parDom[dom].max += 3;
+      const r = reponses[i];
+      if (r !== null) parDom[dom].obtenu += options[r][1];
+    });
+
+    const total = Object.values(parDom).reduce((s,d) => s + d.obtenu, 0);
+    const pctGlobal = Math.round((total / 42) * 100);
+    const [, cls,, mot] = niveau(pctGlobal);
+
+    $("score-chiffre").textContent = total;
+    const nv = $("score-niveau");
+    nv.textContent = mot;
+    nv.className = "niveau " + cls;
+
+    // contraste ressenti / diagnostic
+    const zone = $("contraste-zone");
+    zone.innerHTML = "";
+    if (satisfaction >= 4 && pctGlobal < 55){
+      zone.innerHTML = '<div class="contraste">Vous vous estimez plutôt satisfait de votre communication, et pourtant le diagnostic révèle plusieurs points fragiles. C\'est fréquent : les difficultés d\'information sont rarement visibles depuis la direction, parce que les familles s\'en plaignent peu.</div>';
+    } else if (satisfaction <= 2 && pctGlobal >= 70){
+      zone.innerHTML = '<div class="contraste">Vous êtes sévère avec votre établissement : le diagnostic montre des bases plus solides que vous ne le pensez. L\'enjeu pour vous est l\'automatisation, pas la reconstruction.</div>';
+    }
+
+    // domaines, du plus faible au plus solide
+    const liste = Object.keys(parDom).map(d => {
+      const pct = Math.round((parDom[d].obtenu / parDom[d].max) * 100);
+      return { cle:d, pct:pct, obtenu:parDom[d].obtenu, max:parDom[d].max };
+    }).sort((a,b) => a.pct - b.pct);
+
+    const boite = $("domaines");
+    boite.innerHTML = "";
+    liste.forEach(d => {
+      const [, ncls, bcls, mot] = niveau(d.pct);
+      const bloc = document.createElement("div");
+      bloc.className = "dom";
+      let html = '<div class="ligne"><span class="nom">' + DOMAINES[d.cle].nom + '</span>'
+               + '<span class="niveau ' + ncls + '" style="margin:0;font-size:12px;padding:4px 12px">' + mot + '</span></div>'
+               + '<div class="barre"><i class="' + bcls + '" style="width:' + Math.max(d.pct,4) + '%"></i></div>';
+      if (d.pct < 70){
+        html += '<div class="reponse"><b>Ce que Sentinel apporte</b>' + DOMAINES[d.cle].fonction + '</div>';
+      }
+      bloc.innerHTML = html;
+      boite.appendChild(bloc);
+    });
+
+    // priorites
+    const cp = $("carte-priorites");
+    if (priorites.length){
+      cp.innerHTML = '<h2>Vos priorités</h2><p class="discret" style="margin-bottom:12px">Ce que vous souhaitez améliorer en premier — nous en reparlerons.</p>'
+        + priorites.map(p => '<div class="reponse" style="margin-bottom:8px">' + p + '</div>').join("");
+      cp.classList.remove("cache");
+    } else { cp.classList.add("cache"); }
+
+    // lien WhatsApp
+    const construire = () => {
+      const nom = ($("nom-ecole").value || "").trim();
+      let msg = "Bonjour, je viens de faire le diagnostic Sentinel.\n\n";
+      if (nom) msg += "Etablissement : " + nom + "\n";
+      msg += "Score : " + total + "/42 (" + mot + ")\n\n";
+      msg += "Points les plus faibles :\n";
+      liste.slice(0,3).forEach(d => { msg += "- " + DOMAINES[d.cle].nom + " : " + d.pct + "%\n"; });
+      if (priorites.length) msg += "\nMes priorites : " + priorites.join(", ") + "\n";
+      msg += "\nJ'aimerais en discuter.";
+      $("lien-whatsapp").href = "https://wa.me/2250104965555?text=" + encodeURIComponent(msg);
+    };
+    construire();
+    $("nom-ecole").oninput = construire;
+
+    montrer("ecran-resultat");
+  }
+  </script>
+</body>
+</html>

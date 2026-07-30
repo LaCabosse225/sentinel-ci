@@ -1806,13 +1806,16 @@ class FirebaseService {
     final ref = FirebaseStorage.instance.ref(chemin);
     await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
     final url = await ref.getDownloadURL();
-    await _db.collection('ecoles').doc(ecoleId).update({'logoUrl': url});
+    // set(merge) et non update : fonctionne meme si la fiche ecole n'existe pas encore
+    await _db.collection('ecoles').doc(ecoleId)
+        .set({'logoUrl': url}, SetOptions(merge: true));
     return url;
   }
 
   // Retire le logo d'une ecole (le fichier reste dans Storage, sans consequence).
   static Future<void> retirerLogoEcole(String ecoleId) =>
-      _db.collection('ecoles').doc(ecoleId).update({'logoUrl': FieldValue.delete()});
+      _db.collection('ecoles').doc(ecoleId)
+          .set({'logoUrl': FieldValue.delete()}, SetOptions(merge: true));
 
   // Adresse du logo d'une ecole, ou null si elle n'en a pas.
   static Future<String?> logoUrlEcole(String ecoleId) async {
@@ -6663,9 +6666,9 @@ Future<void> dialogLogoEcole(
               try {
                 await FirebaseService.retirerLogoEcole(ecoleId);
                 if (ctx.mounted) Navigator.pop(ctx);
-              } catch (_) {
+              } catch (e) {
                 setSt(() => envoi = false);
-                if (ctx.mounted) showSnack(ctx, 'Retrait impossible.', error: true);
+                if (ctx.mounted) showSnack(ctx, 'Retrait impossible : $e', error: true);
               }
             },
             child: const Text('Retirer', style: TextStyle(color: AppColors.red))),
@@ -6677,9 +6680,18 @@ Future<void> dialogLogoEcole(
             try {
               await FirebaseService.uploadLogoEcole(ecoleId, choisi!, 'logo.jpg');
               if (ctx.mounted) Navigator.pop(ctx);
-            } catch (_) {
+            } catch (e) {
               setSt(() => envoi = false);
-              if (ctx.mounted) showSnack(ctx, 'Envoi impossible. Reessayez.', error: true);
+              // On affiche la vraie cause : indispensable pour diagnostiquer
+              // (droits Storage manquants, reseau, fiche ecole absente...).
+              final msg = e.toString();
+              if (ctx.mounted) {
+                showSnack(ctx,
+                    msg.contains('unauthorized') || msg.contains('permission')
+                        ? 'Droits insuffisants : publiez les regles Storage.'
+                        : 'Echec : $msg',
+                    error: true);
+              }
             }
           },
           child: envoi

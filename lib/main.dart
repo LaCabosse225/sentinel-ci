@@ -597,14 +597,30 @@ Future<List<({String id, String nom, int nb})>> comptageNotesMatiere(
 }
 
 // ---- Génération PDF ----
-pw.Widget _pdfEntete(String ecoleNom) => pw.Column(children:[
-  pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children:[
+// En-tete commun a tous les PDF. Le logo de l'ecole est facultatif :
+// s'il est absent, la mise en page reste identique a avant.
+pw.Widget _pdfEntete(String ecoleNom, {pw.MemoryImage? logoEcole}) => pw.Column(children:[
+  pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: pw.CrossAxisAlignment.center, children:[
     pw.Text('SENTINEL CI',
         style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: PdfColors.green800)),
-    pw.Text(ecoleNom, style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+    pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children:[
+      pw.Text(ecoleNom, style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+      if (logoEcole != null) ...[
+        pw.SizedBox(width: 8),
+        pw.Container(width: 34, height: 34,
+            child: pw.Image(logoEcole, fit: pw.BoxFit.contain)),
+      ],
+    ]),
   ]),
   pw.Divider(color: PdfColors.green800),
 ]);
+
+// Convertit les octets d'un logo en image utilisable par le generateur PDF.
+pw.MemoryImage? _imagePdf(Uint8List? bytes) {
+  if (bytes == null || bytes.isEmpty) return null;
+  try { return pw.MemoryImage(bytes); } catch (_) { return null; }
+}
 
 // ---- CODES PARENTS ----
 // Nombre maximum de comptes parents pouvant se relier a un meme eleve
@@ -626,7 +642,9 @@ Future<Uint8List> buildListeCodesPdf({
   required String ecoleNom,
   required String titreClasse,
   required List<({String nom, String classe, String ecole, String code, bool parentInscrit})> eleves,
+  Uint8List? logoEcole,
 }) async {
+  final logo = _imagePdf(logoEcole);
   final doc = pw.Document();
   final now = DateTime.now();
   final dateStr = '${now.day.toString().padLeft(2,'0')}/'
@@ -643,7 +661,7 @@ Future<Uint8List> buildListeCodesPdf({
         child: pw.Text('Sentinel CI - Veiller, pas surveiller   -   page ${c.pageNumber}',
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey))),
     build: (ctx) => [
-      _pdfEntete(ecoleNom),
+      _pdfEntete(ecoleNom, logoEcole: logo),
       pw.SizedBox(height: 10),
       pw.Text('Liste des eleves et codes parents',
           style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
@@ -747,14 +765,16 @@ Future<Uint8List> buildBulletinPdf({
   required String ecoleNom, required String classeNom, required String eleveNom,
   required double generale, required Map<String,double> parMatiere,
   required int rang, required int total,
+  Uint8List? logoEcole,
 }) async {
+  final logo = _imagePdf(logoEcole);
   final doc = pw.Document();
   final matieres = parMatiere.keys.toList()..sort();
   doc.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
     margin: const pw.EdgeInsets.all(28),
     build: (ctx) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children:[
-      _pdfEntete(ecoleNom),
+      _pdfEntete(ecoleNom, logoEcole: logo),
       pw.SizedBox(height: 10),
       pw.Text(eleveNom, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
       pw.Text('Classe : $classeNom', style: const pw.TextStyle(color: PdfColors.grey700)),
@@ -832,13 +852,15 @@ Future<Uint8List> buildBulletinPdf({
 Future<Uint8List> buildClassePdf({
   required String ecoleNom, required String classeNom,
   required List<({String nom, double moy})> eleves,
+  Uint8List? logoEcole,
 }) async {
+  final logo = _imagePdf(logoEcole);
   final doc = pw.Document();
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
     margin: const pw.EdgeInsets.all(28),
     build: (ctx) => [
-      _pdfEntete(ecoleNom),
+      _pdfEntete(ecoleNom, logoEcole: logo),
       pw.SizedBox(height: 10),
       pw.Text('Moyennes de la classe', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
       pw.Text('Classe : $classeNom', style: const pw.TextStyle(color: PdfColors.grey700)),
@@ -1776,6 +1798,40 @@ class FirebaseService {
 
   // ---------- ESPACE VIE SCOLAIRE (blog photos) ----------
   // Envoie une photo dans Firebase Storage et renvoie son URL de téléchargement.
+  // ---------- LOGO DE L'ECOLE ----------
+  // Televerse le logo d'un etablissement et l'enregistre sur sa fiche.
+  // Retourne l'adresse de telechargement.
+  static Future<String> uploadLogoEcole(String ecoleId, Uint8List bytes, String nom) async {
+    final chemin = 'logos/$ecoleId/${DateTime.now().millisecondsSinceEpoch}_$nom';
+    final ref = FirebaseStorage.instance.ref(chemin);
+    await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+    final url = await ref.getDownloadURL();
+    await _db.collection('ecoles').doc(ecoleId).update({'logoUrl': url});
+    return url;
+  }
+
+  // Retire le logo d'une ecole (le fichier reste dans Storage, sans consequence).
+  static Future<void> retirerLogoEcole(String ecoleId) =>
+      _db.collection('ecoles').doc(ecoleId).update({'logoUrl': FieldValue.delete()});
+
+  // Adresse du logo d'une ecole, ou null si elle n'en a pas.
+  static Future<String?> logoUrlEcole(String ecoleId) async {
+    try {
+      final d = await _db.collection('ecoles').doc(ecoleId).get();
+      final u = (d.data()?['logoUrl'] ?? '').toString();
+      return u.isEmpty ? null : u;
+    } catch (_) { return null; }
+  }
+
+  // Octets du logo, pour l'incruster dans les PDF. null si absent ou illisible.
+  static Future<Uint8List?> logoEcoleBytes(String ecoleId) async {
+    try {
+      final url = await logoUrlEcole(ecoleId);
+      if (url == null) return null;
+      return await FirebaseStorage.instance.refFromURL(url).getData(3 * 1024 * 1024);
+    } catch (_) { return null; }
+  }
+
   static Future<String> uploadPhotoVieScolaire(String ecoleId, Uint8List bytes, String nom) async {
     final chemin = 'vieScolaire/$ecoleId/${DateTime.now().millisecondsSinceEpoch}_$nom';
     final ref = FirebaseStorage.instance.ref(chemin);
@@ -2904,6 +2960,11 @@ class _LoginScreenState extends State<LoginScreen> {
             begin: Alignment.topLeft, end: Alignment.bottomRight,
             colors: [Color(0xFF062E1A), AppColors.green, AppColors.green2],
           ),
+          // Motif educatif, identite visuelle Sentinel
+          image: DecorationImage(
+            image: AssetImage('assets/images/motif.png'),
+            repeat: ImageRepeat.repeat,
+          ),
         ),
         child: SafeArea(
           child: Center(
@@ -3682,15 +3743,43 @@ class DashboardPage extends StatelessWidget {
           stream: FirebaseService.streamToutesEcoles(),
           builder: (ctx, snap) {
             String nom = user.school;
+            String logo = '';
             if (snap.hasData) {
               for (final d in snap.data!.docs) {
                 if (d.id == user.school) {
-                  nom = ((d.data() as Map)['nom'] ?? user.school).toString();
+                  final m = d.data() as Map;
+                  nom = (m['nom'] ?? user.school).toString();
+                  logo = (m['logoUrl'] ?? '').toString();
                   break;
                 }
               }
             }
-            return Text(nom, style: const TextStyle(fontSize:13, color:AppColors.textMuted));
+            // La direction peut poser ou changer le logo de son etablissement.
+            final peutModifier = user.role == UserRole.admin || user.role == UserRole.directeur;
+            return Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(children: [
+                if (logo.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: Image.network(logo, width: 30, height: 30, fit: BoxFit.cover,
+                        errorBuilder: (c,e,s)=> const SizedBox.shrink()),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(child: Text(nom, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize:13, color:AppColors.textMuted))),
+                if (peutModifier) ...[
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: () => dialogLogoEcole(context, user.school, nom, logo),
+                    child: Icon(
+                        logo.isEmpty ? Icons.add_photo_alternate_outlined : Icons.edit_outlined,
+                        size: 15, color: AppColors.textMuted),
+                  ),
+                ],
+              ]),
+            );
           }),
         const SizedBox(height:20),
 
@@ -3705,6 +3794,9 @@ class DashboardPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                   gradient: const LinearGradient(colors:[AppColors.green, Color(0xFF0E9F5B)]),
+                  image: const DecorationImage(
+                      image: AssetImage('assets/images/motif.png'),
+                      repeat: ImageRepeat.repeat),
                   borderRadius: BorderRadius.circular(14)),
               child: Row(children: const [
                 Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 28),
@@ -4721,7 +4813,9 @@ class MoyennesClassePage extends StatelessWidget {
         }
       } catch (_) {}
       final eleves = await calculerMoyennesClasse(user.school, user.classePrincipale!);
-      final bytes = await buildClassePdf(ecoleNom: ecoleNom, classeNom: classeNom, eleves: eleves);
+      final logo = await FirebaseService.logoEcoleBytes(user.school);
+      final bytes = await buildClassePdf(ecoleNom: ecoleNom, classeNom: classeNom,
+          eleves: eleves, logoEcole: logo);
       if (context.mounted) Navigator.pop(context); // ferme le loader
       if (imprimer) {
         await Printing.layoutPdf(onLayout: (_) async => bytes);
@@ -5002,10 +5096,12 @@ class BulletinPage extends StatelessWidget {
                 Row(children:[
                   Expanded(child: ElevatedButton.icon(
                     onPressed: () async {
+                      final logo = await FirebaseService.logoEcoleBytes(ecoleId);
                       final bytes = await buildBulletinPdf(
                         ecoleNom: d['ecoleNom'] ?? '', classeNom: d['classeNom'] ?? '',
                         eleveNom: d['eleveNom'] ?? eleveNom,
-                        generale: moy, parMatiere: parMat, rang: rang, total: total);
+                        generale: moy, parMatiere: parMat, rang: rang, total: total,
+                        logoEcole: logo);
                       await Printing.sharePdf(bytes: bytes,
                           filename: 'bulletin_${(d['eleveNom'] ?? eleveNom).toString().replaceAll(' ', '_')}.pdf');
                     },
@@ -5015,10 +5111,12 @@ class BulletinPage extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(child: OutlinedButton.icon(
                     onPressed: () async {
+                      final logo = await FirebaseService.logoEcoleBytes(ecoleId);
                       final bytes = await buildBulletinPdf(
                         ecoleNom: d['ecoleNom'] ?? '', classeNom: d['classeNom'] ?? '',
                         eleveNom: d['eleveNom'] ?? eleveNom,
-                        generale: moy, parMatiere: parMat, rang: rang, total: total);
+                        generale: moy, parMatiere: parMat, rang: rang, total: total,
+                        logoEcole: logo);
                       await Printing.layoutPdf(onLayout: (_) async => bytes);
                     },
                     icon: const Icon(Icons.print_rounded, size: 18),
@@ -5119,6 +5217,9 @@ class _AbonnementsDirecteurPageState extends State<AbonnementsDirecteurPage> {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
               gradient: const LinearGradient(colors:[AppColors.green, Color(0xFF0E9F5B)]),
+              image: const DecorationImage(
+                  image: AssetImage('assets/images/motif.png'),
+                  repeat: ImageRepeat.repeat),
               borderRadius: BorderRadius.circular(16)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children:[
             const Text('A payer ce mois',
@@ -6498,6 +6599,98 @@ class _EcolesPageState extends State<EcolesPage> {
 // ══════════════════════════════════════════
 //  UTILISATEURS PAGE (ADMIN)
 // ══════════════════════════════════════════
+// Televersement du logo d'un etablissement (direction uniquement).
+// Le logo apparait sur le tableau de bord et en tete de tous les PDF.
+Future<void> dialogLogoEcole(
+    BuildContext context, String ecoleId, String ecoleNom, String logoActuel) async {
+  Uint8List? choisi;
+  bool envoi = false;
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(builder: (ctx, setSt) => AlertDialog(
+      title: Text('Logo de $ecoleNom', style: const TextStyle(fontSize: 16.5)),
+      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Text(
+            'Ce logo apparaitra sur le tableau de bord de l etablissement et en tete '
+            'des documents PDF : bulletins, listes d eleves, moyennes et recus.',
+            style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+        const SizedBox(height: 14),
+        Center(child: Container(
+          width: 110, height: 110,
+          decoration: BoxDecoration(
+              color: AppColors.bg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border)),
+          child: choisi != null
+              ? ClipRRect(borderRadius: BorderRadius.circular(11),
+                  child: Image.memory(choisi!, fit: BoxFit.contain))
+              : (logoActuel.isNotEmpty
+                  ? ClipRRect(borderRadius: BorderRadius.circular(11),
+                      child: Image.network(logoActuel, fit: BoxFit.contain,
+                          errorBuilder: (c,e,s)=> const Icon(Icons.school_rounded,
+                              size: 40, color: AppColors.textMuted)))
+                  : const Icon(Icons.school_rounded, size: 40, color: AppColors.textMuted)),
+        )),
+        const SizedBox(height: 14),
+        SizedBox(width: double.infinity, child: OutlinedButton.icon(
+          onPressed: envoi ? null : () async {
+            try {
+              final x = await ImagePicker().pickImage(
+                  source: ImageSource.gallery, imageQuality: 85, maxWidth: 600);
+              if (x != null) {
+                final b = await x.readAsBytes();
+                setSt(() => choisi = b);
+              }
+            } catch (_) {
+              if (ctx.mounted) showSnack(ctx, 'Impossible d ouvrir la galerie.', error: true);
+            }
+          },
+          icon: const Icon(Icons.image_outlined, size: 18),
+          label: Text(choisi == null ? 'Choisir une image' : 'Choisir une autre image'),
+          style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.green,
+              side: const BorderSide(color: AppColors.green)),
+        )),
+        const SizedBox(height: 6),
+        const Text('Image carree de preference. Elle sera reduite automatiquement.',
+            style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+      ])),
+      actions: [
+        if (logoActuel.isNotEmpty && choisi == null)
+          TextButton(
+            onPressed: envoi ? null : () async {
+              setSt(() => envoi = true);
+              try {
+                await FirebaseService.retirerLogoEcole(ecoleId);
+                if (ctx.mounted) Navigator.pop(ctx);
+              } catch (_) {
+                setSt(() => envoi = false);
+                if (ctx.mounted) showSnack(ctx, 'Retrait impossible.', error: true);
+              }
+            },
+            child: const Text('Retirer', style: TextStyle(color: AppColors.red))),
+        TextButton(onPressed: envoi ? null : () => Navigator.pop(ctx),
+            child: const Text('Annuler')),
+        ElevatedButton(
+          onPressed: (choisi == null || envoi) ? null : () async {
+            setSt(() => envoi = true);
+            try {
+              await FirebaseService.uploadLogoEcole(ecoleId, choisi!, 'logo.jpg');
+              if (ctx.mounted) Navigator.pop(ctx);
+            } catch (_) {
+              setSt(() => envoi = false);
+              if (ctx.mounted) showSnack(ctx, 'Envoi impossible. Reessayez.', error: true);
+            }
+          },
+          child: envoi
+              ? const SizedBox(height: 18, width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Enregistrer')),
+      ],
+    )),
+  );
+}
+
 // Regeneration du code parent d'un eleve (direction uniquement).
 // L'ancien code cesse immediatement de fonctionner : on demande confirmation.
 Future<void> dialogRegenererCode(
@@ -6982,8 +7175,10 @@ class _ClassesPageState extends State<ClassesPage> {
       final ecoleNom = _estAdmin
           ? 'Toutes les ecoles'
           : await FirebaseService.nomEcole(widget.user.school);
+      // Logo seulement si l'export porte sur une seule ecole
+      final logo = _estAdmin ? null : await FirebaseService.logoEcoleBytes(widget.user.school);
       final bytes = await buildListeCodesPdf(
-          ecoleNom: ecoleNom, titreClasse: titre, eleves: eleves);
+          ecoleNom: ecoleNom, titreClasse: titre, eleves: eleves, logoEcole: logo);
       final fichier = 'codes_${titre.replaceAll(RegExp(r'[^A-Za-z0-9]'), '_')}.pdf';
       await Printing.sharePdf(bytes: bytes, filename: fichier);
     } catch (_) {
@@ -9120,6 +9315,9 @@ class AssistancePage extends StatelessWidget {
             gradient: const LinearGradient(
                 colors: [Color(0xFF1DAC27), Color(0xFF0E6D14)],
                 begin: Alignment.topLeft, end: Alignment.bottomRight),
+            image: const DecorationImage(
+                image: AssetImage('assets/images/motif.png'),
+                repeat: ImageRepeat.repeat),
             borderRadius: BorderRadius.circular(16),
           ),
           child: const Column(children: [

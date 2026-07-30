@@ -84,6 +84,7 @@ flutter:
   assets:
     - assets/icon/logo.png
     - assets/images/accueil.jpg
+    - assets/images/motif.png
 
   # Police Roboto embarquée : indispensable pour la version web
   # (évite le téléchargement depuis fonts.gstatic.com, bloqué sur

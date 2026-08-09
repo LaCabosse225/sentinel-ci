@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../modeles/contenu.dart';
 import '../services/contenu_service.dart';
+import '../donnees/programme_officiel.dart';
 
 // ============================================================================
 //  ECRAN 1 — NIVEAUX ET MATIERES
@@ -353,14 +354,7 @@ class ChapitresPage extends StatelessWidget {
           }
           final chaps = snap.data!;
           if (chaps.isEmpty) {
-            return const Center(
-                child: Padding(
-              padding: EdgeInsets.all(28),
-              child: Text(
-                  'Aucun chapitre.\nCommencez par le chapitre 1 du programme officiel.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textMuted)),
-            ));
+            return _AucunChapitre(niveau: niveau, matiere: matiere);
           }
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
@@ -767,6 +761,105 @@ Future<void> _dialogChapitre(
       ),
     ),
   );
+}
+
+// ============================================================================
+//  ETAT VIDE — INSTALLATION DU PROGRAMME OFFICIEL
+//
+//  Quand une matiere n a encore aucun chapitre et qu un programme officiel
+//  DPFC existe pour ce niveau, un bouton cree les 13 lecons d un seul geste.
+// ============================================================================
+
+class _AucunChapitre extends StatefulWidget {
+  final String niveau;
+  final Matiere matiere;
+  const _AucunChapitre({required this.niveau, required this.matiere});
+  @override
+  State<_AucunChapitre> createState() => _AucunChapitreState();
+}
+
+class _AucunChapitreState extends State<_AucunChapitre> {
+  bool _envoi = false;
+
+  Future<void> _installer() async {
+    final lecons =
+        ProgrammeOfficiel.chapitres(widget.niveau, widget.matiere.id).length;
+    final ok = await confirmerDialog(
+        context,
+        'Installer le programme officiel ?',
+        '$lecons chapitres seront crees d un coup, dans l ordre du programme '
+        'educatif de la DPFC. Vous pourrez ensuite modifier chaque titre.');
+    if (!ok || !mounted) return;
+    setState(() => _envoi = true);
+    try {
+      final r =
+          await ProgrammeOfficiel.installer(widget.niveau, widget.matiere.id);
+      if (!mounted) return;
+      setState(() => _envoi = false);
+      showSnack(
+          context,
+          r.ignores == 0
+              ? '${r.crees} chapitre(s) cree(s).'
+              : '${r.crees} cree(s), ${r.ignores} deja present(s).');
+    } catch (e) {
+      if (mounted) {
+        setState(() => _envoi = false);
+        showSnack(context, 'Erreur : $e', error: true);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dispo =
+        ProgrammeOfficiel.existe(widget.niveau, widget.matiere.id);
+    final lecons =
+        ProgrammeOfficiel.chapitres(widget.niveau, widget.matiere.id).length;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.auto_stories_rounded,
+              size: 44, color: AppColors.textMuted),
+          const SizedBox(height: 12),
+          const Text('Aucun chapitre pour le moment.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textMuted)),
+          if (dispo) ...[
+            const SizedBox(height: 6),
+            Text(
+                'Le programme officiel de la DPFC est disponible : '
+                '$lecons lecons pretes a etre installees.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _envoi ? null : _installer,
+                icon: _envoi
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.playlist_add_check_rounded, size: 18),
+                label: Text(_envoi
+                    ? 'Installation en cours...'
+                    : 'Installer le programme officiel'),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 6),
+            const Text(
+                'Ajoutez les chapitres un a un avec le bouton ci-dessous.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+          ],
+        ]),
+      ),
+    );
+  }
 }
 
 // ============================================================================

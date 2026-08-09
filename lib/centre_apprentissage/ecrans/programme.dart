@@ -14,6 +14,7 @@ import '../../main.dart';
 import '../modeles/contenu.dart';
 import '../services/contenu_service.dart';
 import '../donnees/programme_officiel.dart';
+import 'ressources.dart';
 
 // ============================================================================
 //  ECRAN 1 — NIVEAUX ET MATIERES
@@ -363,7 +364,14 @@ class ChapitresPage extends StatelessWidget {
             itemBuilder: (_, i) {
               final c = chaps[i];
               return SCCard(
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                child: InkWell(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => RessourcesPage(
+                              user: user, chapitre: c, matiere: matiere))),
+                  child:
+                      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Container(
                     width: 38,
                     height: 38,
@@ -453,6 +461,7 @@ class ChapitresPage extends StatelessWidget {
                     ],
                   ),
                 ]),
+                ),
               );
             },
           );

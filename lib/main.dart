@@ -26,6 +26,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gal/gal.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'centre_apprentissage/ecrans/programme.dart';
 
 
 // ── NOTIFICATIONS SONORES ──
@@ -3493,6 +3494,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
+        _NavItem(Icons.menu_book_rounded,      'Contenu'),
       ];
       case UserRole.directeur: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
@@ -3535,6 +3537,7 @@ class _MainShellState extends State<MainShell> {
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
+        ProgrammePage(user: widget.user),
       ];
       case UserRole.directeur: return [
         DashboardPage(user: widget.user),

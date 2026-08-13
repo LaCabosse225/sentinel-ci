@@ -27,6 +27,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:gal/gal.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'centre_apprentissage/ecrans/programme.dart';
+import 'centre_apprentissage/ecrans/eleve_accueil.dart';
 
 
 // ── NOTIFICATIONS SONORES ──
@@ -3523,6 +3524,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
+        _NavItem(Icons.auto_stories_rounded,   'Apprendre'),
       ];
     }
   }
@@ -3568,6 +3570,7 @@ class _MainShellState extends State<MainShell> {
           AlertesPage(user: u),
           AgendaPage(user: u),
           VieScolairePage(user: u),
+          CentreApprentissagePage(user: u),
         ];
     }
   }

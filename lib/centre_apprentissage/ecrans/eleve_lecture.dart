@@ -13,6 +13,10 @@
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
+// Ouverture d'URL : implementation conditionnelle web/mobile,
+// exactement comme dans main.dart (dart:html interdit sur Android).
+import '../../url_launcher_stub.dart'
+    if (dart.library.html) '../../url_launcher_web.dart';
 import '../modeles/contenu.dart';
 
 // ============================================================================

@@ -28,6 +28,8 @@ import 'package:gal/gal.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'centre_apprentissage/ecrans/programme.dart';
 import 'centre_apprentissage/ecrans/eleve_accueil.dart';
+import 'insight/ecran_insight.dart';
+import 'insight/insight_parent.dart';
 
 
 // ── NOTIFICATIONS SONORES ──
@@ -3496,6 +3498,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
         _NavItem(Icons.menu_book_rounded,      'Contenu'),
+        _NavItem(Icons.insights_rounded,       'Insight'),
       ];
       case UserRole.directeur: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
@@ -3504,6 +3507,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
+        _NavItem(Icons.insights_rounded,       'Insight'),
       ];
       case UserRole.prof: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
@@ -3513,6 +3517,8 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.menu_book_rounded,      'Lecons'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
+        if (widget.user.estPrincipal)
+          _NavItem(Icons.insights_rounded,     'Insight'),
       ];
       case UserRole.eleve:
       case UserRole.parent: return [
@@ -3540,6 +3546,7 @@ class _MainShellState extends State<MainShell> {
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
         ProgrammePage(user: widget.user),
+        InsightPage(user: widget.user),
       ];
       case UserRole.directeur: return [
         DashboardPage(user: widget.user),
@@ -3548,6 +3555,7 @@ class _MainShellState extends State<MainShell> {
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
+        InsightPage(user: widget.user),
       ];
       case UserRole.prof: return [
         DashboardPage(user: widget.user),
@@ -3557,6 +3565,7 @@ class _MainShellState extends State<MainShell> {
         LeconsPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
+        if (widget.user.estPrincipal) InsightPage(user: widget.user),
       ];
       case UserRole.eleve:
       case UserRole.parent:
@@ -3864,6 +3873,10 @@ class DashboardPage extends StatelessWidget {
           ),
           const SizedBox(height:20),
         ],
+
+        // Suivi Sentinelle Insight (parent et eleve) : message bienveillant
+        if (user.role == UserRole.parent || user.role == UserRole.eleve)
+          CarteSuiviEnfant(user: user),
 
         // Carte "Mes enfants" (parent)
         if (user.role == UserRole.parent) ...[

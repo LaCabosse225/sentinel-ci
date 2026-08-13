@@ -3677,31 +3677,73 @@ class _MainShellState extends State<MainShell> {
           child: _pages[_idx.clamp(0, _pages.length-1)],
         ),
       ]),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          height: 66,
-          labelTextStyle: WidgetStateProperty.all(
-            const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
-          iconTheme: WidgetStateProperty.all(
-            const IconThemeData(size: 20)),
+      // Barre de navigation DEFILANTE : avec 8 ou 9 sections, une
+      // NavigationBar classique serre les libelles et les coupe. Ici chaque
+      // onglet garde sa largeur et la barre glisse horizontalement.
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: NavigationBar(
-          selectedIndex: _idx,
-          onDestinationSelected: (i) {
-            final idx = i.clamp(0, _pages.length-1);
-            marquerSectionVue(widget.user.uid, _navItems[idx].label);
-            setState(() => _idx = idx);
-          },
-          backgroundColor: Colors.white,
-          indicatorColor: AppColors.greenBg,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: _navItems.map((n) => NavigationDestination(
-              icon: IconePastille(icone: n.icon,
-                  requete: _requetePastille(n.label),
-                  uid: widget.user.uid,
-                  section: n.label,
-                  childId: widget.user.childId),
-              label: n.label)).toList(),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 62,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              itemCount: _navItems.length,
+              itemBuilder: (_, i) {
+                final n = _navItems[i];
+                final actif = i == _idx;
+                return InkWell(
+                  onTap: () {
+                    final idx = i.clamp(0, _pages.length - 1);
+                    marquerSectionVue(widget.user.uid, _navItems[idx].label);
+                    setState(() => _idx = idx);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 74,
+                    margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: actif ? AppColors.greenBg : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconTheme(
+                          data: IconThemeData(
+                            size: 21,
+                            color: actif ? AppColors.green : AppColors.textMuted,
+                          ),
+                          child: IconePastille(
+                            icone: n.icon,
+                            requete: _requetePastille(n.label),
+                            uid: widget.user.uid,
+                            section: n.label,
+                            childId: widget.user.childId,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          n.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: actif ? FontWeight.w800 : FontWeight.w600,
+                            color: actif ? AppColors.green : AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

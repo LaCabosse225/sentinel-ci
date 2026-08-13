@@ -18,6 +18,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../main.dart';
 import '../modeles/contenu.dart';
 import '../services/contenu_service.dart';
+import '../donnees/contenu_officiel.dart';
 
 // ============================================================================
 //  ECRAN — LISTE DES RESSOURCES D'UN CHAPITRE
@@ -165,15 +166,8 @@ class _RessourcesPageState extends State<RessourcesPage> {
               }
               final list = snap.data!;
               if (list.isEmpty) {
-                return const Center(
-                    child: Padding(
-                  padding: EdgeInsets.all(28),
-                  child: Text(
-                      'Ce chapitre est encore vide.\n'
-                      'Commencez par le cours, puis ajoutez des exercices et un quiz.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textMuted)),
-                ));
+                return _ChapitreVide(
+                    user: widget.user, chapitre: widget.chapitre);
               }
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 90),
@@ -308,6 +302,101 @@ class _RessourcesPageState extends State<RessourcesPage> {
                   ])),
             ],
           ),
+        ]),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+//  ETAT VIDE — INSTALLATION DU CONTENU PRET A L'EMPLOI
+//
+//  Quand un chapitre n a encore aucune ressource et qu un contenu redige
+//  existe pour lui, un bouton l installe en entier. Tout arrive en
+//  BROUILLON : rien n est visible par les eleves avant relecture.
+// ============================================================================
+
+class _ChapitreVide extends StatefulWidget {
+  final AppUser user;
+  final Chapitre chapitre;
+  const _ChapitreVide({required this.user, required this.chapitre});
+  @override
+  State<_ChapitreVide> createState() => _ChapitreVideState();
+}
+
+class _ChapitreVideState extends State<_ChapitreVide> {
+  bool _envoi = false;
+
+  Future<void> _installer() async {
+    final n = ContenuOfficiel.ressources(widget.chapitre.id).length;
+    final ok = await confirmerDialog(
+        context,
+        'Installer le contenu de ce chapitre ?',
+        '$n ressources seront creees en BROUILLON : cours, renforcement, '
+        'exercices corriges, fiche de revision et quiz. Vous les relirez '
+        'avant de les publier.');
+    if (!ok || !mounted) return;
+    setState(() => _envoi = true);
+    try {
+      final crees =
+          await ContenuOfficiel.installer(widget.chapitre, widget.user.uid);
+      if (!mounted) return;
+      setState(() => _envoi = false);
+      showSnack(context,
+          '$crees ressource(s) installee(s) en brouillon. Relisez puis publiez.');
+    } catch (e) {
+      if (mounted) {
+        setState(() => _envoi = false);
+        showSnack(context, 'Erreur : $e', error: true);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dispo = ContenuOfficiel.existe(widget.chapitre.id);
+    final n = ContenuOfficiel.ressources(widget.chapitre.id).length;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.inbox_rounded, size: 44, color: AppColors.textMuted),
+          const SizedBox(height: 12),
+          const Text('Ce chapitre est encore vide.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textMuted)),
+          if (dispo) ...[
+            const SizedBox(height: 6),
+            Text(
+                'Un contenu redige est disponible : $n ressources pretes a '
+                'etre installees en brouillon.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 12.5, color: AppColors.textMuted)),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _envoi ? null : _installer,
+                icon: _envoi
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.download_rounded, size: 18),
+                label: Text(_envoi
+                    ? 'Installation en cours...'
+                    : 'Installer le contenu du chapitre'),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 6),
+            const Text(
+                'Commencez par le cours, puis ajoutez des exercices et un quiz.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+          ],
         ]),
       ),
     );

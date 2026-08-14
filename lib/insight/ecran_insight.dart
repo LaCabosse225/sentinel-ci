@@ -28,6 +28,11 @@ class InsightPage extends StatefulWidget {
 class _InsightPageState extends State<InsightPage> {
   String? _classeId;
   String? _classeNom;
+  /// Ecole a laquelle appartient la classe choisie. Indispensable pour le
+  /// super admin, dont la fiche n'est rattachee a aucun etablissement :
+  /// sans cela, l'analyse d'une classe d'une autre ecole ne renvoie rien.
+  String? _classeEcoleId;
+  Map<String, String> _nomsEcoles = {};
   Future<List<AnalyseEleve>>? _analyse;
 
   bool get _estStaff =>
@@ -37,19 +42,29 @@ class _InsightPageState extends State<InsightPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.user.role == UserRole.admin) _chargerNomsEcoles();
     // Le professeur principal arrive directement sur sa classe.
     if (widget.user.role == UserRole.prof &&
         (widget.user.classePrincipale ?? '').isNotEmpty) {
       _classeId = widget.user.classePrincipale;
+      _classeEcoleId = widget.user.school;
       _lancer();
     }
+  }
+
+  Future<void> _chargerNomsEcoles() async {
+    try {
+      final m = await FirebaseService.nomsDesEcoles();
+      if (mounted) setState(() => _nomsEcoles = m);
+    } catch (_) {}
   }
 
   void _lancer() {
     if (_classeId == null) return;
     setState(() {
       _analyse = MoteurInsight.analyserClasse(
-          ecoleId: widget.user.school, classeId: _classeId!);
+          ecoleId: _classeEcoleId ?? widget.user.school,
+          classeId: _classeId!);
     });
   }
 
@@ -63,7 +78,7 @@ class _InsightPageState extends State<InsightPage> {
         child: Padding(
           padding: EdgeInsets.all(28),
           child: Text(
-              'Sentinelle Insight est reserve a la direction et aux '
+              'Sentinel Insight est reserve a la direction et aux '
               'professeurs principaux.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textMuted)),
@@ -86,7 +101,7 @@ class _InsightPageState extends State<InsightPage> {
                   repeat: ImageRepeat.repeat),
               borderRadius: BorderRadius.circular(16)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-            Text('Sentinelle Insight',
+            Text('Sentinel Insight',
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 19,
@@ -102,16 +117,37 @@ class _InsightPageState extends State<InsightPage> {
         if (_estStaff) ...[
           SCCard(
               child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseService.streamClasses(widget.user.school),
+            // Le super admin pilote toutes les ecoles ; le directeur la sienne.
+            stream: widget.user.role == UserRole.admin
+                ? FirebaseService.streamToutesClasses()
+                : FirebaseService.streamClasses(widget.user.school),
             builder: (ctx, snap) {
               if (!snap.hasData) {
                 return const Text('Chargement des classes...',
                     style: TextStyle(color: AppColors.textMuted));
               }
-              final classes = snap.data!.docs;
+              final multiEcoles = widget.user.role == UserRole.admin;
+              final classes = snap.data!.docs.toList();
               if (classes.isEmpty) {
                 return const Text('Aucune classe enregistree.',
                     style: TextStyle(color: AppColors.textMuted));
+              }
+              // Regroupement visuel par ecole : avec plusieurs 6eme A, le nom
+              // de l'etablissement est indispensable pour ne pas se tromper.
+              if (multiEcoles) {
+                classes.sort((a, b) {
+                  final ea = _nomsEcoles[
+                          ((a.data() as Map)['ecoleId'] ?? '').toString()] ??
+                      '';
+                  final eb = _nomsEcoles[
+                          ((b.data() as Map)['ecoleId'] ?? '').toString()] ??
+                      '';
+                  final c = ea.compareTo(eb);
+                  if (c != 0) return c;
+                  return ((a.data() as Map)['nom'] ?? '')
+                      .toString()
+                      .compareTo(((b.data() as Map)['nom'] ?? '').toString());
+                });
               }
               return DropdownButtonFormField<String>(
                 value: _classeId,
@@ -120,13 +156,38 @@ class _InsightPageState extends State<InsightPage> {
                 hint: const Text('Choisir une classe'),
                 items: classes.map((d) {
                   final m = d.data() as Map<String, dynamic>;
+                  final nom = (m['nom'] ?? d.id).toString();
+                  final ecole =
+                      _nomsEcoles[(m['ecoleId'] ?? '').toString()] ?? '';
                   return DropdownMenuItem(
-                      value: d.id, child: Text(m['nom'] ?? d.id));
+                    value: d.id,
+                    child: multiEcoles && ecole.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(ecole,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.orange)),
+                              Text(nom,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 13.5)),
+                            ],
+                          )
+                        : Text(nom),
+                  );
                 }).toList(),
                 onChanged: (v) {
                   final doc = classes.firstWhere((c) => c.id == v);
+                  final m = doc.data() as Map<String, dynamic>;
                   _classeId = v;
-                  _classeNom = ((doc.data() as Map)['nom'] ?? '').toString();
+                  _classeNom = (m['nom'] ?? '').toString();
+                  _classeEcoleId = (m['ecoleId'] ?? '').toString();
                   _lancer();
                 },
               );
@@ -186,9 +247,14 @@ class _InsightPageState extends State<InsightPage> {
                           AppColors.green, AppColors.greenBg),
                     ]),
                     const SizedBox(height: 18),
-                    SectionTitle(_classeNom == null
-                        ? 'Eleves'
-                        : 'Eleves — $_classeNom'),
+                    SectionTitle(() {
+                      if (_classeNom == null) return 'Eleves';
+                      final ec = _nomsEcoles[_classeEcoleId ?? ''] ?? '';
+                      return widget.user.role == UserRole.admin &&
+                              ec.isNotEmpty
+                          ? 'Eleves — $ec · $_classeNom'
+                          : 'Eleves — $_classeNom';
+                    }()),
                     ...list.map((a) => Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: _ligneEleve(a),

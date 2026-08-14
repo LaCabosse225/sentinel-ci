@@ -1307,6 +1307,8 @@ class FirebaseService {
     const collections = [
       'utilisateurs', 'notes', 'absences', 'devoirs', 'lecons', 'agenda',
       'alertes', 'rattrapages', 'classes', 'matieres', 'emploiDuTemps',
+      // 'emploiDutemps' (t minuscule) : collection historique distincte.
+      'emploiDutemps',
       'vieScolaire', 'paiements', 'messages',
       // Contenu prive du Centre d'Apprentissage. Le contenu NATIONAL porte
       // un ecoleId vide : il n'est jamais concerne par cette suppression.

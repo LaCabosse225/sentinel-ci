@@ -30,6 +30,7 @@ import 'centre_apprentissage/ecrans/programme.dart';
 import 'centre_apprentissage/ecrans/eleve_accueil.dart';
 import 'insight/ecran_insight.dart';
 import 'insight/insight_parent.dart';
+import 'maintenance/menage.dart';
 
 
 // ── NOTIFICATIONS SONORES ──
@@ -1307,6 +1308,9 @@ class FirebaseService {
       'utilisateurs', 'notes', 'absences', 'devoirs', 'lecons', 'agenda',
       'alertes', 'rattrapages', 'classes', 'matieres', 'emploiDuTemps',
       'vieScolaire', 'paiements', 'messages',
+      // Contenu prive du Centre d'Apprentissage. Le contenu NATIONAL porte
+      // un ecoleId vide : il n'est jamais concerne par cette suppression.
+      'ca_ressources',
     ];
     for (final col in collections) {
       // On boucle par paquets de 400 (limite Firestore : 500 par lot).
@@ -6811,10 +6815,27 @@ class _EcolesPageState extends State<EcolesPage> {
   @override
   Widget build(BuildContext context) => Column(children:[
     Padding(padding:const EdgeInsets.all(16),
-        child:Row(children:[
-          Expanded(child:ElevatedButton.icon(
-              onPressed:_showAdd,
-              icon:const Icon(Icons.add), label:const Text('Ajouter une ecole'))),
+        child:Column(children:[
+          Row(children:[
+            Expanded(child:ElevatedButton.icon(
+                onPressed:_showAdd,
+                icon:const Icon(Icons.add), label:const Text('Ajouter une ecole'))),
+          ]),
+          if (widget.user.estSuperAdmin) ...[
+            const SizedBox(height: 10),
+            SizedBox(width: double.infinity, child: OutlinedButton.icon(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => MenagePage(user: widget.user))),
+              icon: const Icon(Icons.cleaning_services_rounded, size: 18),
+              label: const Text('Maintenance des donnees'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textMuted,
+                  side: const BorderSide(color: AppColors.border),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+            )),
+          ],
         ])),
     Expanded(child:StreamBuilder<QuerySnapshot>(
         stream: FirebaseService.streamEcoles(),

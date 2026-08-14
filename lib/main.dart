@@ -3770,7 +3770,7 @@ class _MainShellState extends State<MainShell> {
                         child: const Icon(Icons.insights_rounded,
                             color: Colors.white, size: 20),
                       ),
-                      title: const Text('Sentinelle Insight',
+                      title: const Text('Sentinel Insight',
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.w800)),
                       subtitle: const Text(
@@ -4078,7 +4078,7 @@ class DashboardPage extends StatelessWidget {
           const SizedBox(height:20),
         ],
 
-        // Suivi Sentinelle Insight (parent et eleve) : message bienveillant
+        // Suivi Sentinel Insight (parent et eleve) : message bienveillant
         if (user.role == UserRole.parent || user.role == UserRole.eleve)
           CarteSuiviEnfant(user: user),
 
@@ -7185,9 +7185,25 @@ class _ImportElevesPageState extends State<ImportElevesPage> {
   }
 }
 
-class UtilisateursPage extends StatelessWidget {
+class UtilisateursPage extends StatefulWidget {
   final AppUser user;
   const UtilisateursPage({super.key, required this.user});
+  @override
+  State<UtilisateursPage> createState() => _UtilisateursPageState();
+}
+
+class _UtilisateursPageState extends State<UtilisateursPage> {
+  /// Filtre par type de compte. '' = tous.
+  String _typeFiltre = '';
+  AppUser get user => widget.user;
+
+  static const Map<String, String> _libelleRole = {
+    'eleve': 'Eleves',
+    'parent': 'Parents',
+    'prof': 'Professeurs',
+    'directeur': 'Direction',
+    'admin': 'Administrateurs',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -7248,6 +7264,21 @@ class UtilisateursPage extends StatelessWidget {
           )),
         ]),
       ),
+      // ---- Filtre par type de compte ----
+      SizedBox(
+        height: 44,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          children: [
+            _puceType('', 'Tous', roleColors),
+            for (final r in _libelleRole.keys)
+              if (user.role != UserRole.directeur ||
+                  r == 'eleve' || r == 'prof' || r == 'parent')
+                _puceType(r, _libelleRole[r]!, roleColors),
+          ],
+        ),
+      ),
       Expanded(
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseService.streamToutesEcoles(),
@@ -7277,11 +7308,19 @@ class UtilisateursPage extends StatelessWidget {
                     return r=='eleve' || r=='prof' || r=='parent';
                   }).toList();
                 }
+                // Filtre par type de compte choisi dans les puces du haut
+                if (_typeFiltre.isNotEmpty) {
+                  docs = docs.where((d) =>
+                      ((d.data() as Map)['role'] ?? 'eleve') == _typeFiltre)
+                      .toList();
+                }
                 docs.sort((a,b)=>((a.data() as Map)['nom']??'').toString()
                     .toLowerCase()
                     .compareTo(((b.data() as Map)['nom']??'').toString().toLowerCase()));
                 if (docs.isEmpty)
-                  return const Center(child:Text('Aucun utilisateur.'));
+                  return Center(child: Text(_typeFiltre.isEmpty
+                      ? 'Aucun utilisateur.'
+                      : 'Aucun compte de type « ${_libelleRole[_typeFiltre]} ».'));
                 return ListView.separated(
                     padding:const EdgeInsets.all(16),
                     itemCount:docs.length,
@@ -7388,6 +7427,31 @@ class UtilisateursPage extends StatelessWidget {
           }),
       ),
     ]);
+  }
+
+  /// Une puce de filtre, avec le compteur de comptes de ce type.
+  Widget _puceType(String valeur, String libelle,
+      Map<String, (Color, Color)> couleurs) {
+    final actif = _typeFiltre == valeur;
+    final c = couleurs[valeur]?.$1 ?? AppColors.green;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () => setState(() => _typeFiltre = valeur),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+              color: actif ? c : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: actif ? c : AppColors.border)),
+          child: Text(libelle,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: actif ? Colors.white : AppColors.textMuted)),
+        ),
+      ),
+    );
   }
 }
 

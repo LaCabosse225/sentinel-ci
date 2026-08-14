@@ -45,16 +45,18 @@ class _ProgrammePageState extends State<ProgrammePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Securite d'affichage. Les regles Firestore refusent de toute facon
-    // l'ecriture aux autres roles : ceci evite simplement un ecran inutile.
-    if (widget.user.role != UserRole.admin) {
+    // Le programme national (niveaux, matieres, chapitres) n'est modifiable
+    // que par l'equipe Sentinel. La direction et les professeurs le
+    // consultent pour y deposer le contenu propre a leur etablissement.
+    if (widget.user.role == UserRole.eleve ||
+        widget.user.role == UserRole.parent) {
       return Scaffold(
         appBar: AppBar(title: const Text('Programme')),
         body: const Center(
             child: Padding(
           padding: EdgeInsets.all(28),
           child: Text(
-              'Cet espace est reserve a l equipe Sentinel CI.',
+              'Cet espace est reserve a l equipe pedagogique.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textMuted)),
         )),
@@ -63,12 +65,14 @@ class _ProgrammePageState extends State<ProgrammePage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Programme')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _dialogMatiere(context),
-        backgroundColor: AppColors.green,
-        icon: const Icon(Icons.add),
-        label: const Text('Matiere'),
-      ),
+      floatingActionButton: widget.user.role != UserRole.admin
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => _dialogMatiere(context),
+              backgroundColor: AppColors.green,
+              icon: const Icon(Icons.add),
+              label: const Text('Matiere'),
+            ),
       body: Column(children: [
         // ---- Compteurs de contenu ----
         Padding(
@@ -226,13 +230,14 @@ class _ProgrammePageState extends State<ProgrammePage> {
                                 _NbChapitres(niveau: _niveau, matiereId: m.id),
                               ]),
                         ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          tooltip: 'Modifier la matiere',
-                          onPressed: () => _dialogMatiere(context, matiere: m),
-                          icon: const Icon(Icons.edit_outlined,
-                              size: 18, color: AppColors.textMuted),
-                        ),
+                        if (widget.user.role == UserRole.admin)
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            tooltip: 'Modifier la matiere',
+                            onPressed: () => _dialogMatiere(context, matiere: m),
+                            icon: const Icon(Icons.edit_outlined,
+                                size: 18, color: AppColors.textMuted),
+                          ),
                         const Icon(Icons.chevron_right_rounded,
                             color: AppColors.textMuted),
                       ]),
@@ -341,12 +346,14 @@ class ChapitresPage extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _dialogChapitre(context, niveau, matiere),
-        backgroundColor: AppColors.green,
-        icon: const Icon(Icons.add),
-        label: const Text('Chapitre'),
-      ),
+      floatingActionButton: user.role != UserRole.admin
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => _dialogChapitre(context, niveau, matiere),
+              backgroundColor: AppColors.green,
+              icon: const Icon(Icons.add),
+              label: const Text('Chapitre'),
+            ),
       body: StreamBuilder<List<Chapitre>>(
         stream: ContenuService.streamChapitres(niveau, matiereId: matiere.id),
         builder: (ctx, snap) {
@@ -355,7 +362,8 @@ class ChapitresPage extends StatelessWidget {
           }
           final chaps = snap.data!;
           if (chaps.isEmpty) {
-            return _AucunChapitre(niveau: niveau, matiere: matiere);
+            return _AucunChapitre(
+                niveau: niveau, matiere: matiere, estAdmin: user.role == UserRole.admin);
           }
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
@@ -408,6 +416,10 @@ class ChapitresPage extends StatelessWidget {
                                   fontSize: 10.5, color: AppColors.textMuted)),
                         ]),
                   ),
+                  if (user.role != UserRole.admin)
+                    const Icon(Icons.chevron_right_rounded,
+                        color: AppColors.textMuted)
+                  else
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert_rounded,
                         size: 20, color: AppColors.textMuted),
@@ -782,7 +794,9 @@ Future<void> _dialogChapitre(
 class _AucunChapitre extends StatefulWidget {
   final String niveau;
   final Matiere matiere;
-  const _AucunChapitre({required this.niveau, required this.matiere});
+  final bool estAdmin;
+  const _AucunChapitre(
+      {required this.niveau, required this.matiere, this.estAdmin = false});
   @override
   State<_AucunChapitre> createState() => _AucunChapitreState();
 }
@@ -820,7 +834,7 @@ class _AucunChapitreState extends State<_AucunChapitre> {
 
   @override
   Widget build(BuildContext context) {
-    final dispo =
+    final dispo = widget.estAdmin &&
         ProgrammeOfficiel.existe(widget.niveau, widget.matiere.id);
     final lecons =
         ProgrammeOfficiel.chapitres(widget.niveau, widget.matiere.id).length;

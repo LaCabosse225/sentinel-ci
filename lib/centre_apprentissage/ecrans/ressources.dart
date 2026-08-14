@@ -41,6 +41,20 @@ class RessourcesPage extends StatefulWidget {
 class _RessourcesPageState extends State<RessourcesPage> {
   TypeRessource? _filtre;
 
+  /// Portee affichee et publiee :
+  ///  - '' : contenu NATIONAL, partage par toutes les ecoles ;
+  ///  - id : contenu PRIVE de l'etablissement.
+  /// Seule l'equipe Sentinel (role admin) peut basculer entre les deux.
+  late String _portee;
+
+  bool get _estSentinel => widget.user.role == UserRole.admin;
+
+  @override
+  void initState() {
+    super.initState();
+    _portee = _estSentinel ? '' : widget.user.school;
+  }
+
   /// Types proposables dans un chapitre (les sujets d examen et l orientation
   /// ne sont pas rattaches a un chapitre : ils auront leur propre ecran).
   static const List<TypeRessource> _typesChapitre = [
@@ -90,7 +104,8 @@ class _RessourcesPageState extends State<RessourcesPage> {
                 user: widget.user,
                 chapitre: widget.chapitre,
                 matiere: widget.matiere,
-                type: t)));
+                type: t,
+                portee: _portee)));
   }
 
   static String _aide(TypeRessource t) {
@@ -141,6 +156,52 @@ class _RessourcesPageState extends State<RessourcesPage> {
         label: const Text('Ajouter'),
       ),
       body: Column(children: [
+        // ---- Portee du contenu ----
+        if (_estSentinel)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                    value: '',
+                    label: Text('National'),
+                    icon: Icon(Icons.public_rounded, size: 16)),
+                ButtonSegment(
+                    value: '_ecole',
+                    label: Text('Mon ecole'),
+                    icon: Icon(Icons.school_rounded, size: 16)),
+              ],
+              selected: {_portee.isEmpty ? '' : '_ecole'},
+              onSelectionChanged: (s) => setState(() =>
+                  _portee = s.first == '' ? '' : widget.user.school),
+              style: const ButtonStyle(
+                  visualDensity: VisualDensity.compact,
+                  textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 12))),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                  color: AppColors.blueBg,
+                  borderRadius: BorderRadius.circular(10)),
+              child: Row(children: const [
+                Icon(Icons.school_rounded, size: 16, color: AppColors.blue),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                      'Vous ajoutez ici le contenu de votre etablissement. '
+                      'Il reste visible par vos seuls eleves.',
+                      style: TextStyle(fontSize: 11.5, color: AppColors.blue)),
+                ),
+              ]),
+            ),
+          ),
+        const SizedBox(height: 6),
+
         // ---- Filtre par type ----
         SizedBox(
           height: 42,
@@ -159,7 +220,7 @@ class _RessourcesPageState extends State<RessourcesPage> {
         Expanded(
           child: StreamBuilder<List<Ressource>>(
             stream: ContenuService.streamRessourcesChapitre(widget.chapitre.id,
-                type: _filtre),
+                type: _filtre, portee: _portee),
             builder: (ctx, snap) {
               if (!snap.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -211,6 +272,7 @@ class _RessourcesPageState extends State<RessourcesPage> {
                     chapitre: widget.chapitre,
                     matiere: widget.matiere,
                     type: r.type,
+                    portee: r.ecoleId,
                     ressource: r))),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(r.type.emoji, style: const TextStyle(fontSize: 22)),
@@ -244,18 +306,37 @@ class _RessourcesPageState extends State<RessourcesPage> {
                     ],
                   ]),
                   const SizedBox(height: 6),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                        color: r.actif ? AppColors.greenBg : AppColors.goldBg,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Text(r.actif ? 'Publie ✓' : 'Brouillon',
-                        style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: r.actif ? AppColors.green : AppColors.gold)),
-                  ),
+                  Wrap(spacing: 6, runSpacing: 4, children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                          color: r.actif ? AppColors.greenBg : AppColors.goldBg,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Text(r.actif ? 'Publie ✓' : 'Brouillon',
+                          style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color:
+                                  r.actif ? AppColors.green : AppColors.gold)),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                          color: r.estNational
+                              ? AppColors.blueBg
+                              : AppColors.purpleBg,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Text(r.estNational ? 'National' : 'Mon ecole',
+                          style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: r.estNational
+                                  ? AppColors.blue
+                                  : AppColors.purple)),
+                    ),
+                  ]),
                 ]),
           ),
           PopupMenuButton<String>(
@@ -354,7 +435,8 @@ class _ChapitreVideState extends State<_ChapitreVide> {
 
   @override
   Widget build(BuildContext context) {
-    final dispo = ContenuOfficiel.existe(widget.chapitre.id);
+    final dispo = widget.user.role == UserRole.admin &&
+        ContenuOfficiel.existe(widget.chapitre.id);
     final n = ContenuOfficiel.ressources(widget.chapitre.id).length;
     return Center(
       child: Padding(
@@ -412,6 +494,7 @@ class EditeurRessourcePage extends StatefulWidget {
   final Chapitre chapitre;
   final Matiere matiere;
   final TypeRessource type;
+  final String portee; // '' = national, sinon identifiant de l'ecole
   final Ressource? ressource;
   const EditeurRessourcePage(
       {super.key,
@@ -419,6 +502,7 @@ class EditeurRessourcePage extends StatefulWidget {
       required this.chapitre,
       required this.matiere,
       required this.type,
+      this.portee = '',
       this.ressource});
 
   @override
@@ -547,6 +631,7 @@ class _EditeurRessourcePageState extends State<EditeurRessourcePage> {
       chapitreId: widget.chapitre.id,
       niveau: widget.chapitre.niveau,
       matiereId: widget.chapitre.matiereId,
+      ecoleId: widget.portee,
       contenu: _contenu.text.trim(),
       imagesUrls: _images,
       pdfUrl: _pdf.text.trim(),
@@ -814,6 +899,39 @@ class _EditeurRessourcePageState extends State<EditeurRessourcePage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+                color: widget.portee.isEmpty
+                    ? AppColors.blueBg
+                    : AppColors.purpleBg,
+                borderRadius: BorderRadius.circular(10)),
+            child: Row(children: [
+              Icon(
+                  widget.portee.isEmpty
+                      ? Icons.public_rounded
+                      : Icons.school_rounded,
+                  size: 16,
+                  color: widget.portee.isEmpty
+                      ? AppColors.blue
+                      : AppColors.purple),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                    widget.portee.isEmpty
+                        ? 'Contenu national — visible par toutes les ecoles'
+                        : 'Contenu de votre etablissement — visible par vos eleves uniquement',
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: widget.portee.isEmpty
+                            ? AppColors.blue
+                            : AppColors.purple)),
+              ),
+            ]),
+          ),
           SCCard(
               child: Column(children: [
             TextField(

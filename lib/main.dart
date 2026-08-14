@@ -3489,36 +3489,39 @@ class _MainShellState extends State<MainShell> {
 
   List<_NavItem> get _navItems {
     switch(widget.user.role){
+      // Les QUATRE PREMIERS onglets restent visibles en permanence.
+      // Les suivants sont regroupes derriere le bouton « Plus ».
+      // L'ordre traduit donc une priorite d'usage, pas un ordre historique.
       case UserRole.admin: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.school_rounded,         'Ecoles'),
+        _NavItem(Icons.insights_rounded,       'Insight'),
+        _NavItem(Icons.menu_book_rounded,      'Contenu'),
         _NavItem(Icons.people_rounded,         'Membres'),
         _NavItem(Icons.credit_card_rounded,    'Revenus'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
-        _NavItem(Icons.menu_book_rounded,      'Contenu'),
-        _NavItem(Icons.insights_rounded,       'Insight'),
       ];
       case UserRole.directeur: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
-        _NavItem(Icons.people_rounded,         'Membres'),
-        _NavItem(Icons.card_membership_rounded,'Forfait'),
-        _NavItem(Icons.notifications_rounded,  'Alertes'),
-        _NavItem(Icons.calendar_month_rounded, 'Agenda'),
-        _NavItem(Icons.photo_library_rounded,  'Actus'),
-        _NavItem(Icons.menu_book_rounded,      'Contenu'),
         _NavItem(Icons.insights_rounded,       'Insight'),
+        _NavItem(Icons.people_rounded,         'Membres'),
+        _NavItem(Icons.menu_book_rounded,      'Contenu'),
+        _NavItem(Icons.calendar_month_rounded, 'Agenda'),
+        _NavItem(Icons.notifications_rounded,  'Alertes'),
+        _NavItem(Icons.card_membership_rounded,'Forfait'),
+        _NavItem(Icons.photo_library_rounded,  'Actus'),
       ];
       case UserRole.prof: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.edit_rounded,           'Notes'),
-        _NavItem(Icons.assignment_rounded,     'Devoirs'),
         _NavItem(Icons.how_to_reg_rounded,     'Absence'),
-        _NavItem(Icons.menu_book_rounded,      'Lecons'),
+        _NavItem(Icons.assignment_rounded,     'Devoirs'),
+        _NavItem(Icons.menu_book_rounded,      'Contenu'),
+        _NavItem(Icons.auto_stories_rounded,   'Lecons'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
-        _NavItem(Icons.menu_book_rounded,      'Contenu'),
         if (widget.user.estPrincipal)
           _NavItem(Icons.insights_rounded,     'Insight'),
       ];
@@ -3526,49 +3529,50 @@ class _MainShellState extends State<MainShell> {
       case UserRole.parent: return [
         _NavItem(Icons.dashboard_rounded,      'Accueil'),
         _NavItem(Icons.bar_chart_rounded,      'Notes'),
+        _NavItem(Icons.auto_stories_rounded,   'Apprendre'),
         _NavItem(Icons.assignment_rounded,     'Devoirs'),
         _NavItem(Icons.how_to_reg_rounded,     'Absence'),
         _NavItem(Icons.menu_book_rounded,      'Cours'),
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
-        _NavItem(Icons.auto_stories_rounded,   'Apprendre'),
       ];
     }
   }
 
   List<Widget> get _pages {
     switch(widget.user.role){
+      // ORDRE STRICTEMENT IDENTIQUE a celui de _navItems ci-dessus.
       case UserRole.admin: return [
         DashboardPage(user: widget.user),
         EcolesPage(user: widget.user),
+        InsightPage(user: widget.user),
+        ProgrammePage(user: widget.user),
         UtilisateursPage(user: widget.user),
         RevenusPage(user: widget.user),
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
-        ProgrammePage(user: widget.user),
-        InsightPage(user: widget.user),
       ];
       case UserRole.directeur: return [
         DashboardPage(user: widget.user),
-        UtilisateursPage(user: widget.user),
-        AbonnementsDirecteurPage(user: widget.user),
-        AlertesPage(user: widget.user),
-        AgendaPage(user: widget.user),
-        VieScolairePage(user: widget.user),
-        ProgrammePage(user: widget.user),
         InsightPage(user: widget.user),
+        UtilisateursPage(user: widget.user),
+        ProgrammePage(user: widget.user),
+        AgendaPage(user: widget.user),
+        AlertesPage(user: widget.user),
+        AbonnementsDirecteurPage(user: widget.user),
+        VieScolairePage(user: widget.user),
       ];
       case UserRole.prof: return [
         DashboardPage(user: widget.user),
         NotesPage(user: widget.user),
-        DevoirsPage(user: widget.user),
         AbsencesPage(user: widget.user),
+        DevoirsPage(user: widget.user),
+        ProgrammePage(user: widget.user),
         LeconsPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
-        ProgrammePage(user: widget.user),
         if (widget.user.estPrincipal) InsightPage(user: widget.user),
       ];
       case UserRole.eleve:
@@ -3577,15 +3581,160 @@ class _MainShellState extends State<MainShell> {
         return [
           DashboardPage(user: u, onEnfantsMaj: _chargerEnfants),
           NotesPage(user: u),
+          CentreApprentissagePage(user: u),
           DevoirsPage(user: u),
           AbsencesPage(user: u),
           LeconsPage(user: u),
           AlertesPage(user: u),
           AgendaPage(user: u),
           VieScolairePage(user: u),
-          CentreApprentissagePage(user: u),
         ];
     }
+  }
+
+  // ── UN ONGLET DE LA BARRE ──
+  Widget _boutonOnglet({
+    required _NavItem item,
+    required bool actif,
+    required VoidCallback onTap,
+    IconData? icone,
+    String? libelle,
+    bool pastilleSimple = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+        decoration: BoxDecoration(
+          color: actif ? AppColors.greenBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconTheme(
+              data: IconThemeData(
+                size: 21,
+                color: actif ? AppColors.green : AppColors.textMuted,
+              ),
+              child: pastilleSimple
+                  ? Icon(icone ?? item.icon)
+                  : IconePastille(
+                      icone: icone ?? item.icon,
+                      requete: _requetePastille(item.label),
+                      uid: widget.user.uid,
+                      section: item.label,
+                      childId: widget.user.childId,
+                    ),
+            ),
+            const SizedBox(height: 3),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Text(
+                libelle ?? item.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: actif ? FontWeight.w800 : FontWeight.w600,
+                  color: actif ? AppColors.green : AppColors.textMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── LE BOUTON « PLUS » ──
+  // Quand une section du menu est ouverte, le bouton prend son icone et son
+  // nom : l'utilisateur voit toujours ou il se trouve.
+  Widget _boutonPlus() {
+    final dansLeMenu = _idx >= 4;
+    final courant =
+        dansLeMenu && _idx < _navItems.length ? _navItems[_idx] : null;
+    return _boutonOnglet(
+      item: courant ?? _navItems.first,
+      actif: dansLeMenu,
+      icone: courant?.icon ?? Icons.more_horiz_rounded,
+      libelle: courant?.label ?? 'Plus',
+      pastilleSimple: courant == null,
+      onTap: _ouvrirMenuSections,
+    );
+  }
+
+  // ── LA FEUILLE DES AUTRES SECTIONS ──
+  Future<void> _ouvrirMenuSections() async {
+    final items = _navItems;
+    final choix = await showModalBottomSheet<int>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            width: 42,
+            height: 4,
+            margin: const EdgeInsets.only(top: 10, bottom: 6),
+            decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(4)),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Toutes les sections',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (int i = 4; i < items.length; i++)
+                  ListTile(
+                    leading: IconTheme(
+                      data: IconThemeData(
+                          size: 22,
+                          color:
+                              _idx == i ? AppColors.green : AppColors.textMuted),
+                      child: IconePastille(
+                        icone: items[i].icon,
+                        requete: _requetePastille(items[i].label),
+                        uid: widget.user.uid,
+                        section: items[i].label,
+                        childId: widget.user.childId,
+                      ),
+                    ),
+                    title: Text(items[i].label,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                                _idx == i ? FontWeight.w800 : FontWeight.w600,
+                            color: _idx == i
+                                ? AppColors.green
+                                : AppColors.textMain)),
+                    trailing: _idx == i
+                        ? const Icon(Icons.check_rounded,
+                            color: AppColors.green, size: 20)
+                        : const Icon(Icons.chevron_right_rounded,
+                            color: AppColors.textMuted, size: 20),
+                    onTap: () => Navigator.pop(ctx, i),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+        ]),
+      ),
+    );
+    if (choix == null || !mounted) return;
+    marquerSectionVue(widget.user.uid, _navItems[choix].label);
+    setState(() => _idx = choix);
   }
 
   @override
@@ -3690,9 +3839,11 @@ class _MainShellState extends State<MainShell> {
           child: _pages[_idx.clamp(0, _pages.length-1)],
         ),
       ]),
-      // Barre de navigation DEFILANTE : avec 8 ou 9 sections, une
-      // NavigationBar classique serre les libelles et les coupe. Ici chaque
-      // onglet garde sa largeur et la barre glisse horizontalement.
+      // ── BARRE DE NAVIGATION ──
+      // Quatre onglets visibles en permanence, plus un bouton « Plus » qui
+      // ouvre le reste. Une barre defilante avait ete essayee : personne ne
+      // devinait qu'elle defilait, et les dernieres sections restaient
+      // introuvables. Ici, tout est atteignable en deux gestes au maximum.
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -3701,61 +3852,21 @@ class _MainShellState extends State<MainShell> {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 62,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              itemCount: _navItems.length,
-              itemBuilder: (_, i) {
-                final n = _navItems[i];
-                final actif = i == _idx;
-                return InkWell(
-                  onTap: () {
-                    final idx = i.clamp(0, _pages.length - 1);
-                    marquerSectionVue(widget.user.uid, _navItems[idx].label);
-                    setState(() => _idx = idx);
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 74,
-                    margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: actif ? AppColors.greenBg : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconTheme(
-                          data: IconThemeData(
-                            size: 21,
-                            color: actif ? AppColors.green : AppColors.textMuted,
-                          ),
-                          child: IconePastille(
-                            icone: n.icon,
-                            requete: _requetePastille(n.label),
-                            uid: widget.user.uid,
-                            section: n.label,
-                            childId: widget.user.childId,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          n.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: actif ? FontWeight.w800 : FontWeight.w600,
-                            color: actif ? AppColors.green : AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
+            height: 60,
+            child: Row(children: [
+              for (int i = 0; i < _navItems.length && i < 4; i++)
+                Expanded(
+                  child: _boutonOnglet(
+                    item: _navItems[i],
+                    actif: _idx == i,
+                    onTap: () {
+                      marquerSectionVue(widget.user.uid, _navItems[i].label);
+                      setState(() => _idx = i);
+                    },
                   ),
-                );
-              },
-            ),
+                ),
+              if (_navItems.length > 4) Expanded(child: _boutonPlus()),
+            ]),
           ),
         ),
       ),

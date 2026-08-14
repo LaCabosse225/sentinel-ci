@@ -80,6 +80,10 @@ class ServiceMenage {
     'rattrapages',
     'matieres',
     'emploiDuTemps',
+    // Collection historique, avec un « t » minuscule. Firestore la traite
+    // comme une collection distincte : sans cette ligne, ses documents
+    // orphelins resteraient invisibles au diagnostic.
+    'emploiDutemps',
     'vieScolaire',
     'paiements',
     'messages',

@@ -3592,6 +3592,60 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  // ── L'ONGLET SIGNATURE : SENTINELLE INSIGHT ──
+  // Insight est le coeur de l'application : il ne se presente pas comme les
+  // autres sections. Pastille pleine aux couleurs Sentinel, icone blanche,
+  // legerement surelevee. On ne le met PAS en rouge : dans cette application
+  // le rouge signale un probleme (absence, suppression, eleve prioritaire).
+  // Un onglet rouge en permanence banaliserait les vraies alertes.
+  Widget _boutonInsight({required bool actif, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Transform.translate(
+            offset: const Offset(0, -3),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.green2, Color(0xFF0A5D12)],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.green.withOpacity(actif ? .45 : .28),
+                    blurRadius: actif ? 12 : 7,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+                border: actif
+                    ? Border.all(color: Colors.white, width: 2)
+                    : null,
+              ),
+              child: const Icon(Icons.insights_rounded,
+                  color: Colors.white, size: 21),
+            ),
+          ),
+          Transform.translate(
+            offset: const Offset(0, -2),
+            child: Text('Insight',
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: actif ? FontWeight.w800 : FontWeight.w700,
+                  color: actif ? AppColors.green : AppColors.textMain,
+                )),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── UN ONGLET DE LA BARRE ──
   Widget _boutonOnglet({
     required _NavItem item,
@@ -3601,6 +3655,10 @@ class _MainShellState extends State<MainShell> {
     String? libelle,
     bool pastilleSimple = false,
   }) {
+    // Insight a son propre rendu.
+    if ((libelle ?? item.label) == 'Insight') {
+      return _boutonInsight(actif: actif, onTap: onTap);
+    }
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -3696,6 +3754,37 @@ class _MainShellState extends State<MainShell> {
               shrinkWrap: true,
               children: [
                 for (int i = 4; i < items.length; i++)
+                  if (items[i].label == 'Insight')
+                    ListTile(
+                      leading: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [AppColors.green2, Color(0xFF0A5D12)],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.insights_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                      title: const Text('Sentinelle Insight',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w800)),
+                      subtitle: const Text(
+                          'Reperer les eleves qui ont besoin d aide',
+                          style: TextStyle(
+                              fontSize: 11.5, color: AppColors.textMuted)),
+                      trailing: _idx == i
+                          ? const Icon(Icons.check_rounded,
+                              color: AppColors.green, size: 20)
+                          : const Icon(Icons.chevron_right_rounded,
+                              color: AppColors.textMuted, size: 20),
+                      onTap: () => Navigator.pop(ctx, i),
+                    )
+                  else
                   ListTile(
                     leading: IconTheme(
                       data: IconThemeData(

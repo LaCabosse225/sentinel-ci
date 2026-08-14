@@ -503,7 +503,8 @@ class ContenuChapitrePage extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<List<Ressource>>(
-        future: ContenuService.ressourcesChapitre(chapitre.id),
+        future: ContenuService.ressourcesChapitre(chapitre.id,
+            ecoleId: user.school),
         builder: (ctx, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -599,6 +600,21 @@ class ContenuChapitrePage extends StatelessWidget {
                   Text(r.titre,
                       style: const TextStyle(
                           fontSize: 13.5, fontWeight: FontWeight.w700)),
+                  if (!r.estNational) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                          color: AppColors.greenBg,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: const Text('Cours de mon ecole',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.green)),
+                    ),
+                  ],
                   const SizedBox(height: 2),
                   if (r.type == TypeRessource.exercice)
                     Text(

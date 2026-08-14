@@ -42,7 +42,7 @@ class ContenuService {
   static int _versionConnue = -1;
   static List<Matiere>? _cacheMatieres;
   static final Map<String, List<Chapitre>> _cacheChapitres = {}; // cle : niveau
-  static final Map<String, List<Ressource>> _cacheRessources = {}; // cle : chapitreId
+  static final Map<String, List<Ressource>> _cacheRessources = {}; // cle : chapitreId|ecoleId
 
   /// Vide entierement le cache (appele automatiquement quand la version change).
   static void viderCache() {
@@ -251,16 +251,23 @@ class ContenuService {
 
   /// Flux temps reel des ressources d'un chapitre — pour le back-office.
   /// Affiche aussi les brouillons (actif = false).
+  /// [portee] filtre l'affichage du back-office :
+  ///  - null  : tout ce que l'utilisateur a le droit de voir ;
+  ///  - ''    : uniquement le contenu national ;
+  ///  - 'id'  : uniquement le contenu de cette ecole.
   static Stream<List<Ressource>> streamRessourcesChapitre(String chapitreId,
-      {TypeRessource? type}) {
+      {TypeRessource? type, String? portee}) {
     return _db
         .collection(colRessources)
         .where('chapitreId', isEqualTo: chapitreId)
         .snapshots()
         .map((s) {
       var l = s.docs.map((d) => Ressource.depuisDoc(d)).toList();
+      if (portee != null) l = l.where((r) => r.ecoleId == portee).toList();
       if (type != null) l = l.where((r) => r.type == type).toList();
       l.sort((a, b) {
+        final e = (a.estNational ? 1 : 0).compareTo(b.estNational ? 1 : 0);
+        if (e != 0) return e;
         final c = a.type.index.compareTo(b.type.index);
         return c != 0 ? c : a.ordre.compareTo(b.ordre);
       });
@@ -269,27 +276,45 @@ class ContenuService {
   }
 
   /// Ressources publiees d'un chapitre — lecture mise en cache (cote eleve).
+  ///
+  /// [ecoleId] est l'ecole de l'eleve. Il recoit :
+  ///  - le contenu NATIONAL (ecoleId vide sur la ressource) ;
+  ///  - le contenu PRIVE de SON ecole.
+  /// Le contenu des autres ecoles est ecarte.
+  ///
+  /// Le contenu de l'ecole passe AVANT le national : le cours du professeur
+  /// de l'eleve doit arriver en premier.
   static Future<List<Ressource>> ressourcesChapitre(String chapitreId,
-      {TypeRessource? type}) async {
+      {TypeRessource? type, String ecoleId = ''}) async {
     await verifierVersion();
-    if (!_cacheRessources.containsKey(chapitreId)) {
+    final cle = '$chapitreId|$ecoleId';
+    if (!_cacheRessources.containsKey(cle)) {
       final s = await _db.collection(colRessources)
           .where('chapitreId', isEqualTo: chapitreId).get();
-      final l = s.docs.map((d) => Ressource.depuisDoc(d)).toList();
+      final l = s.docs
+          .map((d) => Ressource.depuisDoc(d))
+          .where((r) => r.estNational || r.ecoleId == ecoleId)
+          .toList();
       l.sort((a, b) {
+        // 1. le contenu de l'ecole d'abord
+        final e = (a.estNational ? 1 : 0).compareTo(b.estNational ? 1 : 0);
+        if (e != 0) return e;
+        // 2. puis par type, dans l'ordre pedagogique
         final c = a.type.index.compareTo(b.type.index);
         return c != 0 ? c : a.ordre.compareTo(b.ordre);
       });
-      _cacheRessources[chapitreId] = l;
+      _cacheRessources[cle] = l;
     }
-    var l = _cacheRessources[chapitreId]!.where((r) => r.actif).toList();
+    var l = _cacheRessources[cle]!.where((r) => r.actif).toList();
     if (type != null) l = l.where((r) => r.type == type).toList();
     return l;
   }
 
   /// Exercices d'un chapitre classes du plus facile au niveau examen.
-  static Future<List<Ressource>> exercices(String chapitreId, {int? difficulte}) async {
-    var l = await ressourcesChapitre(chapitreId, type: TypeRessource.exercice);
+  static Future<List<Ressource>> exercices(String chapitreId,
+      {int? difficulte, String ecoleId = ''}) async {
+    var l = await ressourcesChapitre(chapitreId,
+        type: TypeRessource.exercice, ecoleId: ecoleId);
     if (difficulte != null) {
       l = l.where((r) => r.difficulte == difficulte).toList();
     }
@@ -303,10 +328,13 @@ class ContenuService {
   /// Sujets d'examen : 'BEPC' ou 'BAC'. Filtre unique sur le champ 'examen',
   /// tri par annee decroissante cote application.
   static Future<List<Ressource>> sujetsExamen(String examen,
-      {String? matiereId, String? serie}) async {
+      {String? matiereId, String? serie, String ecoleId = ''}) async {
     final s = await _db.collection(colRessources)
         .where('examen', isEqualTo: examen).get();
-    var l = s.docs.map((d) => Ressource.depuisDoc(d)).where((r) => r.actif).toList();
+    var l = s.docs
+        .map((d) => Ressource.depuisDoc(d))
+        .where((r) => r.actif && (r.estNational || r.ecoleId == ecoleId))
+        .toList();
     if (matiereId != null && matiereId.isNotEmpty) {
       l = l.where((r) => r.matiereId == matiereId).toList();
     }

@@ -386,6 +386,12 @@ class Ressource {
   final String niveau;
   final String matiereId;
 
+  // --- Portée du contenu ---
+  // Vide   : contenu NATIONAL, partagé par toutes les écoles (rédigé par
+  //          l'équipe Sentinel à partir du programme officiel).
+  // Rempli : contenu PRIVÉ de cette école, invisible pour les autres.
+  final String ecoleId;
+
   // --- Contenu principal ---
   final String contenu; // texte de la leçon / fiche / explication
   final List<String> imagesUrls; // schémas, illustrations (Firebase Storage)
@@ -421,6 +427,7 @@ class Ressource {
     this.chapitreId = '',
     this.niveau = '',
     this.matiereId = '',
+    this.ecoleId = '',
     this.contenu = '',
     this.imagesUrls = const [],
     this.pdfUrl = '',
@@ -450,6 +457,7 @@ class Ressource {
       chapitreId: d['chapitreId'] as String? ?? '',
       niveau: d['niveau'] as String? ?? '',
       matiereId: d['matiereId'] as String? ?? '',
+      ecoleId: d['ecoleId'] as String? ?? '',
       contenu: d['contenu'] as String? ?? '',
       imagesUrls: List<String>.from(d['imagesUrls'] as List? ?? const []),
       pdfUrl: d['pdfUrl'] as String? ?? '',
@@ -479,6 +487,7 @@ class Ressource {
         'chapitreId': chapitreId,
         'niveau': niveau,
         'matiereId': matiereId,
+        'ecoleId': ecoleId,
         'contenu': contenu,
         'imagesUrls': imagesUrls,
         'pdfUrl': pdfUrl,
@@ -497,6 +506,9 @@ class Ressource {
         if (creation) 'dateCreation': FieldValue.serverTimestamp(),
         'dateMaj': FieldValue.serverTimestamp(),
       };
+
+  /// Vrai si la ressource fait partie du programme national partagé.
+  bool get estNational => ecoleId.isEmpty;
 
   /// Total des points d'un quiz.
   int get totalPoints =>
@@ -535,6 +547,7 @@ class Ressource {
     String? chapitreId,
     String? niveau,
     String? matiereId,
+    String? ecoleId,
     String? contenu,
     List<String>? imagesUrls,
     String? pdfUrl,
@@ -559,6 +572,7 @@ class Ressource {
       chapitreId: chapitreId ?? this.chapitreId,
       niveau: niveau ?? this.niveau,
       matiereId: matiereId ?? this.matiereId,
+      ecoleId: ecoleId ?? this.ecoleId,
       contenu: contenu ?? this.contenu,
       imagesUrls: imagesUrls ?? this.imagesUrls,
       pdfUrl: pdfUrl ?? this.pdfUrl,

@@ -3507,6 +3507,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.notifications_rounded,  'Alertes'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
+        _NavItem(Icons.menu_book_rounded,      'Contenu'),
         _NavItem(Icons.insights_rounded,       'Insight'),
       ];
       case UserRole.prof: return [
@@ -3517,6 +3518,7 @@ class _MainShellState extends State<MainShell> {
         _NavItem(Icons.menu_book_rounded,      'Lecons'),
         _NavItem(Icons.calendar_month_rounded, 'Agenda'),
         _NavItem(Icons.photo_library_rounded,  'Actus'),
+        _NavItem(Icons.menu_book_rounded,      'Contenu'),
         if (widget.user.estPrincipal)
           _NavItem(Icons.insights_rounded,     'Insight'),
       ];
@@ -3555,6 +3557,7 @@ class _MainShellState extends State<MainShell> {
         AlertesPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
+        ProgrammePage(user: widget.user),
         InsightPage(user: widget.user),
       ];
       case UserRole.prof: return [
@@ -3565,6 +3568,7 @@ class _MainShellState extends State<MainShell> {
         LeconsPage(user: widget.user),
         AgendaPage(user: widget.user),
         VieScolairePage(user: widget.user),
+        ProgrammePage(user: widget.user),
         if (widget.user.estPrincipal) InsightPage(user: widget.user),
       ];
       case UserRole.eleve:

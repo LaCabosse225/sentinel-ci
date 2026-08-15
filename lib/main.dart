@@ -30,6 +30,7 @@ import 'centre_apprentissage/ecrans/programme.dart';
 import 'centre_apprentissage/ecrans/eleve_accueil.dart';
 import 'insight/ecran_insight.dart';
 import 'insight/insight_parent.dart';
+import 'avis/avis.dart';
 import 'maintenance/menage.dart';
 
 
@@ -4084,6 +4085,9 @@ class DashboardPage extends StatelessWidget {
           const SizedBox(height:20),
         ],
 
+        // Demande d'avis sur Sentinel : discrete, apres plusieurs ouvertures
+        CarteDemandeAvis(user: user),
+
         // Suivi Sentinel Insight (parent et eleve) : message bienveillant
         if (user.role == UserRole.parent || user.role == UserRole.eleve)
           CarteSuiviEnfant(user: user),
@@ -6824,6 +6828,19 @@ class _EcolesPageState extends State<EcolesPage> {
                 icon:const Icon(Icons.add), label:const Text('Ajouter une ecole'))),
           ]),
           if (widget.user.estSuperAdmin) ...[
+            const SizedBox(height: 10),
+            SizedBox(width: double.infinity, child: OutlinedButton.icon(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => AvisRecusPage(user: widget.user))),
+              icon: const Icon(Icons.star_rounded, size: 18),
+              label: const Text('Avis des utilisateurs'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.gold,
+                  side: const BorderSide(color: AppColors.gold),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+            )),
             const SizedBox(height: 10),
             SizedBox(width: double.infinity, child: OutlinedButton.icon(
               onPressed: () => Navigator.push(context,

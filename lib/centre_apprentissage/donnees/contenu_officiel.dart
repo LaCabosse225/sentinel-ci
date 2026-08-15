@@ -1590,6 +1590,1615 @@ le nombre de gauche doit toujours être le plus petit.
     ],
 
     // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 4 : EQUATIONS ET INEQUATIONS DANS R
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch04': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Équations et inéquations du premier degré dans ℝ',
+        ordre: 1,
+        contenu: r'''
+1. QU'EST-CE QU'UNE ÉQUATION
+
+Une équation est une égalité qui contient une inconnue, généralement notée x.
+
+Résoudre l'équation, c'est trouver toutes les valeurs de x qui rendent
+l'égalité vraie. Ces valeurs s'appellent les solutions.
+
+Une équation du premier degré peut toujours se ramener à la forme :
+
+    ax + b = 0      avec a ≠ 0
+
+Sa solution unique est :
+
+    x = -b / a
+
+
+2. LES DEUX RÈGLES DE RÉSOLUTION
+
+Règle 1 — on peut ajouter ou retrancher le même nombre aux deux membres.
+
+    x - 5 = 12
+    x - 5 + 5 = 12 + 5
+    x = 17
+
+Règle 2 — on peut multiplier ou diviser les deux membres par un même
+nombre NON NUL.
+
+    3x = 21
+    3x / 3 = 21 / 3
+    x = 7
+
+
+3. MÉTHODE COMPLÈTE
+
+Étape 1 : développer et réduire chaque membre s'il y a des parenthèses.
+Étape 2 : regrouper les x d'un côté, les nombres de l'autre.
+Étape 3 : diviser par le coefficient de x.
+Étape 4 : vérifier en remplaçant dans l'équation de départ.
+
+Exemple :
+
+    5(x - 2) = 3x + 4
+    5x - 10 = 3x + 4
+    5x - 3x = 4 + 10
+    2x = 14
+    x = 7
+
+Vérification : 5(7-2) = 25 et 3×7 + 4 = 25. C'est juste.
+
+
+4. ÉQUATION-PRODUIT
+
+Un produit de facteurs est nul si et seulement si l'un au moins des
+facteurs est nul.
+
+    A × B = 0   équivaut à   A = 0  ou  B = 0
+
+Exemple :
+
+    (x - 3)(2x + 8) = 0
+    x - 3 = 0   ou   2x + 8 = 0
+    x = 3       ou   x = -4
+
+Les solutions sont 3 et -4.
+
+C'est pour cela que la factorisation est si utile : elle transforme une
+équation compliquée en deux équations simples.
+
+
+5. LES INÉQUATIONS
+
+Une inéquation utilise un des symboles <, >, ≤ ou ≥.
+
+Les solutions ne sont plus un ou deux nombres, mais tout un INTERVALLE.
+
+LA RÈGLE ESSENTIELLE :
+Quand on multiplie ou divise les deux membres par un nombre NÉGATIF, le
+sens de l'inégalité s'INVERSE.
+
+    -2x < 6
+    x > -3        (on a divisé par -2, donc < devient >)
+
+Avec un nombre positif, rien ne change :
+
+    3x < 12
+    x < 4
+
+
+6. ÉCRIRE L'ENSEMBLE DES SOLUTIONS
+
+On peut l'écrire de trois façons :
+
+    x > -3
+    x ∈ ]-3 ; +∞[
+    ou par une représentation sur une droite graduée, la zone hachurée.
+
+Rappel : le crochet est fermé si la borne est incluse (≤ ou ≥), ouvert
+sinon (< ou >).
+
+
+7. SYSTÈME DE DEUX INÉQUATIONS
+
+Résoudre un système, c'est chercher les nombres qui vérifient les DEUX
+inéquations en même temps. On résout chacune séparément, puis on prend
+l'INTERSECTION.
+
+Exemple :
+
+    2x - 1 ≥ 3        et        x + 4 < 10
+    2x ≥ 4                      x < 6
+    x ≥ 2                       x < 6
+
+Intersection : 2 ≤ x < 6, soit x ∈ [2 ; 6[.
+
+
+8. RÉSOUDRE UN PROBLÈME
+
+Étape 1 : choisir l'inconnue et écrire ce qu'elle représente.
+Étape 2 : mettre le problème en équation.
+Étape 3 : résoudre.
+Étape 4 : vérifier que la solution a du sens dans le contexte.
+Étape 5 : rédiger une phrase de conclusion.
+
+Un âge, un prix ou une longueur ne peuvent pas être négatifs : si vous
+trouvez une valeur négative, relisez votre mise en équation.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Résoudre pas à pas, sans se perdre',
+        ordre: 1,
+        contenu: r'''
+L'IMAGE DE LA BALANCE
+
+Une équation, c'est une balance en équilibre. Le signe égal est le point
+d'appui.
+
+Tu peux faire ce que tu veux, à UNE condition : faire exactement la même
+chose des deux côtés. Sinon la balance penche et l'égalité est fausse.
+
+    Tu retires 5 à gauche ? Retire 5 à droite.
+    Tu divises par 3 à gauche ? Divise par 3 à droite.
+
+
+L'ORDRE DES OPÉRATIONS
+
+Beaucoup d'élèves s'emmêlent parce qu'ils font tout en même temps. Fais-le
+en trois temps, toujours dans le même ordre.
+
+    7x - 4 = 3x + 12
+
+Temps 1 — les x à gauche. Je retire 3x des deux côtés.
+    7x - 3x - 4 = 12
+    4x - 4 = 12
+
+Temps 2 — les nombres à droite. J'ajoute 4 des deux côtés.
+    4x = 16
+
+Temps 3 — je divise par le coefficient de x.
+    x = 4
+
+Vérifie : 7×4 - 4 = 24 et 3×4 + 12 = 24. Parfait.
+
+
+LE PIÈGE QUI FAIT PERDRE LE PLUS DE POINTS
+
+Dans une INÉQUATION, multiplier ou diviser par un nombre NÉGATIF inverse
+le sens.
+
+    -3x ≥ 12
+
+Faux : x ≥ -4
+Juste : x ≤ -4
+
+Pourquoi ? Teste avec x = -10 :
+    -3 × (-10) = 30, et 30 ≥ 12. C'est vrai.
+Or -10 ≤ -4. Donc c'est bien x ≤ -4.
+
+LE RÉFLEXE : dès que tu divises par un négatif, entoure le symbole et
+retourne-le. Fais-le systématiquement, même quand tu es sûr de toi.
+
+
+COMMENT ÉVITER DE DIVISER PAR UN NÉGATIF
+
+Astuce : range les x du côté où le coefficient est positif.
+
+    5 - 2x < 3x + 20
+
+Au lieu de tout mettre à gauche, mets les x à DROITE :
+    5 - 20 < 3x + 2x
+    -15 < 5x
+    -3 < x
+
+Aucune division par un négatif, donc aucun risque d'oublier d'inverser.
+
+
+L'ÉQUATION-PRODUIT
+
+Si tu vois (quelque chose)(quelque chose) = 0, ne développe surtout pas.
+
+Un produit est nul quand l'un des facteurs est nul. Traite chaque
+parenthèse séparément :
+
+    (2x - 6)(x + 1) = 0
+    2x - 6 = 0  ou  x + 1 = 0
+    x = 3       ou  x = -1
+
+Deux solutions. Développer t'aurait donné une équation du second degré,
+que tu ne sais pas encore résoudre en 3e.
+
+
+METTRE UN PROBLÈME EN ÉQUATION
+
+Écris toujours cette phrase en premier :
+    « Soit x le nombre de ... » ou « Soit x le prix de ... »
+
+Puis traduis chaque phrase de l'énoncé en langage mathématique.
+
+    « le double de »        →  2x
+    « augmenté de 5 »       →  + 5
+    « diminué de 5 »        →  - 5
+    « le triple, moins 4 »  →  3x - 4
+    « la somme vaut 30 »    →  ... = 30
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : oublier d'inverser le sens dans une inéquation.
+Erreur 2 : développer une équation-produit au lieu de l'utiliser.
+Erreur 3 : ne pas vérifier sa solution. La vérification prend dix secondes.
+Erreur 4 : oublier la phrase de conclusion dans un problème.
+Erreur 5 : garder une solution négative pour un prix ou un âge.
+
+
+CONSEIL POUR LE BEPC
+
+Vérifie TOUJOURS ta solution en la remplaçant dans l'équation de départ.
+Si les deux membres ne donnent pas le même nombre, tu as le temps de te
+corriger avant de rendre la copie.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Équations, inéquations et système',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+1) Résous l'équation :   4x - 9 = x + 6
+
+2) Résous l'équation-produit :   (3x - 12)(x + 5) = 0
+
+3) Résous l'inéquation :   -5x + 3 ≤ 18
+   Donne l'ensemble des solutions sous forme d'intervalle.
+
+4) Résous le système :   x - 2 ≥ 1   et   3x < 21
+''',
+        solution: r'''
+1) ÉQUATION 4x - 9 = x + 6
+
+On regroupe les x à gauche et les nombres à droite :
+
+    4x - x = 6 + 9
+    3x = 15
+    x = 5
+
+Vérification : 4×5 - 9 = 11 et 5 + 6 = 11. Les deux membres sont égaux.
+
+    La solution est x = 5.
+
+
+2) ÉQUATION-PRODUIT (3x - 12)(x + 5) = 0
+
+Un produit est nul si l'un au moins de ses facteurs est nul :
+
+    3x - 12 = 0        ou        x + 5 = 0
+    3x = 12                     x = -5
+    x = 4
+
+    Les solutions sont 4 et -5.
+
+
+3) INÉQUATION -5x + 3 ≤ 18
+
+On isole le terme en x :
+
+    -5x ≤ 18 - 3
+    -5x ≤ 15
+
+On divise par -5. ATTENTION : -5 est négatif, donc le sens de l'inégalité
+s'inverse.
+
+    x ≥ 15 / (-5)
+    x ≥ -3
+
+    L'ensemble des solutions est [-3 ; +∞[.
+
+Vérification avec x = 0 : -5×0 + 3 = 3, et 3 ≤ 18. C'est vrai, et 0
+appartient bien à [-3 ; +∞[.
+
+
+4) SYSTÈME
+
+On résout chaque inéquation séparément.
+
+Première inéquation :
+    x - 2 ≥ 1
+    x ≥ 3
+
+Seconde inéquation :
+    3x < 21
+    x < 7
+
+Les solutions du système sont les nombres qui vérifient les DEUX
+conditions : c'est l'intersection.
+
+    3 ≤ x < 7
+
+    L'ensemble des solutions est [3 ; 7[.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le transport des élèves',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Un collège de Yamoussoukro organise une sortie pédagogique.
+
+Une société de transport propose deux formules :
+
+    Formule A : 5 000 F par élève, sans frais fixes.
+    Formule B : 60 000 F de frais fixes, puis 3 000 F par élève.
+
+On note x le nombre d'élèves participant à la sortie.
+
+1) Exprime en fonction de x le prix payé avec chaque formule.
+2) Pour quel nombre d'élèves les deux formules coûtent-elles le même prix ?
+3) À partir de combien d'élèves la formule B devient-elle plus avantageuse ?
+4) Le collège inscrit 45 élèves. Quelle formule doit-il choisir, et
+   combien économise-t-il ?
+''',
+        solution: r'''
+1) EXPRESSION DES DEUX PRIX
+
+Soit x le nombre d'élèves.
+
+Formule A : 5 000 F par élève, sans frais fixes.
+    Prix A = 5000x
+
+Formule B : 60 000 F fixes, plus 3 000 F par élève.
+    Prix B = 3000x + 60000
+
+
+2) ÉGALITÉ DES DEUX FORMULES
+
+On résout l'équation Prix A = Prix B :
+
+    5000x = 3000x + 60000
+    5000x - 3000x = 60000
+    2000x = 60000
+    x = 30
+
+Vérification :
+    Formule A : 5000 × 30 = 150 000 F
+    Formule B : 3000 × 30 + 60000 = 90 000 + 60 000 = 150 000 F
+
+CONCLUSION : pour 30 élèves, les deux formules coûtent 150 000 F.
+
+
+3) QUAND LA FORMULE B EST-ELLE PLUS AVANTAGEUSE ?
+
+La formule B est plus avantageuse lorsque son prix est INFÉRIEUR :
+
+    Prix B < Prix A
+    3000x + 60000 < 5000x
+    60000 < 5000x - 3000x
+    60000 < 2000x
+    30 < x
+
+Ici on divise par 2000, qui est positif : le sens ne change pas.
+
+CONCLUSION : la formule B devient plus avantageuse à partir de 31 élèves.
+
+Le nombre d'élèves étant un entier, on ne peut pas s'arrêter à « x > 30 » :
+il faut préciser 31.
+
+
+4) CAS DE 45 ÉLÈVES
+
+    Formule A : 5000 × 45 = 225 000 F
+    Formule B : 3000 × 45 + 60000 = 135 000 + 60 000 = 195 000 F
+
+Comme 45 > 30, la formule B est bien la plus avantageuse, ce qui confirme
+la question 3.
+
+Économie réalisée :
+
+    225 000 - 195 000 = 30 000 F
+
+CONCLUSION : le collège doit choisir la formule B et économise 30 000 F.
+
+
+CE QU'IL FAUT RETENIR
+Les frais fixes sont pénalisants quand le groupe est petit, mais deviennent
+négligeables quand il grandit. C'est le raisonnement que fait tout
+gestionnaire avant de signer un contrat.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Équations et inéquations — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+ÉQUATION DU PREMIER DEGRÉ
+
+    ax + b = 0    →    x = -b / a      (a ≠ 0)
+
+Méthode :
+1. développer et réduire
+2. les x d'un côté, les nombres de l'autre
+3. diviser par le coefficient de x
+4. vérifier
+
+
+LES DEUX RÈGLES
+
+On peut ajouter ou retrancher le même nombre aux deux membres.
+On peut multiplier ou diviser par un même nombre NON NUL.
+
+
+ÉQUATION-PRODUIT
+
+    A × B = 0    équivaut à    A = 0  ou  B = 0
+
+Ne jamais développer une équation-produit : c'est un cadeau, on la garde
+telle quelle.
+
+
+INÉQUATION : LA RÈGLE À NE JAMAIS OUBLIER
+
+Multiplier ou diviser par un NÉGATIF inverse le sens.
+
+    -2x < 6    →    x > -3
+
+Avec un positif, rien ne change.
+
+
+ÉCRIRE LES SOLUTIONS
+
+    x > 3     →    ]3 ; +∞[
+    x ≥ 3     →    [3 ; +∞[
+    x < 3     →    ]-∞ ; 3[
+    x ≤ 3     →    ]-∞ ; 3]
+
+
+SYSTÈME DE DEUX INÉQUATIONS
+
+On résout chacune, puis on prend l'INTERSECTION.
+
+    x ≥ 2  et  x < 6    →    [2 ; 6[
+
+
+TRADUIRE UN ÉNONCÉ
+
+    le double de x            →  2x
+    x augmenté de 5           →  x + 5
+    le triple de x, moins 4   →  3x - 4
+    au plus                   →  ≤
+    au moins                  →  ≥
+    strictement plus que      →  >
+
+
+LES RÉFLEXES QUI SAUVENT
+
+- Toujours commencer par « Soit x le ... »
+- Toujours vérifier la solution dans l'équation de départ
+- Toujours conclure par une phrase
+- Un prix, un âge, un effectif ne sont jamais négatifs
+- Un effectif est un ENTIER : « x > 30 » se conclut par « à partir de 31 »
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : équations et inéquations',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'eq1',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Résous l\'équation 6x - 4 = 2x + 16. Écris seulement la '
+                'valeur de x.',
+            reponseAttendue: '5',
+            explication:
+                '6x - 2x = 16 + 4, donc 4x = 20 et x = 5. '
+                'Vérification : 6×5 - 4 = 26 et 2×5 + 16 = 26.',
+          ),
+          QuestionQuiz(
+            id: 'eq2',
+            type: TypeQuestion.qcm,
+            enonce: 'Quelles sont les solutions de (x - 7)(2x + 3) = 0 ?',
+            choix: [
+              '7 et -1,5',
+              '7 et 1,5',
+              '-7 et 1,5',
+              'Il n\'y a pas de solution',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'Un produit est nul si un facteur est nul. x - 7 = 0 donne '
+                'x = 7 ; 2x + 3 = 0 donne 2x = -3, soit x = -1,5.',
+          ),
+          QuestionQuiz(
+            id: 'eq3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Pour résoudre -4x > 20, on divise par -4 et on obtient x > -5.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [1],
+            explication:
+                'Diviser par un nombre négatif INVERSE le sens de l\'inégalité. '
+                'La bonne réponse est x < -5. Vérifie avec x = -10 : '
+                '-4 × (-10) = 40, et 40 > 20. C\'est bien cohérent.',
+          ),
+          QuestionQuiz(
+            id: 'eq4',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Quel est l\'ensemble des solutions du système x ≥ 1 et x < 5 ?',
+            choix: ['[1 ; 5]', '[1 ; 5[', ']1 ; 5[', '[5 ; +∞['],
+            bonnesReponses: [1],
+            explication:
+                'x ≥ 1 donne un crochet fermé sur 1 ; x < 5 donne un crochet '
+                'ouvert sur 5. L\'intersection est donc [1 ; 5[.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 5 : SYSTEMES DANS R x R
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch05': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Systèmes de deux équations à deux inconnues',
+        ordre: 1,
+        contenu: r'''
+1. QU'EST-CE QU'UN SYSTÈME
+
+Un système de deux équations du premier degré à deux inconnues s'écrit :
+
+    ax + by = c
+    a'x + b'y = c'
+
+Résoudre le système, c'est trouver le COUPLE (x ; y) qui vérifie les deux
+équations en même temps.
+
+La solution n'est pas un nombre, mais un couple de nombres. On l'écrit
+entre parenthèses, avec un point-virgule : (3 ; 5).
+
+
+2. MÉTHODE 1 — LA SUBSTITUTION
+
+On isole une inconnue dans une équation, puis on la remplace dans l'autre.
+
+Exemple :
+
+    x + 2y = 11        (1)
+    3x - y = 5         (2)
+
+Étape 1 — j'isole x dans (1) :
+    x = 11 - 2y
+
+Étape 2 — je remplace x par cette expression dans (2) :
+    3(11 - 2y) - y = 5
+    33 - 6y - y = 5
+    33 - 7y = 5
+    -7y = -28
+    y = 4
+
+Étape 3 — je remplace y par 4 dans l'expression de x :
+    x = 11 - 2×4 = 11 - 8 = 3
+
+    La solution est le couple (3 ; 4).
+
+Quand choisir la substitution ? Quand une inconnue a pour coefficient 1
+ou -1 : elle s'isole sans fraction.
+
+
+3. MÉTHODE 2 — LA COMBINAISON
+
+On multiplie les équations pour faire disparaître une inconnue par
+addition ou soustraction.
+
+Exemple :
+
+    2x + 3y = 19       (1)
+    5x - 2y = 4        (2)
+
+Étape 1 — je veux éliminer y. Je multiplie (1) par 2 et (2) par 3 :
+    4x + 6y = 38
+    15x - 6y = 12
+
+Étape 2 — j'additionne les deux lignes : les termes en y s'annulent.
+    19x = 50 ... 
+
+Reprenons avec des valeurs plus simples pour la démonstration :
+
+    2x + 3y = 19       (1)
+    5x - 2y = 11       (2)
+
+Multiplions (1) par 2 et (2) par 3 :
+    4x + 6y = 38
+    15x - 6y = 33
+
+Additionnons :
+    19x = 71 ...
+
+Le principe reste : on choisit les multiplicateurs de façon à obtenir des
+coefficients OPPOSÉS pour une inconnue, puis on additionne.
+
+Cas simple :
+
+    3x + 2y = 16       (1)
+    x - 2y = 0         (2)
+
+Les coefficients de y sont déjà opposés : +2 et -2. On additionne
+directement :
+
+    4x = 16
+    x = 4
+
+Puis on remplace dans (2) :
+    4 - 2y = 0
+    y = 2
+
+    La solution est (4 ; 2).
+
+Quand choisir la combinaison ? Quand aucune inconnue n'a un coefficient
+égal à 1, ou quand des coefficients sont déjà opposés.
+
+
+4. MÉTHODE 3 — LA RÉSOLUTION GRAPHIQUE
+
+Chaque équation représente une DROITE dans un repère.
+
+La solution du système correspond au POINT D'INTERSECTION des deux droites.
+
+Trois cas possibles :
+
+- les droites se coupent en un point → une seule solution
+- les droites sont parallèles distinctes → aucune solution
+- les droites sont confondues → une infinité de solutions
+
+Pour tracer, on met chaque équation sous la forme y = ax + b, puis on
+place deux points par droite.
+
+La lecture graphique donne une solution APPROCHÉE. Pour une valeur exacte,
+il faut résoudre algébriquement.
+
+
+5. VÉRIFIER SA SOLUTION
+
+Il faut remplacer x et y dans les DEUX équations. Une solution qui ne
+vérifie qu'une seule équation n'est pas une solution du système.
+
+
+6. RÉSOUDRE UN PROBLÈME
+
+Étape 1 : nommer les deux inconnues.
+    « Soit x le prix d'un cahier et y le prix d'un stylo. »
+Étape 2 : traduire chaque information en une équation.
+Étape 3 : résoudre le système.
+Étape 4 : vérifier dans l'énoncé, pas seulement dans les équations.
+Étape 5 : conclure par une phrase.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Substitution ou combinaison : comment choisir',
+        ordre: 1,
+        contenu: r'''
+LA QUESTION À SE POSER EN PREMIER
+
+Regarde les coefficients des inconnues.
+
+Y a-t-il un coefficient égal à 1 ou -1 ?
+    OUI  → substitution : l'inconnue s'isole sans fraction
+    NON  → combinaison : plus rapide et sans dénominateur
+
+Y a-t-il déjà deux coefficients opposés, comme +2y et -2y ?
+    OUI  → combinaison, il suffit d'additionner
+
+
+LA SUBSTITUTION, PAS À PAS
+
+    x + 3y = 14
+    2x - y = 7
+
+Le x de la première a pour coefficient 1 : c'est lui qu'on isole.
+
+    x = 14 - 3y
+
+Maintenant, dans la SECONDE équation, partout où il y a x, j'écris
+(14 - 3y). Les parenthèses sont obligatoires.
+
+    2(14 - 3y) - y = 7
+    28 - 6y - y = 7
+    28 - 7y = 7
+    -7y = -21
+    y = 3
+
+Je reviens à mon expression de x :
+    x = 14 - 3×3 = 14 - 9 = 5
+
+    Solution : (5 ; 3)
+
+L'erreur classique : remplacer dans la MÊME équation que celle utilisée
+pour isoler. Cela donne 0 = 0, ce qui n'apprend rien. Il faut remplacer
+dans l'AUTRE équation.
+
+
+LA COMBINAISON, PAS À PAS
+
+    4x + 3y = 27
+    2x - 5y = -19
+
+Objectif : faire disparaître une inconnue.
+
+Je choisis d'éliminer x. Le coefficient de x est 4 dans la première et 2
+dans la seconde. Si je multiplie la seconde par 2, j'obtiendrai 4x aussi.
+
+    4x + 3y = 27
+    4x - 10y = -38
+
+Les coefficients sont maintenant IDENTIQUES, donc je SOUSTRAIS :
+
+    (4x + 3y) - (4x - 10y) = 27 - (-38)
+    3y + 10y = 65
+    13y = 65
+    y = 5
+
+Puis dans la première équation :
+    4x + 15 = 27
+    4x = 12
+    x = 3
+
+    Solution : (3 ; 5)
+
+LA RÈGLE DES SIGNES :
+    coefficients IDENTIQUES  → on SOUSTRAIT
+    coefficients OPPOSÉS     → on ADDITIONNE
+
+
+METTRE UN PROBLÈME EN SYSTÈME
+
+Deux inconnues, donc deux phrases à traduire. Cherche dans l'énoncé les
+deux informations chiffrées.
+
+    « 3 cahiers et 5 stylos coûtent 2 400 F »   →   3x + 5y = 2400
+    « 2 cahiers et 3 stylos coûtent 1 550 F »   →   2x + 3y = 1550
+
+Nomme toujours tes inconnues AVANT d'écrire les équations. Sans cette
+phrase, le correcteur ne sait pas ce que représentent x et y, et tu perds
+des points même si le calcul est juste.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : oublier les parenthèses lors de la substitution.
+Erreur 2 : remplacer dans la même équation que celle utilisée pour isoler.
+Erreur 3 : additionner alors que les coefficients sont identiques.
+Erreur 4 : trouver x et oublier de calculer y. Une solution est un COUPLE.
+Erreur 5 : ne vérifier que dans une seule équation.
+
+
+CONSEIL POUR LE BEPC
+
+Écris ta solution sous la forme (x ; y) avec un point-virgule, jamais une
+virgule : (3 ; 5) et non (3, 5), qui pourrait se lire comme le nombre
+décimal 3,5.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Résoudre par les deux méthodes',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+1) Résous par SUBSTITUTION le système :
+
+       x + 4y = 22
+       3x - y = 14
+
+2) Résous par COMBINAISON le système :
+
+       5x + 2y = 24
+       3x - 2y = 8
+
+3) Vérifie chacune de tes solutions dans les deux équations d'origine.
+''',
+        solution: r'''
+1) RÉSOLUTION PAR SUBSTITUTION
+
+    x + 4y = 22        (1)
+    3x - y = 14        (2)
+
+Dans (1), le coefficient de x vaut 1 : on isole x.
+
+    x = 22 - 4y
+
+On remplace x par cette expression dans (2), sans oublier les parenthèses :
+
+    3(22 - 4y) - y = 14
+    66 - 12y - y = 14
+    66 - 13y = 14
+    -13y = 14 - 66
+    -13y = -52
+    y = 4
+
+On revient à l'expression de x :
+
+    x = 22 - 4×4 = 22 - 16 = 6
+
+    La solution est le couple (6 ; 4).
+
+
+2) RÉSOLUTION PAR COMBINAISON
+
+    5x + 2y = 24       (1)
+    3x - 2y = 8        (2)
+
+Les coefficients de y sont +2 et -2 : ils sont déjà OPPOSÉS. On additionne
+donc directement les deux équations.
+
+    (5x + 2y) + (3x - 2y) = 24 + 8
+    8x = 32
+    x = 4
+
+On remplace x par 4 dans (1) :
+
+    5×4 + 2y = 24
+    20 + 2y = 24
+    2y = 4
+    y = 2
+
+    La solution est le couple (4 ; 2).
+
+
+3) VÉRIFICATIONS
+
+Premier système, avec (6 ; 4) :
+    Équation (1) : 6 + 4×4 = 6 + 16 = 22 ✓
+    Équation (2) : 3×6 - 4 = 18 - 4 = 14 ✓
+
+Second système, avec (4 ; 2) :
+    Équation (1) : 5×4 + 2×2 = 20 + 4 = 24 ✓
+    Équation (2) : 3×4 - 2×2 = 12 - 4 = 8 ✓
+
+Les deux solutions vérifient bien les deux équations de leur système.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'La rentrée au marché de Treichville',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Pour la rentrée scolaire, deux familles font leurs achats au marché de
+Treichville, chez le même vendeur.
+
+La famille Koné achète 3 cahiers et 5 stylos et paie 2 400 F.
+La famille Diallo achète 2 cahiers et 3 stylos et paie 1 550 F.
+
+1) Choisis les inconnues et mets le problème en système d'équations.
+2) Résous le système.
+3) Combien coûtent un cahier et un stylo ?
+4) Une troisième famille veut acheter 6 cahiers et 4 stylos. Combien
+   devra-t-elle payer ?
+''',
+        solution: r'''
+1) MISE EN ÉQUATION
+
+Soit x le prix d'un cahier, en francs CFA.
+Soit y le prix d'un stylo, en francs CFA.
+
+Famille Koné : 3 cahiers et 5 stylos pour 2 400 F.
+    3x + 5y = 2400        (1)
+
+Famille Diallo : 2 cahiers et 3 stylos pour 1 550 F.
+    2x + 3y = 1550        (2)
+
+
+2) RÉSOLUTION
+
+Aucun coefficient ne vaut 1 : la combinaison est la méthode la plus
+adaptée.
+
+Éliminons x. Multiplions (1) par 2 et (2) par 3 :
+
+    6x + 10y = 4800
+    6x + 9y = 4650
+
+Les coefficients de x sont IDENTIQUES : on soustrait.
+
+    (6x + 10y) - (6x + 9y) = 4800 - 4650
+    y = 150
+
+On remplace y par 150 dans (1) :
+
+    3x + 5×150 = 2400
+    3x + 750 = 2400
+    3x = 1650
+    x = 550
+
+    La solution est le couple (550 ; 150).
+
+
+3) INTERPRÉTATION
+
+CONCLUSION : un cahier coûte 550 F et un stylo coûte 150 F.
+
+Vérification dans l'énoncé, pas seulement dans les équations :
+    Famille Koné : 3×550 + 5×150 = 1650 + 750 = 2400 F ✓
+    Famille Diallo : 2×550 + 3×150 = 1100 + 450 = 1550 F ✓
+
+Les prix sont positifs et réalistes : la solution a du sens.
+
+
+4) TROISIÈME FAMILLE
+
+6 cahiers et 4 stylos :
+
+    6 × 550 + 4 × 150
+  = 3300 + 600
+  = 3900
+
+CONCLUSION : la troisième famille devra payer 3 900 F.
+
+
+CE QU'IL FAUT RETENIR
+Deux informations chiffrées dans l'énoncé donnent deux équations. C'est la
+règle : autant d'équations que d'inconnues, sinon le problème n'a pas de
+solution unique.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Systèmes — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+LA FORME D'UN SYSTÈME
+
+    ax + by = c
+    a'x + b'y = c'
+
+La solution est un COUPLE, noté (x ; y) avec un point-virgule.
+
+
+CHOISIR SA MÉTHODE
+
+Un coefficient vaut 1 ou -1        →  SUBSTITUTION
+Aucun coefficient simple           →  COMBINAISON
+Des coefficients déjà opposés      →  COMBINAISON, on additionne
+
+
+LA SUBSTITUTION
+
+1. isoler une inconnue dans une équation
+2. remplacer dans l'AUTRE équation, avec des parenthèses
+3. résoudre
+4. revenir à l'expression pour trouver la seconde inconnue
+
+
+LA COMBINAISON
+
+1. multiplier pour obtenir des coefficients égaux ou opposés
+2. coefficients IDENTIQUES → on SOUSTRAIT
+   coefficients OPPOSÉS    → on ADDITIONNE
+3. résoudre l'équation à une inconnue obtenue
+4. remplacer pour trouver la seconde
+
+
+LA RÉSOLUTION GRAPHIQUE
+
+Chaque équation est une droite. La solution est leur point d'intersection.
+
+    droites sécantes      →  une solution
+    parallèles distinctes →  aucune solution
+    droites confondues    →  une infinité
+
+La lecture graphique donne une valeur APPROCHÉE.
+
+
+METTRE UN PROBLÈME EN SYSTÈME
+
+1. « Soit x le ... et y le ... » — obligatoire
+2. une phrase chiffrée = une équation
+3. résoudre
+4. vérifier dans l'ÉNONCÉ
+5. conclure par une phrase
+
+
+LES PIÈGES
+
+- oublier les parenthèses en substituant
+- remplacer dans la même équation que celle utilisée pour isoler
+- additionner quand les coefficients sont identiques
+- trouver x et oublier y
+- écrire (3, 5) au lieu de (3 ; 5)
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les systèmes',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'sy1',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Dans le système x + 2y = 9 et 4x - 3y = 3, quelle méthode est '
+                'la plus rapide ?',
+            choix: [
+              'La substitution, car x a pour coefficient 1',
+              'La combinaison, car les coefficients sont opposés',
+              'La méthode graphique, car elle est exacte',
+              'Aucune méthode ne fonctionne',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'Le coefficient de x vaut 1 dans la première équation : il '
+                's\'isole sans fraction, ce qui rend la substitution très '
+                'rapide. La méthode graphique, elle, ne donne qu\'une valeur '
+                'approchée.',
+          ),
+          QuestionQuiz(
+            id: 'sy2',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Quand deux équations ont des coefficients IDENTIQUES pour une '
+                'inconnue, on additionne les deux équations pour l\'éliminer.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [1],
+            explication:
+                'Coefficients identiques : on SOUSTRAIT. Coefficients opposés : '
+                'on additionne. Additionner 4x et 4x donnerait 8x, l\'inconnue '
+                'ne disparaîtrait pas.',
+          ),
+          QuestionQuiz(
+            id: 'sy3',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Deux droites représentant un système sont parallèles et '
+                'distinctes. Que peut-on dire du système ?',
+            choix: [
+              'Il a une solution unique',
+              'Il n\'a aucune solution',
+              'Il a une infinité de solutions',
+              'On ne peut pas conclure',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'La solution correspond au point d\'intersection. Deux droites '
+                'parallèles distinctes ne se coupent jamais : le système n\'a '
+                'aucune solution.',
+          ),
+          QuestionQuiz(
+            id: 'sy4',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Résous le système 2x + y = 13 et x - y = 2. Écris la solution '
+                'sous la forme (x ; y), par exemple (4 ; 5).',
+            reponseAttendue: '(5 ; 3)',
+            explication:
+                'Les coefficients de y sont +1 et -1, donc opposés : on '
+                'additionne. 3x = 15, soit x = 5. Puis 5 - y = 2 donne y = 3.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 6 : APPLICATIONS AFFINES
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch06': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Applications affines et linéaires',
+        ordre: 1,
+        contenu: r'''
+1. DÉFINITIONS
+
+Une application affine est une application f qui, à tout nombre réel x,
+associe le nombre ax + b, où a et b sont deux nombres fixés.
+
+    f(x) = ax + b
+
+    a s'appelle le COEFFICIENT DIRECTEUR
+    b s'appelle l'ORDONNÉE À L'ORIGINE
+
+Une application LINÉAIRE est le cas particulier où b = 0 :
+
+    f(x) = ax
+
+Toute application linéaire est affine, mais l'inverse est faux.
+
+
+2. CALCULER UNE IMAGE
+
+L'image de x par f, c'est f(x). On remplace simplement x par sa valeur.
+
+Pour f(x) = 3x - 5 :
+    f(2) = 3×2 - 5 = 1
+    f(0) = -5
+    f(-1) = -3 - 5 = -8
+
+Remarque : f(0) = b. L'ordonnée à l'origine se lit donc immédiatement.
+
+
+3. CALCULER UN ANTÉCÉDENT
+
+Chercher l'antécédent de y, c'est résoudre l'équation f(x) = y.
+
+Pour f(x) = 3x - 5, quel est l'antécédent de 7 ?
+
+    3x - 5 = 7
+    3x = 12
+    x = 4
+
+L'antécédent de 7 est 4.
+
+
+4. REPRÉSENTATION GRAPHIQUE
+
+La représentation graphique d'une application affine est une DROITE.
+
+    f(x) = ax + b   →   droite d'équation y = ax + b
+
+Celle d'une application linéaire est une droite qui PASSE PAR L'ORIGINE
+du repère, puisque f(0) = 0.
+
+Pour tracer, il suffit de deux points. Le plus simple :
+    le point (0 ; b), qui est l'intersection avec l'axe des ordonnées
+    un second point, par exemple (1 ; a + b)
+
+
+5. LE SENS DE VARIATION
+
+Le signe du coefficient directeur a détermine tout :
+
+    a > 0   →   f est CROISSANTE   (la droite monte)
+    a < 0   →   f est DÉCROISSANTE (la droite descend)
+    a = 0   →   f est CONSTANTE    (droite horizontale)
+
+Exemples :
+    f(x) = 2x + 1   est croissante
+    g(x) = -3x + 7  est décroissante
+    h(x) = 4        est constante
+
+
+6. DÉTERMINER a ET b À PARTIR DE DEUX POINTS
+
+Si l'on connaît deux images, f(x₁) = y₁ et f(x₂) = y₂, alors :
+
+    a = (y₂ - y₁) / (x₂ - x₁)
+
+Puis on trouve b en remplaçant dans f(x) = ax + b.
+
+Exemple : f(2) = 7 et f(5) = 16.
+
+    a = (16 - 7) / (5 - 2) = 9 / 3 = 3
+
+Puis avec f(2) = 7 :
+    3×2 + b = 7
+    6 + b = 7
+    b = 1
+
+    Donc f(x) = 3x + 1.
+
+
+7. LE COEFFICIENT DIRECTEUR SE LIT SUR LE GRAPHIQUE
+
+a représente l'accroissement de y quand x augmente de 1.
+
+Concrètement : depuis un point de la droite, on avance de 1 vers la
+droite, puis on compte de combien on monte (a > 0) ou on descend (a < 0).
+
+
+8. PROPORTIONNALITÉ
+
+Une application LINÉAIRE traduit une situation de PROPORTIONNALITÉ.
+
+    f(x) = ax   →   y est proportionnel à x, de coefficient a
+
+Une application affine avec b ≠ 0 n'est PAS une situation de
+proportionnalité : il y a une part fixe.
+
+Exemple concret :
+    Un taxi qui facture 500 F du kilomètre : f(x) = 500x, linéaire.
+    Un taxi avec 1 000 F de prise en charge : f(x) = 500x + 1000, affine
+    mais pas proportionnelle. Doubler la distance ne double pas le prix.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Lire et construire une droite',
+        ordre: 1,
+        contenu: r'''
+AFFINE OU LINÉAIRE : LA DIFFÉRENCE EN UNE PHRASE
+
+    Linéaire : f(x) = ax        la droite passe par l'origine
+    Affine   : f(x) = ax + b    la droite coupe l'axe des y en b
+
+Toute linéaire est affine. Une affine n'est linéaire que si b = 0.
+
+
+CE QUE SIGNIFIENT a ET b, CONCRÈTEMENT
+
+Imagine une facture de taxi : f(x) = 500x + 1000.
+
+    b = 1000  →  ce que tu paies AVANT de rouler, la prise en charge
+    a = 500   →  ce que tu paies pour CHAQUE kilomètre supplémentaire
+
+b est le point de départ, a est le rythme.
+
+C'est vrai partout : un abonnement téléphonique, un tarif d'électricité,
+un contrat de transport.
+
+
+TRACER UNE DROITE EN 30 SECONDES
+
+    f(x) = 2x - 3
+
+Étape 1 — place le point (0 ; -3). C'est b, il se lit directement.
+
+Étape 2 — depuis ce point, avance de 1 vers la droite et monte de 2,
+puisque a = 2. Tu arrives en (1 ; -1).
+
+Étape 3 — trace la droite passant par ces deux points, et prolonge-la des
+deux côtés.
+
+Si a était négatif, tu descendrais au lieu de monter.
+
+
+LIRE a SUR UN GRAPHIQUE
+
+Choisis deux points bien lisibles de la droite, aux coordonnées entières.
+
+    a = (différence des y) / (différence des x)
+
+Autrement dit : de combien on monte quand on avance de 1.
+
+Attention au signe : si la droite descend, a est négatif.
+
+
+IMAGE OU ANTÉCÉDENT : NE PLUS CONFONDRE
+
+    IMAGE      : on te donne x, tu calcules f(x). C'est un CALCUL.
+    ANTÉCÉDENT : on te donne f(x), tu cherches x. C'est une ÉQUATION.
+
+Sur le graphique :
+    image de 3      → je pars de 3 sur l'axe horizontal, je monte
+                      jusqu'à la droite, je lis à gauche
+    antécédent de 5 → je pars de 5 sur l'axe vertical, je vais
+                      horizontalement jusqu'à la droite, je lis en bas
+
+
+TROUVER a ET b À PARTIR DE DEUX POINTS
+
+C'est un exercice très fréquent au BEPC.
+
+    f(1) = 5   et   f(4) = 14
+
+Étape 1 — le coefficient directeur :
+    a = (14 - 5) / (4 - 1) = 9 / 3 = 3
+
+Étape 2 — l'ordonnée à l'origine, avec l'un des deux points :
+    f(1) = 5, donc 3×1 + b = 5, donc b = 2
+
+    f(x) = 3x + 2
+
+Étape 3 — vérifie avec l'AUTRE point :
+    f(4) = 3×4 + 2 = 14 ✓
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : inverser image et antécédent.
+Erreur 2 : calculer a en inversant le rapport. C'est bien la différence
+des y DIVISÉE PAR la différence des x, jamais l'inverse.
+Erreur 3 : oublier le signe de a quand la droite descend.
+Erreur 4 : dire qu'une application affine traduit une proportionnalité.
+Ce n'est vrai que si b = 0.
+Erreur 5 : tracer la droite à partir d'un seul point.
+
+
+CONSEIL POUR LE BEPC
+
+Après avoir trouvé f(x), vérifie toujours avec le second point de
+l'énoncé. Si ça ne tombe pas juste, tu as fait une erreur de calcul sur a
+ou sur b, et tu peux encore te corriger.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Images, antécédents et variations',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+On considère les applications définies par :
+
+    f(x) = 4x - 6
+    g(x) = -2x + 5
+
+1) Calcule f(3), f(0) et f(-2).
+2) Détermine l'antécédent de 10 par f.
+3) Précise le sens de variation de f et celui de g. Justifie.
+4) Laquelle de ces deux applications est linéaire ? Justifie.
+''',
+        solution: r'''
+1) CALCUL D'IMAGES
+
+    f(3) = 4×3 - 6 = 12 - 6 = 6
+    f(0) = 4×0 - 6 = -6
+    f(-2) = 4×(-2) - 6 = -8 - 6 = -14
+
+Remarque : f(0) = -6, ce qui correspond bien à l'ordonnée à l'origine.
+
+
+2) ANTÉCÉDENT DE 10 PAR f
+
+Chercher l'antécédent de 10, c'est résoudre l'équation f(x) = 10.
+
+    4x - 6 = 10
+    4x = 16
+    x = 4
+
+Vérification : f(4) = 4×4 - 6 = 10 ✓
+
+    L'antécédent de 10 par f est 4.
+
+
+3) SENS DE VARIATION
+
+Pour f(x) = 4x - 6, le coefficient directeur est a = 4.
+Comme 4 > 0, l'application f est CROISSANTE.
+
+Pour g(x) = -2x + 5, le coefficient directeur est a = -2.
+Comme -2 < 0, l'application g est DÉCROISSANTE.
+
+
+4) APPLICATION LINÉAIRE
+
+Une application est linéaire lorsqu'elle s'écrit f(x) = ax, c'est-à-dire
+lorsque b = 0.
+
+    Pour f : b = -6, donc f n'est pas linéaire.
+    Pour g : b = 5, donc g n'est pas linéaire.
+
+CONCLUSION : aucune de ces deux applications n'est linéaire. Elles sont
+toutes les deux affines, avec une ordonnée à l'origine non nulle.
+
+Leurs représentations graphiques ne passent donc pas par l'origine du
+repère.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Deux forfaits de téléphone',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Un opérateur ivoirien propose deux forfaits mensuels.
+
+    Forfait Liberté : 2 000 F par mois, puis 25 F par minute d'appel.
+    Forfait Confort : 6 000 F par mois, puis 5 F par minute d'appel.
+
+On note x le nombre de minutes d'appel dans le mois.
+
+1) Exprime le prix de chaque forfait par une application affine, notée
+   respectivement L(x) et C(x).
+2) Précise, pour chacune, le coefficient directeur et l'ordonnée à
+   l'origine, et donne leur signification concrète.
+3) Calcule L(100) et C(100). Quel forfait est le plus avantageux pour
+   100 minutes ?
+4) À partir de combien de minutes le forfait Confort devient-il plus
+   avantageux ?
+''',
+        solution: r'''
+1) LES DEUX APPLICATIONS
+
+Soit x le nombre de minutes d'appel dans le mois.
+
+Forfait Liberté : 2 000 F fixes, plus 25 F par minute.
+    L(x) = 25x + 2000
+
+Forfait Confort : 6 000 F fixes, plus 5 F par minute.
+    C(x) = 5x + 6000
+
+
+2) COEFFICIENTS ET SIGNIFICATIONS
+
+Pour L(x) = 25x + 2000 :
+    coefficient directeur a = 25 → le prix de CHAQUE minute
+    ordonnée à l'origine  b = 2000 → l'abonnement mensuel, payé même sans
+                                     aucun appel
+
+Pour C(x) = 5x + 6000 :
+    a = 5    → le prix de chaque minute, cinq fois moins cher
+    b = 6000 → un abonnement mensuel trois fois plus élevé
+
+Les deux applications sont croissantes, puisque leurs coefficients
+directeurs sont positifs : plus on appelle, plus on paie.
+
+
+3) CAS DE 100 MINUTES
+
+    L(100) = 25×100 + 2000 = 2500 + 2000 = 4500
+    C(100) = 5×100 + 6000 = 500 + 6000 = 6500
+
+    L(100) = 4 500 F   et   C(100) = 6 500 F
+
+CONCLUSION : pour 100 minutes, le forfait Liberté est plus avantageux. Il
+fait économiser 2 000 F.
+
+
+4) SEUIL DE BASCULEMENT
+
+Le forfait Confort devient plus avantageux lorsque son prix est inférieur :
+
+    C(x) < L(x)
+    5x + 6000 < 25x + 2000
+    6000 - 2000 < 25x - 5x
+    4000 < 20x
+    200 < x
+
+On divise par 20, qui est positif : le sens de l'inégalité ne change pas.
+
+CONCLUSION : le forfait Confort devient plus avantageux à partir de
+201 minutes d'appel par mois.
+
+Vérification au point d'équilibre, pour x = 200 :
+    L(200) = 25×200 + 2000 = 5000 + 2000 = 7000
+    C(200) = 5×200 + 6000 = 1000 + 6000 = 7000
+Les deux forfaits coûtent exactement 7 000 F : c'est bien le seuil.
+
+
+INTERPRÉTATION GRAPHIQUE
+Les deux droites se coupent au point de coordonnées (200 ; 7000). Avant ce
+point, la droite de Liberté est en dessous ; après, c'est celle de Confort.
+Le point d'intersection donne toujours le seuil de basculement.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Applications affines — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+LES DÉFINITIONS
+
+    Affine   : f(x) = ax + b
+    Linéaire : f(x) = ax        (cas où b = 0)
+
+    a = coefficient directeur
+    b = ordonnée à l'origine, et b = f(0)
+
+
+LE SENS DE VARIATION
+
+    a > 0   →   croissante   (la droite monte)
+    a < 0   →   décroissante (la droite descend)
+    a = 0   →   constante    (droite horizontale)
+
+
+IMAGE ET ANTÉCÉDENT
+
+    IMAGE de x        : on calcule f(x)
+    ANTÉCÉDENT de y   : on résout l'équation f(x) = y
+
+
+TROUVER a ET b AVEC DEUX POINTS
+
+    a = (y₂ - y₁) / (x₂ - x₁)
+
+Puis on remplace dans f(x) = ax + b pour trouver b.
+Et on vérifie avec le second point.
+
+
+LA REPRÉSENTATION GRAPHIQUE
+
+C'est une DROITE.
+    affine   → coupe l'axe des ordonnées en b
+    linéaire → passe par l'origine
+
+Pour tracer : place (0 ; b), puis avance de 1 et monte de a.
+
+
+PROPORTIONNALITÉ
+
+Seule une application LINÉAIRE traduit une proportionnalité.
+Dès qu'il y a une part fixe b ≠ 0, il n'y a plus proportionnalité.
+
+
+LA LECTURE CONCRÈTE
+
+Dans un tarif :
+    b = la part fixe, payée même sans consommer
+    a = le prix de chaque unité consommée
+
+Le point d'intersection de deux droites donne le SEUIL à partir duquel
+une offre devient plus avantageuse que l'autre.
+
+
+LES PIÈGES
+
+- confondre image et antécédent
+- inverser le rapport dans le calcul de a
+- oublier le signe négatif de a quand la droite descend
+- croire qu'une affine est toujours proportionnelle
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les applications affines',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'af1',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Soit f(x) = 5x - 8. Calcule f(3). Écris seulement le nombre.',
+            reponseAttendue: '7',
+            explication: 'f(3) = 5×3 - 8 = 15 - 8 = 7.',
+          ),
+          QuestionQuiz(
+            id: 'af2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'L\'application définie par g(x) = -4x + 9 est-elle croissante '
+                'ou décroissante ?',
+            choix: [
+              'Croissante, car 9 est positif',
+              'Décroissante, car le coefficient directeur -4 est négatif',
+              'Constante',
+              'On ne peut pas savoir sans graphique',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'Seul le signe du coefficient directeur a compte. Ici a = -4, '
+                'donc la droite descend : g est décroissante. L\'ordonnée à '
+                'l\'origine n\'a aucune influence sur les variations.',
+          ),
+          QuestionQuiz(
+            id: 'af3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'La représentation graphique de f(x) = 3x + 2 passe par '
+                'l\'origine du repère.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [1],
+            explication:
+                'f(0) = 2, donc la droite coupe l\'axe des ordonnées au point '
+                '(0 ; 2), pas à l\'origine. Seules les applications LINÉAIRES, '
+                'où b = 0, passent par l\'origine.',
+          ),
+          QuestionQuiz(
+            id: 'af4',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Une application affine vérifie f(1) = 4 et f(3) = 10. '
+                'Combien vaut son coefficient directeur a ?',
+            reponseAttendue: '3',
+            explication:
+                'a = (10 - 4) / (3 - 1) = 6 / 2 = 3. '
+                'On trouve ensuite b = 1, donc f(x) = 3x + 1.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 9 : PROPRIETES DE THALES
     // ════════════════════════════════════════════════════════════════════
     '3e_math_ch09': [

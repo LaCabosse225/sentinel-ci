@@ -3199,6 +3199,595 @@ LES PIÈGES
     ],
 
     // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 7 : STATISTIQUE
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch07': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Statistique : effectifs, fréquences et médiane',
+        ordre: 1,
+        contenu: r'''
+1. LE VOCABULAIRE
+
+La POPULATION est l'ensemble étudié : les élèves d'une classe, les
+habitants d'un village, les commerçants d'un marché.
+
+Chaque élément de cette population est un INDIVIDU.
+
+Le CARACTÈRE est ce que l'on observe : la note obtenue, l'âge, la taille,
+le moyen de transport.
+
+Un caractère est QUANTITATIF s'il se mesure par un nombre (une note, une
+taille) et QUALITATIF sinon (une couleur, un moyen de transport).
+
+
+2. EFFECTIF ET EFFECTIF TOTAL
+
+L'EFFECTIF d'une valeur est le nombre d'individus qui possèdent cette
+valeur.
+
+L'EFFECTIF TOTAL, noté N, est le nombre total d'individus.
+
+    N = somme de tous les effectifs
+
+
+3. LA FRÉQUENCE
+
+La fréquence d'une valeur est la part qu'elle représente dans l'ensemble.
+
+    fréquence = effectif / effectif total
+
+On l'exprime souvent en pourcentage :
+
+    fréquence en % = (effectif / N) × 100
+
+La somme de toutes les fréquences vaut toujours 1, soit 100 %.
+
+
+4. EFFECTIFS CUMULÉS CROISSANTS
+
+L'effectif cumulé croissant d'une valeur, c'est le nombre d'individus dont
+la valeur est INFÉRIEURE OU ÉGALE à celle-ci.
+
+On l'obtient en additionnant les effectifs de proche en proche.
+
+Exemple :
+
+    Valeur      8    10    12    14    16
+    Effectif    4     7     9     6     4
+    ECC         4    11    20    26    30
+
+Lecture : 20 élèves ont une note inférieure ou égale à 12.
+
+Le dernier effectif cumulé est toujours égal à l'effectif total.
+
+On définit de la même façon les FRÉQUENCES CUMULÉES CROISSANTES.
+
+
+5. LA MOYENNE
+
+La moyenne est la valeur que chacun aurait si l'on partageait
+équitablement.
+
+    moyenne = (somme des valeurs × effectifs) / effectif total
+
+Sur l'exemple précédent :
+
+    (8×4 + 10×7 + 12×9 + 14×6 + 16×4) / 30
+  = (32 + 70 + 108 + 84 + 64) / 30
+  = 358 / 30
+  ≈ 11,93
+
+
+6. LA MÉDIANE
+
+La médiane est la valeur qui PARTAGE la série en deux groupes de même
+effectif : la moitié des individus est en dessous, la moitié au-dessus.
+
+Méthode : on range les valeurs dans l'ordre croissant, puis :
+
+    si N est IMPAIR  → la médiane est la valeur du milieu,
+                       c'est-à-dire la (N+1)/2 ᵉ valeur
+    si N est PAIR    → la médiane est la moyenne des deux valeurs
+                       centrales, la N/2 ᵉ et la (N/2 + 1) ᵉ
+
+Les effectifs cumulés croissants servent justement à repérer rapidement
+ces valeurs centrales.
+
+Sur l'exemple, N = 30 est pair. Il faut donc la 15ᵉ et la 16ᵉ valeur.
+D'après les ECC, la 15ᵉ et la 16ᵉ se trouvent dans la colonne dont l'ECC
+vaut 20, c'est-à-dire la valeur 12.
+
+    Médiane = 12
+
+
+7. MOYENNE OU MÉDIANE : LAQUELLE CHOISIR
+
+La moyenne tient compte de toutes les valeurs, mais elle est sensible aux
+valeurs extrêmes. Un seul 0 dans une classe fait chuter la moyenne.
+
+La médiane n'est pas influencée par les extrêmes : elle décrit mieux le
+« milieu réel » d'une série déséquilibrée.
+
+C'est pourquoi on donne souvent les deux ensemble.
+
+
+8. LE MODE ET LA CLASSE MODALE
+
+Le MODE est la valeur qui a le plus grand effectif.
+
+Quand les données sont regroupées en classes, on parle de CLASSE MODALE :
+c'est la classe qui a le plus grand effectif.
+
+Attention : si deux classes n'ont pas la même largeur, la comparaison
+directe des effectifs n'a pas de sens.
+
+
+9. LE DIAGRAMME CIRCULAIRE
+
+Le disque entier représente l'effectif total, soit 360°.
+
+L'angle d'un secteur se calcule par proportionnalité :
+
+    angle = (effectif / effectif total) × 360°
+
+ou, ce qui revient au même :
+
+    angle = fréquence × 360°
+
+Sur l'exemple, pour la valeur 12 :
+
+    angle = (9 / 30) × 360 = 0,3 × 360 = 108°
+
+La somme de tous les angles doit valoir 360°. C'est la vérification à
+faire avant de tracer.
+
+
+10. LES AUTRES REPRÉSENTATIONS
+
+Le diagramme en bâtons ou en barres convient aux caractères quantitatifs
+discrets. La hauteur est proportionnelle à l'effectif.
+
+L'histogramme s'emploie pour des données regroupées en classes. C'est
+l'AIRE du rectangle, et non sa hauteur, qui est proportionnelle à
+l'effectif.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Tableaux, médiane et diagrammes, pas à pas',
+        ordre: 1,
+        contenu: r'''
+CONSTRUIRE LE TABLEAU AVANT TOUT
+
+Face à une liste de données brutes, ne calcule rien tout de suite.
+Construis d'abord un tableau à quatre lignes :
+
+    Valeur
+    Effectif
+    Effectif cumulé croissant
+    Fréquence
+
+Presque toutes les questions se répondent ensuite par simple lecture.
+
+
+LES EFFECTIFS CUMULÉS : COMMENT NE PAS SE TROMPER
+
+On additionne de proche en proche, de la gauche vers la droite.
+
+    Effectif    4     7     9     6     4
+    ECC         4    11    20    26    30
+                ↑     ↑
+                4   4+7  11+9  20+6  26+4
+
+Contrôle immédiat : le DERNIER effectif cumulé doit être égal à
+l'effectif total. Si ce n'est pas le cas, tu as fait une erreur d'addition.
+
+
+TROUVER LA MÉDIANE SANS SE PERDRE
+
+Étape 1 — compte l'effectif total N.
+
+Étape 2 — N est-il pair ou impair ?
+    IMPAIR : tu cherches UNE valeur, celle de rang (N+1)/2
+    PAIR   : tu cherches DEUX valeurs, celles de rang N/2 et N/2 + 1,
+             et tu en fais la moyenne
+
+Étape 3 — utilise les effectifs cumulés pour situer ce rang.
+
+Exemple avec N = 30, donc pair. Il faut les rangs 15 et 16.
+
+    Valeur      8    10    12    14    16
+    ECC         4    11    20    26    30
+
+Le rang 15 : est-il ≤ 4 ? Non. ≤ 11 ? Non. ≤ 20 ? Oui.
+Donc la 15ᵉ valeur est 12. Idem pour la 16ᵉ.
+
+    Médiane = (12 + 12) / 2 = 12
+
+L'astuce : cherche la PREMIÈRE colonne dont l'effectif cumulé atteint ou
+dépasse le rang recherché.
+
+
+MOYENNE ET MÉDIANE NE SONT PAS LA MÊME CHOSE
+
+    Moyenne : on partage équitablement
+    Médiane : on coupe la série en deux moitiés
+
+Exemple parlant. Cinq élèves ont 2, 3, 3, 4 et 18.
+    Moyenne = 30/5 = 6
+    Médiane = 3
+
+La moyenne de 6 donne l'impression d'une classe correcte. Pourtant quatre
+élèves sur cinq sont en dessous de 4. C'est le 18 qui tire tout vers le
+haut.
+
+La médiane décrit mieux la réalité de cette classe.
+
+
+LES ANGLES DU DIAGRAMME CIRCULAIRE
+
+Le disque complet, c'est 360°. Le calcul est une simple proportionnalité.
+
+    angle = (effectif / N) × 360
+
+Astuce pratique : calcule d'abord le coefficient 360/N, une fois pour
+toutes, puis multiplie chaque effectif par ce nombre.
+
+    Si N = 30, alors 360/30 = 12.
+    Chaque individu vaut donc 12°.
+    Un effectif de 9 donne 9 × 12 = 108°.
+
+VÉRIFICATION OBLIGATOIRE : la somme de tous tes angles doit faire 360°.
+Si tu trouves 358° ou 362°, c'est un arrondi ; ajuste le plus grand
+secteur. Si l'écart est plus grand, tu as une erreur de calcul.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : confondre la valeur et l'effectif. La médiane est une VALEUR du
+caractère, pas un nombre d'individus.
+
+Erreur 2 : oublier de ranger les valeurs dans l'ordre croissant avant de
+chercher la médiane.
+
+Erreur 3 : prendre la valeur du milieu du TABLEAU au lieu de la valeur de
+rang (N+1)/2. Le milieu du tableau n'a rien à voir avec la médiane.
+
+Erreur 4 : oublier de multiplier par les effectifs dans le calcul de la
+moyenne.
+
+Erreur 5 : ne pas vérifier que les angles totalisent 360°.
+
+
+CONSEIL POUR LE BEPC
+
+Recopie toujours le tableau complet sur ta copie, même si l'énoncé en
+donne une partie. Un tableau bien tenu rapporte des points à lui seul, et
+il t'évite la plupart des erreurs.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Les notes de la 3ᵉ B',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Voici les notes obtenues par les 30 élèves de la classe de 3ᵉ B au dernier
+devoir de mathématiques.
+
+    Note        8    10    12    14    16
+    Effectif    4     7     9     6     4
+
+1) Recopie et complète le tableau avec les effectifs cumulés croissants.
+2) Calcule la moyenne de la classe, arrondie au centième.
+3) Détermine la médiane. Interprète le résultat.
+4) Quel est le mode de cette série ?
+5) Calcule l'angle du secteur correspondant à la note 12 dans un
+   diagramme circulaire.
+''',
+        solution: r'''
+1) EFFECTIFS CUMULÉS CROISSANTS
+
+On additionne les effectifs de proche en proche.
+
+    Note        8    10    12    14    16
+    Effectif    4     7     9     6     4
+    ECC         4    11    20    26    30
+
+Contrôle : le dernier effectif cumulé vaut 30, ce qui correspond bien à
+l'effectif total.
+
+
+2) MOYENNE
+
+    Moyenne = (8×4 + 10×7 + 12×9 + 14×6 + 16×4) / 30
+
+Calculons le numérateur :
+    8×4  = 32
+    10×7 = 70
+    12×9 = 108
+    14×6 = 84
+    16×4 = 64
+    Somme = 32 + 70 + 108 + 84 + 64 = 358
+
+Donc :
+    Moyenne = 358 / 30 ≈ 11,9333...
+
+    Moyenne ≈ 11,93
+
+
+3) MÉDIANE
+
+L'effectif total est N = 30, qui est PAIR.
+La médiane est donc la moyenne des valeurs de rang 15 et 16.
+
+On cherche dans les effectifs cumulés la première colonne qui atteint 15 :
+
+    ECC = 4  → non
+    ECC = 11 → non
+    ECC = 20 → oui
+
+Les 15ᵉ et 16ᵉ valeurs se trouvent donc dans la colonne de la note 12.
+
+    Médiane = (12 + 12) / 2 = 12
+
+INTERPRÉTATION : la moitié des élèves de la classe a obtenu une note
+inférieure ou égale à 12, et l'autre moitié une note supérieure ou égale
+à 12.
+
+
+4) MODE
+
+Le mode est la valeur ayant le plus grand effectif.
+
+Le plus grand effectif est 9, obtenu pour la note 12.
+
+    Le mode est 12.
+
+
+5) ANGLE DU SECTEUR DE LA NOTE 12
+
+Le disque entier représente les 30 élèves, soit 360°.
+
+    angle = (effectif / N) × 360
+    angle = (9 / 30) × 360
+    angle = 0,3 × 360
+    angle = 108°
+
+    L'angle du secteur de la note 12 mesure 108°.
+
+
+REMARQUE
+Comme N = 30, chaque élève représente 360/30 = 12°. On peut donc calculer
+tous les angles très vite :
+    note 8  : 4 × 12 = 48°
+    note 10 : 7 × 12 = 84°
+    note 12 : 9 × 12 = 108°
+    note 14 : 6 × 12 = 72°
+    note 16 : 4 × 12 = 48°
+Somme : 48 + 84 + 108 + 72 + 48 = 360°. La vérification est faite.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'L\'enquête du marché de Cocody',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Une enquête a été menée auprès de 200 clients du marché de Cocody sur leur
+moyen de transport habituel pour s'y rendre.
+
+    Moyen de transport        Effectif
+    Marche à pied                60
+    Gbaka                        70
+    Taxi                         40
+    Véhicule personnel           30
+
+1) Calcule la fréquence de chaque moyen de transport, en pourcentage.
+2) Calcule l'angle de chaque secteur pour un diagramme circulaire.
+3) Vérifie que la somme des angles vaut bien 360°.
+4) Le caractère étudié est-il quantitatif ou qualitatif ? Peut-on calculer
+   une moyenne ? Justifie.
+''',
+        solution: r'''
+1) FRÉQUENCES EN POURCENTAGE
+
+L'effectif total est N = 60 + 70 + 40 + 30 = 200.
+
+    fréquence en % = (effectif / 200) × 100
+
+    Marche à pied      : (60 / 200) × 100 = 30 %
+    Gbaka              : (70 / 200) × 100 = 35 %
+    Taxi               : (40 / 200) × 100 = 20 %
+    Véhicule personnel : (30 / 200) × 100 = 15 %
+
+Contrôle : 30 + 35 + 20 + 15 = 100 %. Correct.
+
+
+2) ANGLES DU DIAGRAMME CIRCULAIRE
+
+    angle = (effectif / 200) × 360
+
+Calculons d'abord le coefficient : 360 / 200 = 1,8.
+Chaque client représente donc 1,8°.
+
+    Marche à pied      : 60 × 1,8 = 108°
+    Gbaka              : 70 × 1,8 = 126°
+    Taxi               : 40 × 1,8 = 72°
+    Véhicule personnel : 30 × 1,8 = 54°
+
+
+3) VÉRIFICATION
+
+    108 + 126 + 72 + 54 = 360°
+
+La somme vaut bien 360°. Le diagramme peut être tracé.
+
+
+4) NATURE DU CARACTÈRE
+
+Le caractère étudié est le moyen de transport. Ce n'est pas un nombre :
+c'est une catégorie.
+
+    Le caractère est QUALITATIF.
+
+On ne peut donc PAS calculer de moyenne. Additionner « marche à pied » et
+« taxi » n'a aucun sens mathématique.
+
+En revanche, on peut parfaitement déterminer le MODE : c'est la modalité
+la plus fréquente, ici le gbaka, avec 70 clients sur 200.
+
+
+CE QU'IL FAUT RETENIR
+Moyenne et médiane n'existent que pour un caractère QUANTITATIF.
+Pour un caractère qualitatif, on se limite aux effectifs, aux fréquences
+et au mode.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Statistique — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+LE VOCABULAIRE
+
+    Population : l'ensemble étudié
+    Individu   : un élément de cet ensemble
+    Caractère  : ce que l'on observe
+        quantitatif → un nombre (note, taille)
+        qualitatif  → une catégorie (couleur, transport)
+
+
+LES FORMULES
+
+    fréquence = effectif / N
+    fréquence en % = (effectif / N) × 100
+    moyenne = (somme des valeurs × effectifs) / N
+    angle = (effectif / N) × 360
+
+
+EFFECTIFS CUMULÉS CROISSANTS
+
+On additionne de proche en proche, de gauche à droite.
+Le dernier doit être égal à l'effectif total : c'est le contrôle.
+
+
+LA MÉDIANE
+
+Elle partage la série en deux moitiés égales.
+
+    N IMPAIR → valeur de rang (N+1)/2
+    N PAIR   → moyenne des valeurs de rang N/2 et N/2 + 1
+
+On la repère grâce aux effectifs cumulés : on cherche la première colonne
+dont l'ECC atteint le rang voulu.
+
+
+MOYENNE OU MÉDIANE
+
+    Moyenne : sensible aux valeurs extrêmes
+    Médiane : insensible aux extrêmes, décrit mieux le milieu réel
+
+Sur 2, 3, 3, 4, 18 : moyenne = 6, médiane = 3.
+
+
+LE MODE
+
+La valeur ayant le plus grand effectif.
+Pour des données groupées, on parle de CLASSE MODALE.
+
+
+LE DIAGRAMME CIRCULAIRE
+
+Le disque entier = 360° = l'effectif total.
+Astuce : calcule 360/N une seule fois, puis multiplie chaque effectif.
+VÉRIFIE toujours que la somme des angles vaut 360°.
+
+
+LES PIÈGES
+
+- confondre valeur et effectif
+- oublier de ranger dans l'ordre croissant
+- prendre le milieu du tableau au lieu du rang (N+1)/2
+- oublier les effectifs dans le calcul de la moyenne
+- calculer une moyenne sur un caractère qualitatif
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : la statistique',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'st1',
+            type: TypeQuestion.qcm,
+            enonce: 'Que représente la médiane d\'une série statistique ?',
+            choix: [
+              'La valeur la plus fréquente',
+              'La valeur qui partage la série en deux groupes de même effectif',
+              'La moyenne de toutes les valeurs',
+              'La différence entre la plus grande et la plus petite valeur',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'La médiane coupe la série en deux moitiés. La valeur la plus '
+                'fréquente est le MODE, et la moyenne est un autre indicateur.',
+          ),
+          QuestionQuiz(
+            id: 'st2',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Dans une série de 40 individus, un caractère a un effectif de '
+                '10. Quel est l\'angle de son secteur dans un diagramme '
+                'circulaire ? (Écris seulement le nombre de degrés)',
+            reponseAttendue: '90',
+            explication:
+                'angle = (10 / 40) × 360 = 0,25 × 360 = 90°. Ce secteur '
+                'représente donc un quart du disque.',
+          ),
+          QuestionQuiz(
+            id: 'st3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'On peut calculer la moyenne d\'un caractère qualitatif, comme '
+                'la couleur préférée des élèves.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [1],
+            explication:
+                'La moyenne suppose d\'additionner des nombres. Un caractère '
+                'qualitatif désigne des catégories, qu\'on ne peut pas '
+                'additionner. On peut seulement en donner le mode.',
+          ),
+          QuestionQuiz(
+            id: 'st4',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Une série a 5 valeurs : 2, 3, 3, 4 et 18. Que valent sa '
+                'moyenne et sa médiane ?',
+            choix: [
+              'moyenne 6 et médiane 3',
+              'moyenne 3 et médiane 6',
+              'moyenne 6 et médiane 4',
+              'moyenne 3 et médiane 3',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'Moyenne = (2+3+3+4+18)/5 = 30/5 = 6. Pour la médiane, N = 5 '
+                'est impair : c\'est la 3ᵉ valeur, soit 3. L\'écart entre les '
+                'deux vient du 18, qui tire la moyenne vers le haut.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 9 : PROPRIETES DE THALES
     // ════════════════════════════════════════════════════════════════════
     '3e_math_ch09': [
@@ -3726,6 +4315,2242 @@ d'après la réciproque de la propriété de Thalès, (MN) // (BC). »
                 'Les longueurs sont multipliées par k, mais les aires par k². '
                 'Ici k = 1/2, donc l\'aire est multipliée par (1/2)² = 1/4. '
                 'C\'est un piège classique au BEPC.',
+          ),
+        ],
+      ),
+    ],
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 10 : ANGLES INSCRITS
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch10': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Angles inscrits et angles au centre',
+        ordre: 1,
+        contenu: r'''
+1. LE VOCABULAIRE DU CERCLE
+
+Une CORDE est un segment dont les deux extrémités sont sur le cercle.
+
+Une corde partage le cercle en deux ARCS : le petit et le grand.
+
+Le rayon relie le centre à un point du cercle. Le diamètre est une corde
+qui passe par le centre.
+
+
+2. L'ANGLE AU CENTRE
+
+Un angle au centre a son SOMMET AU CENTRE du cercle.
+
+L'angle au centre AOB, où O est le centre, INTERCEPTE l'arc AB.
+
+
+3. L'ANGLE INSCRIT
+
+Un angle inscrit a son SOMMET SUR LE CERCLE, et ses deux côtés coupent le
+cercle en deux autres points.
+
+L'angle AMB, avec M sur le cercle, intercepte l'arc AB qui ne contient
+pas M.
+
+Pour reconnaître un angle inscrit, deux conditions :
+    le sommet est SUR le cercle
+    les deux côtés recoupent le cercle
+
+
+4. LA PROPRIÉTÉ FONDAMENTALE
+
+Dans un cercle, l'angle au centre est le DOUBLE de tout angle inscrit qui
+intercepte le même arc.
+
+    mes AOB = 2 × mes AMB
+
+Autrement dit, l'angle inscrit vaut la MOITIÉ de l'angle au centre :
+
+    mes AMB = mes AOB / 2
+
+Exemple : si l'angle au centre AOB mesure 80°, alors tout angle inscrit
+interceptant l'arc AB mesure 40°.
+
+
+5. CONSÉQUENCE : DEUX ANGLES INSCRITS ÉGAUX
+
+Deux angles inscrits qui interceptent le MÊME ARC ont la même mesure.
+
+C'est logique : ils valent tous les deux la moitié du même angle au
+centre.
+
+    si M et N sont sur le cercle, du même côté de la corde [AB],
+    alors mes AMB = mes ANB
+
+C'est une propriété très utile : peu importe où l'on place le sommet sur
+l'arc, l'angle ne change pas.
+
+
+6. CAS PARTICULIER : L'ANGLE DROIT
+
+Si [AB] est un DIAMÈTRE du cercle, alors l'angle au centre AOB est un
+angle plat, donc il mesure 180°.
+
+Tout angle inscrit interceptant ce diamètre mesure donc 180 / 2 = 90°.
+
+PROPRIÉTÉ : si M est un point d'un cercle de diamètre [AB], distinct de A
+et de B, alors le triangle AMB est RECTANGLE en M.
+
+La réciproque est vraie aussi : si un triangle AMB est rectangle en M,
+alors M appartient au cercle de diamètre [AB].
+
+C'est le lien entre ce chapitre et le triangle rectangle.
+
+
+7. À QUOI CELA SERT
+
+Ces propriétés permettent de calculer des angles sans rapporteur, de
+démontrer qu'un triangle est rectangle, ou de prouver que quatre points
+appartiennent à un même cercle.
+
+Elles reviennent très régulièrement au BEPC, souvent combinées avec la
+propriété de Pythagore ou celle de Thalès.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Reconnaître les angles sur un cercle',
+        ordre: 1,
+        contenu: r'''
+LA QUESTION À SE POSER DEVANT LA FIGURE
+
+Où est le SOMMET de l'angle ?
+
+    au CENTRE du cercle  →  angle au centre
+    SUR le cercle        →  angle inscrit
+    ailleurs             →  ni l'un ni l'autre, la propriété ne s'applique
+                            pas
+
+C'est la première chose à vérifier, avant tout calcul.
+
+
+REPÉRER L'ARC INTERCEPTÉ
+
+L'arc intercepté est celui qui se trouve « à l'intérieur » de l'angle,
+entre ses deux côtés.
+
+Astuce : place ton doigt au sommet de l'angle, suis les deux côtés jusqu'au
+cercle. L'arc situé en face, entre les deux points d'arrivée et sans
+passer par ton doigt, c'est l'arc intercepté.
+
+
+LA PROPRIÉTÉ, DANS LE BON SENS
+
+    angle au centre = 2 × angle inscrit
+    angle inscrit = angle au centre ÷ 2
+
+Le CENTRE voit toujours plus GRAND. Retiens cela et tu ne te tromperas
+jamais de sens.
+
+    Angle au centre de 100° → angle inscrit de 50°
+    Angle inscrit de 35°    → angle au centre de 70°
+
+Si tu trouves un angle inscrit plus grand que l'angle au centre, tu as
+divisé au lieu de multiplier, ou l'inverse.
+
+
+DEUX ANGLES INSCRITS SUR LE MÊME ARC
+
+Si tu vois plusieurs sommets sur le cercle, mais que les côtés aboutissent
+aux MÊMES deux points, tous ces angles sont ÉGAUX.
+
+    mes AMB = mes ANB = mes APB
+
+C'est souvent la clé d'un exercice : un angle qu'on ne connaît pas est
+égal à un angle qu'on connaît, parce qu'ils interceptent le même arc.
+
+
+LE RÉFLEXE DU DIAMÈTRE
+
+Dès que tu vois un DIAMÈTRE dans un exercice avec un cercle, pense
+immédiatement : ANGLE DROIT.
+
+    M sur le cercle de diamètre [AB]  →  triangle AMB rectangle en M
+
+Et une fois que tu sais que le triangle est rectangle, tu peux utiliser
+Pythagore et la trigonométrie. C'est très souvent le but caché de
+l'exercice.
+
+La réciproque sert dans l'autre sens : pour démontrer qu'un point est sur
+un cercle, il suffit de montrer qu'il voit le diamètre sous un angle droit.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : appliquer la propriété à un angle dont le sommet n'est ni au
+centre ni sur le cercle. Vérifie toujours la position du sommet.
+
+Erreur 2 : multiplier au lieu de diviser. Le centre voit plus grand.
+
+Erreur 3 : comparer deux angles inscrits qui n'interceptent PAS le même
+arc. Ils n'ont alors aucune raison d'être égaux.
+
+Erreur 4 : oublier de citer la propriété dans la rédaction. En géométrie,
+la justification vaut autant que le résultat.
+
+
+CONSEIL POUR LE BEPC
+
+Sur ta figure, repasse en couleur l'arc intercepté. Tu verras
+immédiatement quels angles se rapportent au même arc, et l'exercice se
+déroulera tout seul.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Angles dans un cercle',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Sur un cercle de centre O, on place trois points A, B et M.
+
+L'angle au centre AOB mesure 76°, et le point M appartient au grand arc AB.
+
+1) Quelle est la nature de l'angle AMB ? Justifie.
+2) Calcule la mesure de l'angle AMB.
+3) On place un quatrième point N sur le grand arc AB, distinct de M.
+   Que peut-on dire de l'angle ANB ? Justifie.
+''',
+        solution: r'''
+1) NATURE DE L'ANGLE AMB
+
+Le point M appartient au cercle, et les deux côtés [MA) et [MB) de l'angle
+recoupent le cercle en A et en B.
+
+    L'angle AMB est un ANGLE INSCRIT dans le cercle.
+
+Il intercepte l'arc AB qui ne contient pas M, c'est-à-dire le petit arc,
+celui-là même qu'intercepte l'angle au centre AOB.
+
+
+2) MESURE DE L'ANGLE AMB
+
+L'angle au centre AOB et l'angle inscrit AMB interceptent le même arc AB.
+
+D'après la propriété de l'angle inscrit, l'angle au centre est le double
+de l'angle inscrit :
+
+    mes AOB = 2 × mes AMB
+
+Donc :
+
+    mes AMB = mes AOB / 2
+    mes AMB = 76 / 2
+    mes AMB = 38°
+
+    L'angle AMB mesure 38°.
+
+
+3) L'ANGLE ANB
+
+Le point N appartient lui aussi au cercle, sur le même arc que M. L'angle
+ANB est donc également un angle inscrit, et il intercepte le MÊME arc AB
+que l'angle AMB.
+
+Deux angles inscrits qui interceptent le même arc ont la même mesure.
+
+    mes ANB = mes AMB = 38°
+
+    L'angle ANB mesure également 38°.
+
+
+CE QU'IL FAUT RETENIR
+La position exacte du sommet sur l'arc n'a aucune importance : tant qu'il
+reste sur le même arc, l'angle inscrit garde la même mesure. C'est ce qui
+rend cette propriété si puissante.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le triangle caché dans le cercle',
+        ordre: 2,
+        difficulte: Difficulte.difficile,
+        enonce: r'''
+Soit un cercle de centre O et de diamètre [AB] tel que AB = 10 cm.
+
+M est un point du cercle, distinct de A et de B, tel que AM = 6 cm.
+
+1) Démontre que le triangle AMB est rectangle en M.
+2) Calcule la longueur MB.
+3) Calcule la mesure de l'angle MAB, arrondie au degré.
+   On donne : cos 53° ≈ 0,6.
+''',
+        solution: r'''
+1) LE TRIANGLE EST-IL RECTANGLE ?
+
+Le point M appartient au cercle de diamètre [AB], et il est distinct de A
+et de B.
+
+D'après la propriété de l'angle inscrit dans un demi-cercle :
+
+    si M est un point d'un cercle de diamètre [AB], distinct de A et B,
+    alors le triangle AMB est rectangle en M.
+
+    Le triangle AMB est donc RECTANGLE EN M.
+
+On peut aussi le justifier autrement : [AB] étant un diamètre, l'angle au
+centre AOB est un angle plat, il mesure 180°. L'angle inscrit AMB, qui
+intercepte le même arc, mesure donc 180 / 2 = 90°.
+
+
+2) LONGUEUR MB
+
+Le triangle AMB est rectangle en M. D'après la propriété de Pythagore :
+
+    AB² = AM² + MB²
+
+On remplace par les valeurs connues :
+
+    10² = 6² + MB²
+    100 = 36 + MB²
+
+On isole MB² :
+
+    MB² = 100 - 36
+    MB² = 64
+
+Donc :
+
+    MB = √64 = 8
+
+    MB mesure 8 cm.
+
+On reconnaît d'ailleurs le triplet 6 — 8 — 10, qui est un multiple du
+triplet 3 — 4 — 5.
+
+
+3) MESURE DE L'ANGLE MAB
+
+Plaçons-nous dans le triangle AMB, rectangle en M, et considérons l'angle
+en A.
+
+    [AM] est le côté ADJACENT à cet angle
+    [AB] est l'HYPOTÉNUSE
+
+On utilise donc le cosinus :
+
+    cos(MAB) = AM / AB
+    cos(MAB) = 6 / 10
+    cos(MAB) = 0,6
+
+Or l'énoncé donne cos 53° ≈ 0,6.
+
+    L'angle MAB mesure environ 53°.
+
+
+VÉRIFICATION
+La somme des angles d'un triangle vaut 180°. Ici :
+    90° (en M) + 53° (en A) = 143°
+Il reste 37° pour l'angle en B, ce qui est cohérent avec un triangle
+rectangle dont les deux angles aigus sont complémentaires.
+
+
+MÉTHODE À RETENIR POUR LE BEPC
+Cet exercice enchaîne trois chapitres : angle inscrit pour établir l'angle
+droit, Pythagore pour la longueur, trigonométrie pour l'angle. C'est la
+structure typique d'un exercice de géométrie au BEPC. Dès que vous voyez
+un diamètre, cherchez l'angle droit : il ouvre tout le reste.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Angles inscrits — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+RECONNAÎTRE LES ANGLES
+
+    sommet AU CENTRE  →  angle au centre
+    sommet SUR le cercle, côtés recoupant le cercle  →  angle inscrit
+
+
+LA PROPRIÉTÉ FONDAMENTALE
+
+Pour un même arc intercepté :
+
+    angle au centre = 2 × angle inscrit
+    angle inscrit = angle au centre ÷ 2
+
+Le CENTRE voit toujours plus GRAND.
+
+
+DEUX ANGLES INSCRITS SUR LE MÊME ARC
+
+Ils ont la même mesure.
+
+    mes AMB = mes ANB   si M et N sont sur le même arc
+
+La position du sommet sur l'arc n'a pas d'importance.
+
+
+LE CAS DU DIAMÈTRE
+
+Si [AB] est un diamètre et M un point du cercle distinct de A et B :
+
+    le triangle AMB est RECTANGLE EN M
+
+Réciproque : si AMB est rectangle en M, alors M appartient au cercle de
+diamètre [AB].
+
+
+LE RÉFLEXE
+
+Diamètre dans un exercice  →  angle droit  →  Pythagore et trigonométrie
+deviennent utilisables.
+
+
+LA PHRASE TYPE À RECOPIER
+
+« Les angles AOB et AMB interceptent le même arc AB. D'après la propriété
+de l'angle inscrit, mes AOB = 2 × mes AMB. »
+
+« M appartient au cercle de diamètre [AB] et est distinct de A et de B.
+Donc le triangle AMB est rectangle en M. »
+
+
+LES PIÈGES
+
+- appliquer la propriété à un sommet qui n'est ni au centre ni sur le
+  cercle
+- multiplier au lieu de diviser
+- comparer deux angles inscrits qui n'interceptent pas le même arc
+- oublier de justifier : en géométrie, la propriété citée vaut des points
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les angles inscrits',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'ai1',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Dans un cercle, un angle au centre mesure 110°. Combien mesure '
+                'un angle inscrit interceptant le même arc ? (Écris seulement '
+                'le nombre de degrés)',
+            reponseAttendue: '55',
+            explication:
+                'L\'angle inscrit vaut la moitié de l\'angle au centre : '
+                '110 / 2 = 55°.',
+          ),
+          QuestionQuiz(
+            id: 'ai2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'À quoi reconnaît-on un angle inscrit dans un cercle ?',
+            choix: [
+              'Son sommet est au centre du cercle',
+              'Son sommet est sur le cercle et ses côtés recoupent le cercle',
+              'Ses côtés sont deux rayons',
+              'Il mesure toujours 90°',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'Deux conditions : le sommet est SUR le cercle, et les deux '
+                'côtés le recoupent. Si le sommet est au centre, c\'est un '
+                'angle au centre.',
+          ),
+          QuestionQuiz(
+            id: 'ai3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Si M est un point d\'un cercle de diamètre [AB], distinct de A '
+                'et de B, alors le triangle AMB est rectangle en M.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'Le diamètre correspond à un angle au centre de 180°. L\'angle '
+                'inscrit vaut donc 180 / 2 = 90°. C\'est une propriété très '
+                'utilisée au BEPC.',
+          ),
+          QuestionQuiz(
+            id: 'ai4',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Deux angles inscrits interceptent le même arc d\'un cercle. '
+                'Que peut-on dire de leurs mesures ?',
+            choix: [
+              'Elles sont égales',
+              'L\'une est le double de l\'autre',
+              'Leur somme vaut 180°',
+              'On ne peut rien dire',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'Chacun vaut la moitié du même angle au centre : ils sont donc '
+                'égaux, quelle que soit la position de leur sommet sur l\'arc.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 11 : VECTEURS
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch11': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Les vecteurs du plan',
+        ordre: 1,
+        contenu: r'''
+1. QU'EST-CE QU'UN VECTEUR
+
+Un vecteur représente un DÉPLACEMENT. Il est défini par trois éléments :
+
+    sa DIRECTION   : la droite selon laquelle on se déplace
+    son SENS       : dans quel sens on parcourt cette droite
+    sa NORME       : la longueur du déplacement
+
+Le vecteur qui va du point A au point B se note AB, avec une flèche.
+Sa norme est la longueur AB.
+
+
+2. ÉGALITÉ DE DEUX VECTEURS
+
+Deux vecteurs sont ÉGAUX s'ils ont la même direction, le même sens et la
+même norme.
+
+Un vecteur ne dépend PAS de l'endroit où on le dessine. On peut le
+déplacer librement dans le plan : il reste le même.
+
+Propriété très utile :
+
+    AB = DC   équivaut à dire que ABCD est un PARALLÉLOGRAMME
+
+Attention à l'ordre des lettres : AB = DC, et non AB = CD.
+
+
+3. LE VECTEUR NUL ET LE VECTEUR OPPOSÉ
+
+Le vecteur nul, noté 0, est le vecteur AA : on ne se déplace pas.
+
+L'opposé du vecteur AB est le vecteur BA : même direction, même norme,
+mais SENS CONTRAIRE.
+
+    BA = -AB
+
+
+4. LA SOMME DE DEUX VECTEURS
+
+Additionner deux vecteurs, c'est enchaîner deux déplacements.
+
+LA RELATION DE CHASLES :
+
+    AB + BC = AC
+
+On part de A, on passe par B, on arrive en C. Le point intermédiaire
+disparaît.
+
+C'est la règle la plus utilisée du chapitre. Repérez-la : la lettre de fin
+du premier vecteur doit être la lettre de début du second.
+
+Autre méthode, la règle du parallélogramme : si les deux vecteurs partent
+du même point, leur somme est la diagonale du parallélogramme qu'ils
+forment.
+
+
+5. LA DIFFÉRENCE DE DEUX VECTEURS
+
+Soustraire un vecteur, c'est additionner son opposé :
+
+    u - v = u + (-v)
+
+Cas fréquent :
+
+    AB - AC = AB + CA = CA + AB = CB
+
+
+6. LE PRODUIT D'UN VECTEUR PAR UN NOMBRE RÉEL
+
+Multiplier un vecteur u par un nombre réel k donne le vecteur ku.
+
+    la DIRECTION reste la même
+    la NORME est multipliée par |k|
+    le SENS est conservé si k > 0, inversé si k < 0
+
+Exemples :
+    2u  : même sens, deux fois plus long
+    -u  : sens contraire, même longueur
+    0,5u : même sens, deux fois plus court
+
+
+7. VECTEURS COLINÉAIRES
+
+Deux vecteurs non nuls sont COLINÉAIRES s'ils ont la même DIRECTION,
+autrement dit s'ils sont portés par des droites parallèles.
+
+Traduction mathématique :
+
+    u et v sont colinéaires   s'il existe un réel k tel que   v = ku
+
+À quoi cela sert :
+
+    AB et AC colinéaires  →  les points A, B et C sont ALIGNÉS
+    AB et CD colinéaires  →  les droites (AB) et (CD) sont PARALLÈLES
+
+C'est l'outil pour démontrer un alignement ou un parallélisme.
+
+
+8. VECTEURS ORTHOGONAUX
+
+Deux vecteurs sont ORTHOGONAUX si leurs directions sont perpendiculaires.
+
+    AB et CD orthogonaux  →  les droites (AB) et (CD) sont
+                             PERPENDICULAIRES
+
+
+9. LE MILIEU D'UN SEGMENT
+
+I est le milieu de [AB] si et seulement si :
+
+    AI = IB
+
+ou encore :
+
+    IA + IB = 0
+
+Cette dernière écriture est souvent la plus pratique dans les
+démonstrations.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Chasles et colinéarité, pas à pas',
+        ordre: 1,
+        contenu: r'''
+UN VECTEUR N'EST PAS UN POINT
+
+C'est l'obstacle numéro un. Un vecteur, ce n'est pas un endroit : c'est un
+DÉPLACEMENT, une instruction du type « avance de 3 vers la droite et de 2
+vers le haut ».
+
+Conséquence : le même vecteur peut être dessiné à des endroits différents
+du plan. Deux flèches parallèles, de même longueur et de même sens,
+représentent le MÊME vecteur.
+
+
+LA RELATION DE CHASLES : L'IMAGE DU VOYAGE
+
+    AB + BC = AC
+
+Tu vas d'Abidjan à Yamoussoukro, puis de Yamoussoukro à Bouaké. Au total,
+tu es allé d'Abidjan à Bouaké. Le point de passage disparaît.
+
+LA RÈGLE DE RECONNAISSANCE : la lettre de FIN du premier vecteur doit être
+la lettre de DÉBUT du second.
+
+    AB + BC   →  le B se touche, ça marche  →  AC
+    AB + CD   →  B et C ne se touchent pas  →  on ne peut pas simplifier
+
+CHASLES DANS L'AUTRE SENS
+On peut aussi COUPER un vecteur en insérant un point de passage :
+
+    AC = AB + BC
+
+C'est très utile quand on veut faire apparaître un point particulier dans
+une démonstration.
+
+
+LA DIFFÉRENCE : TRANSFORMER EN ADDITION
+
+Ne cherche jamais à soustraire directement. Transforme d'abord.
+
+    AB - AC
+
+Remplace -AC par CA, son opposé :
+
+    AB - AC = AB + CA
+
+Puis réorganise pour que les lettres se touchent :
+
+    = CA + AB = CB
+
+Retiens ce résultat, il revient souvent : AB - AC = CB.
+
+
+LE PRODUIT PAR UN RÉEL
+
+    2u    deux fois plus long, même sens
+    -u    même longueur, sens opposé
+    -3u   trois fois plus long, sens opposé
+    0,5u  moitié moins long, même sens
+
+Le SIGNE gère le sens, la VALEUR ABSOLUE gère la longueur.
+
+
+DÉMONTRER UN ALIGNEMENT
+
+C'est l'exercice type. Pour montrer que A, B et C sont alignés :
+
+Étape 1 — exprime les vecteurs AB et AC.
+Étape 2 — cherche un réel k tel que AC = k AB.
+Étape 3 — s'il existe, les vecteurs sont colinéaires, donc les points sont
+alignés.
+
+    Si AC = 3 AB, alors A, B et C sont alignés.
+
+ATTENTION : les deux vecteurs doivent partir du MÊME point. AB et AC, ou
+BA et BC, mais pas AB et CD.
+
+
+DÉMONTRER UN PARALLÉLISME
+
+Même principe, mais avec deux vecteurs qui ne partagent pas de point.
+
+    Si CD = 2 AB, alors (AB) et (CD) sont parallèles.
+
+
+DÉMONTRER QU'UN QUADRILATÈRE EST UN PARALLÉLOGRAMME
+
+Il suffit de montrer que deux côtés opposés sont représentés par des
+vecteurs égaux.
+
+    AB = DC   →   ABCD est un parallélogramme
+
+ATTENTION À L'ORDRE DES LETTRES. Pour ABCD, c'est AB = DC. Écrire AB = CD
+donnerait un quadrilatère croisé, ce qui est faux.
+
+Le moyen de contrôle : parcours le quadrilatère dans l'ordre A, B, C, D.
+Les côtés [AB] et [DC] sont bien opposés et parcourus dans le même sens.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : appliquer Chasles quand les lettres ne se touchent pas.
+Erreur 2 : écrire AB = CD au lieu de AB = DC pour un parallélogramme.
+Erreur 3 : confondre le vecteur AB et la longueur AB. Le vecteur a une
+flèche, la longueur est un nombre positif.
+Erreur 4 : oublier que les vecteurs doivent partir du même point pour
+conclure à un alignement.
+
+
+CONSEIL POUR LE BEPC
+
+Quand tu bloques, écris tous les vecteurs de l'énoncé en fonction de deux
+vecteurs de base, souvent AB et AC. Presque tous les exercices se
+débloquent ainsi.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Relation de Chasles et parallélogramme',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+1) Simplifie les expressions vectorielles suivantes :
+   a) AB + BC
+   b) MN + NP + PQ
+   c) AB - AC
+
+2) ABCD est un parallélogramme.
+   a) Cite deux vecteurs égaux dans cette figure.
+   b) Que vaut AB + AD ? Justifie.
+
+3) Soit I le milieu du segment [AB].
+   Écris une égalité vectorielle traduisant cette situation.
+''',
+        solution: r'''
+1) SIMPLIFICATIONS
+
+a) AB + BC
+
+La lettre de fin du premier vecteur est B, et c'est aussi la lettre de
+début du second. La relation de Chasles s'applique :
+
+    AB + BC = AC
+
+
+b) MN + NP + PQ
+
+On applique Chasles deux fois de suite :
+
+    MN + NP = MP
+    puis MP + PQ = MQ
+
+    MN + NP + PQ = MQ
+
+Tous les points intermédiaires disparaissent : il ne reste que le premier
+et le dernier.
+
+
+c) AB - AC
+
+On transforme la soustraction en addition, en remplaçant -AC par CA :
+
+    AB - AC = AB + CA
+
+On réorganise pour que les lettres se touchent :
+
+    = CA + AB
+    = CB
+
+    AB - AC = CB
+
+
+2) LE PARALLÉLOGRAMME ABCD
+
+a) Dans un parallélogramme ABCD, les côtés opposés sont parallèles et de
+même longueur, et parcourus dans le même sens :
+
+    AB = DC        et        AD = BC
+
+Attention à l'ordre des lettres : c'est bien AB = DC, et non AB = CD.
+
+
+b) Calculons AB + AD.
+
+D'après la question précédente, AD = BC. Remplaçons :
+
+    AB + AD = AB + BC
+
+Les lettres se touchent, on applique Chasles :
+
+    AB + AD = AC
+
+    La somme AB + AD est égale au vecteur AC, c'est-à-dire à la DIAGONALE
+    du parallélogramme issue de A.
+
+C'est la règle du parallélogramme : la somme de deux vecteurs issus d'un
+même point est la diagonale du parallélogramme qu'ils construisent.
+
+
+3) LE MILIEU
+
+I est le milieu de [AB] signifie que le déplacement de A vers I est
+exactement le même que celui de I vers B :
+
+    AI = IB
+
+On peut aussi l'écrire sous la forme :
+
+    IA + IB = 0
+
+Les deux écritures sont acceptées. La seconde est souvent plus commode
+dans les démonstrations.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Démontrer un alignement',
+        ordre: 2,
+        difficulte: Difficulte.difficile,
+        enonce: r'''
+Soient A, B et C trois points non alignés du plan.
+
+On définit les points M et N par :
+
+    AM = 2 AB
+    AN = 2 AC
+
+1) Exprime le vecteur MN en fonction de AB et AC.
+2) Exprime le vecteur BC en fonction de AB et AC.
+3) Démontre que les droites (MN) et (BC) sont parallèles.
+4) Quelle relation existe-t-il entre les longueurs MN et BC ?
+''',
+        solution: r'''
+1) EXPRESSION DE MN
+
+Pour faire apparaître le point A, dont on connaît les relations, on
+utilise la relation de Chasles en insérant A comme point de passage :
+
+    MN = MA + AN
+
+Or MA est l'opposé de AM :
+
+    MA = -AM = -2 AB
+
+Et par hypothèse :
+
+    AN = 2 AC
+
+Donc :
+
+    MN = -2 AB + 2 AC
+
+On peut factoriser par 2 :
+
+    MN = 2(AC - AB)
+
+
+2) EXPRESSION DE BC
+
+Même méthode, on insère le point A :
+
+    BC = BA + AC
+
+Or BA = -AB, donc :
+
+    BC = -AB + AC
+    BC = AC - AB
+
+
+3) PARALLÉLISME DES DROITES (MN) ET (BC)
+
+Comparons les deux résultats.
+
+    MN = 2(AC - AB)
+    BC = AC - AB
+
+On en déduit immédiatement :
+
+    MN = 2 BC
+
+Il existe donc un réel k, ici k = 2, tel que MN = k BC.
+
+Les vecteurs MN et BC sont donc COLINÉAIRES.
+
+Deux vecteurs colinéaires ont la même direction, ce qui signifie que leurs
+droites supports sont parallèles.
+
+    CONCLUSION : les droites (MN) et (BC) sont parallèles.
+
+
+4) RELATION ENTRE LES LONGUEURS
+
+L'égalité MN = 2 BC porte sur les vecteurs. En passant aux normes,
+c'est-à-dire aux longueurs :
+
+    MN = 2 × BC
+
+    La longueur MN est le DOUBLE de la longueur BC.
+
+
+REMARQUE IMPORTANTE
+On aurait pu obtenir le même résultat avec la propriété de Thalès : les
+points M et N sont les images de B et C dans un agrandissement de rapport
+2 de centre A. La méthode vectorielle est souvent plus rapide et se rédige
+en moins de lignes.
+
+MÉTHODE À RETENIR
+Pour démontrer un parallélisme ou un alignement, exprimez toujours les
+vecteurs en fonction de DEUX vecteurs de base, ici AB et AC. La relation
+entre eux apparaît alors d'elle-même.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Vecteurs — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+DÉFINITION
+
+Un vecteur est un DÉPLACEMENT, défini par :
+    une direction, un sens, une norme
+
+Il ne dépend pas de l'endroit où on le dessine.
+
+
+LA RELATION DE CHASLES
+
+    AB + BC = AC
+
+La lettre de fin du premier doit être la lettre de début du second.
+On peut aussi couper : AC = AB + BC, pour faire apparaître un point.
+
+
+LA DIFFÉRENCE
+
+    AB - AC = AB + CA = CB
+
+On transforme toujours la soustraction en addition.
+
+
+LE VECTEUR OPPOSÉ
+
+    BA = -AB
+
+
+LE PRODUIT PAR UN RÉEL
+
+    ku : même direction
+         norme multipliée par |k|
+         même sens si k > 0, sens opposé si k < 0
+
+
+COLINÉARITÉ
+
+    u et v colinéaires  ⟺  il existe k tel que v = ku
+
+    AB et AC colinéaires  →  A, B, C ALIGNÉS
+    AB et CD colinéaires  →  (AB) // (CD)
+
+
+PARALLÉLOGRAMME
+
+    ABCD est un parallélogramme  ⟺  AB = DC
+
+ATTENTION À L'ORDRE : AB = DC, jamais AB = CD.
+
+
+MILIEU
+
+    I milieu de [AB]  ⟺  AI = IB  ⟺  IA + IB = 0
+
+
+RÈGLE DU PARALLÉLOGRAMME
+
+    AB + AD = AC   dans le parallélogramme ABCD
+
+La somme de deux vecteurs issus d'un même point est la diagonale.
+
+
+LES PIÈGES
+
+- appliquer Chasles quand les lettres ne se touchent pas
+- écrire AB = CD au lieu de AB = DC
+- confondre le vecteur AB et la longueur AB
+- comparer des vecteurs qui ne partent pas du même point pour un
+  alignement
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les vecteurs',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'vec1',
+            type: TypeQuestion.qcm,
+            enonce: 'Que vaut la somme MN + NP ?',
+            choix: ['MP', 'NP', 'PM', 'On ne peut pas simplifier'],
+            bonnesReponses: [0],
+            explication:
+                'Relation de Chasles : la lettre de fin du premier vecteur (N) '
+                'est la lettre de début du second. Le point intermédiaire '
+                'disparaît, il reste MP.',
+          ),
+          QuestionQuiz(
+            id: 'vec2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'ABCD est un parallélogramme. Quelle égalité vectorielle est '
+                'correcte ?',
+            choix: ['AB = CD', 'AB = DC', 'AB = BC', 'AC = BD'],
+            bonnesReponses: [1],
+            explication:
+                'Dans le parallélogramme ABCD, les côtés [AB] et [DC] sont '
+                'opposés et parcourus dans le même sens : AB = DC. Écrire '
+                'AB = CD décrirait un quadrilatère croisé.',
+          ),
+          QuestionQuiz(
+            id: 'vec3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Si AC = 3 AB, alors les points A, B et C sont alignés.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'Les vecteurs AC et AB sont colinéaires, et ils partent du même '
+                'point A. Les trois points sont donc bien alignés.',
+          ),
+          QuestionQuiz(
+            id: 'vec4',
+            type: TypeQuestion.qcm,
+            enonce: 'À quoi est égal le vecteur AB - AC ?',
+            choix: ['BC', 'CB', 'AA', 'BA'],
+            bonnesReponses: [1],
+            explication:
+                'AB - AC = AB + CA = CA + AB = CB. Un résultat à mémoriser : '
+                'il revient très souvent dans les exercices.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 12 : COORDONNEES D'UN VECTEUR
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch12': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Coordonnées dans un repère',
+        ordre: 1,
+        contenu: r'''
+1. LE REPÈRE DU PLAN
+
+Un repère du plan est constitué d'un point O appelé ORIGINE et de deux
+axes gradués sécants en O.
+
+    l'axe horizontal est l'axe des ABSCISSES
+    l'axe vertical est l'axe des ORDONNÉES
+
+Tout point M du plan est alors repéré par un couple de nombres (x ; y)
+appelé ses COORDONNÉES.
+
+    x est l'abscisse, y est l'ordonnée
+
+On écrit M(x ; y), avec un point-virgule.
+
+Un repère est ORTHOGONAL si les deux axes sont perpendiculaires, et
+ORTHONORMÉ s'ils sont de plus gradués avec la même unité.
+
+
+2. COORDONNÉES D'UN VECTEUR
+
+Soient A(xA ; yA) et B(xB ; yB) deux points du plan.
+
+Les coordonnées du vecteur AB sont :
+
+    AB (xB - xA ; yB - yA)
+
+On soustrait TOUJOURS les coordonnées du point de DÉPART à celles du point
+d'ARRIVÉE. L'ordre compte.
+
+Exemple : A(1 ; 2) et B(5 ; 4).
+
+    AB (5 - 1 ; 4 - 2) = AB (4 ; 2)
+
+Lecture concrète : pour aller de A à B, on avance de 4 vers la droite et
+de 2 vers le haut.
+
+
+3. ÉGALITÉ DE DEUX VECTEURS
+
+Deux vecteurs sont égaux si et seulement si leurs coordonnées sont égales,
+une à une.
+
+    u (x ; y) = v (x' ; y')   ⟺   x = x'  et  y = y'
+
+
+4. OPÉRATIONS SUR LES COORDONNÉES
+
+Soient u (x ; y) et v (x' ; y') deux vecteurs, et k un réel.
+
+    u + v  a pour coordonnées  (x + x' ; y + y')
+    u - v  a pour coordonnées  (x - x' ; y - y')
+    ku     a pour coordonnées  (kx ; ky)
+
+Tout se fait coordonnée par coordonnée : les abscisses ensemble, les
+ordonnées ensemble.
+
+
+5. COORDONNÉES DU MILIEU D'UN SEGMENT
+
+Si I est le milieu de [AB], alors :
+
+    xI = (xA + xB) / 2
+    yI = (yA + yB) / 2
+
+Le milieu a pour coordonnées la MOYENNE des coordonnées des extrémités.
+
+Exemple : A(1 ; 2) et B(5 ; 4).
+
+    xI = (1 + 5)/2 = 3
+    yI = (2 + 4)/2 = 3
+
+    I(3 ; 3)
+
+
+6. DISTANCE DE DEUX POINTS
+
+Dans un repère ORTHONORMÉ, la distance entre A(xA ; yA) et B(xB ; yB) est :
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+
+Cette formule n'est rien d'autre que la propriété de Pythagore appliquée
+au triangle rectangle dont [AB] est l'hypoténuse.
+
+Exemple : A(1 ; 2) et B(5 ; 4).
+
+    AB = √[(5-1)² + (4-2)²]
+    AB = √[16 + 4]
+    AB = √20 = 2√5
+
+ATTENTION : cette formule n'est valable que dans un repère ORTHONORMÉ.
+
+
+7. NORME D'UN VECTEUR
+
+La norme d'un vecteur u (x ; y), notée ‖u‖, est sa longueur :
+
+    ‖u‖ = √(x² + y²)
+
+
+8. COLINÉARITÉ ET DÉTERMINANT
+
+Soient u (x ; y) et v (x' ; y').
+
+Le DÉTERMINANT de ces deux vecteurs est le nombre :
+
+    det(u ; v) = xy' - yx'
+
+PROPRIÉTÉ :
+
+    u et v sont colinéaires   ⟺   xy' - yx' = 0
+
+C'est le critère le plus rapide pour tester une colinéarité, donc un
+alignement ou un parallélisme.
+
+Exemple : u(2 ; 3) et v(4 ; 6).
+
+    det = 2×6 - 3×4 = 12 - 12 = 0
+
+Les vecteurs sont colinéaires. On vérifie d'ailleurs que v = 2u.
+
+Moyen mnémotechnique : on multiplie en CROIX, puis on soustrait.
+
+
+9. À QUOI CELA SERT
+
+Avec les coordonnées, la géométrie devient du calcul :
+
+    démontrer un alignement    →  déterminant nul
+    démontrer un parallélisme  →  déterminant nul
+    trouver un milieu          →  moyenne des coordonnées
+    calculer une longueur      →  formule de la distance
+    reconnaître un
+    parallélogramme            →  égalité de deux vecteurs
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Calculer avec les coordonnées',
+        ordre: 1,
+        contenu: r'''
+LE SENS DE LA SOUSTRACTION
+
+    AB (xB - xA ; yB - yA)
+
+ARRIVÉE moins DÉPART. Toujours dans cet ordre.
+
+Le moyen de ne jamais se tromper : dans le nom du vecteur AB, la SECONDE
+lettre est celle d'arrivée, et c'est elle qui vient EN PREMIER dans le
+calcul.
+
+Si tu inverses, tu obtiens le vecteur opposé, et tous tes résultats
+suivants seront faux d'un signe.
+
+Vérification rapide : regarde ta figure. Si B est à droite de A, l'abscisse
+de AB doit être POSITIVE. Si B est plus haut, l'ordonnée doit être
+positive.
+
+
+MILIEU OU VECTEUR : NE PAS CONFONDRE
+
+C'est l'erreur la plus fréquente du chapitre.
+
+    Coordonnées du VECTEUR AB   →  on SOUSTRAIT :  (xB - xA ; yB - yA)
+    Coordonnées du MILIEU de [AB] →  on ADDITIONNE et on DIVISE PAR 2 :
+                                     ((xA + xB)/2 ; (yA + yB)/2)
+
+Un vecteur peut avoir des coordonnées négatives. Un milieu est un POINT
+situé entre A et B : ses coordonnées sont comprises entre celles de A et
+celles de B. Si ce n'est pas le cas, tu as confondu les deux formules.
+
+
+LA DISTANCE, C'EST PYTHAGORE DÉGUISÉ
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+
+Pourquoi ? Parce qu'on construit un triangle rectangle : on avance
+horizontalement de (xB - xA), puis verticalement de (yB - yA). Le segment
+[AB] en est l'hypoténuse.
+
+Deux remarques :
+    les carrés rendent le résultat positif, donc l'ordre de soustraction
+    n'a AUCUNE importance ici
+    n'oublie jamais la racine carrée à la fin
+
+
+LE DÉTERMINANT : LA MULTIPLICATION EN CROIX
+
+Pour u(x ; y) et v(x' ; y') :
+
+    det = xy' - yx'
+
+Écris les coordonnées en colonnes :
+
+    x    x'
+    y    y'
+
+Puis multiplie en croix : x × y' d'abord, moins y × x'.
+
+    Si det = 0  →  les vecteurs sont COLINÉAIRES
+    Si det ≠ 0  →  ils ne le sont pas
+
+C'est plus rapide que de chercher le coefficient k, surtout avec des
+nombres qui ne tombent pas juste.
+
+
+LES TROIS DÉMONSTRATIONS TYPES
+
+Démontrer que A, B, C sont ALIGNÉS :
+    1. calcule les coordonnées de AB et AC
+    2. calcule le déterminant
+    3. s'il est nul, les vecteurs sont colinéaires, donc les points sont
+       alignés
+
+Démontrer que (AB) et (CD) sont PARALLÈLES :
+    même méthode, avec les vecteurs AB et CD
+
+Démontrer que ABCD est un PARALLÉLOGRAMME :
+    1. calcule les coordonnées de AB et de DC
+    2. si elles sont égales, alors AB = DC
+    3. donc ABCD est un parallélogramme
+
+    Autre méthode, souvent plus rapide : montre que [AC] et [BD] ont le
+    MÊME MILIEU. Les diagonales d'un parallélogramme se coupent en leur
+    milieu.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : soustraire dans le mauvais sens pour un vecteur.
+Erreur 2 : appliquer la formule du milieu pour un vecteur, ou l'inverse.
+Erreur 3 : oublier la racine carrée dans le calcul d'une distance.
+Erreur 4 : utiliser la formule de distance dans un repère qui n'est pas
+orthonormé. L'énoncé le précise toujours : lisez-le.
+Erreur 5 : oublier de simplifier le radical final. √20 doit devenir 2√5.
+
+
+CONSEIL POUR LE BEPC
+
+Trace toujours la figure dans le repère, même si l'énoncé ne le demande
+pas. Elle te permet de vérifier tous tes résultats d'un coup d'œil : un
+milieu mal placé ou un vecteur qui pointe dans le mauvais sens se voit
+immédiatement.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Vecteurs, milieu et distance',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé.
+
+On donne les points A(-2 ; 1), B(4 ; 3) et C(6 ; -1).
+
+1) Calcule les coordonnées des vecteurs AB et AC.
+2) Calcule les coordonnées du milieu I du segment [AB].
+3) Calcule la distance AB. Donne le résultat sous la forme la plus simple.
+4) Les points A, B et C sont-ils alignés ? Justifie par un calcul.
+''',
+        solution: r'''
+1) COORDONNÉES DES VECTEURS
+
+Rappel : AB (xB - xA ; yB - yA), soit arrivée moins départ.
+
+Pour AB, avec A(-2 ; 1) et B(4 ; 3) :
+
+    xAB = 4 - (-2) = 4 + 2 = 6
+    yAB = 3 - 1 = 2
+
+    AB (6 ; 2)
+
+Pour AC, avec A(-2 ; 1) et C(6 ; -1) :
+
+    xAC = 6 - (-2) = 8
+    yAC = -1 - 1 = -2
+
+    AC (8 ; -2)
+
+
+2) MILIEU DE [AB]
+
+Pour un milieu, on additionne et on divise par 2 :
+
+    xI = (xA + xB) / 2 = (-2 + 4) / 2 = 2 / 2 = 1
+    yI = (yA + yB) / 2 = (1 + 3) / 2 = 4 / 2 = 2
+
+    I(1 ; 2)
+
+Contrôle : les coordonnées de I sont bien comprises entre celles de A et
+celles de B. C'est cohérent.
+
+
+3) DISTANCE AB
+
+Le repère est orthonormé, on peut donc appliquer la formule :
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+    AB = √[6² + 2²]
+    AB = √[36 + 4]
+    AB = √40
+
+On simplifie le radical : 40 = 4 × 10, et 4 est un carré parfait.
+
+    AB = √4 × √10 = 2√10
+
+    AB = 2√10   (soit environ 6,32)
+
+
+4) ALIGNEMENT DE A, B ET C
+
+Les points A, B et C sont alignés si et seulement si les vecteurs AB et AC
+sont colinéaires.
+
+On calcule le déterminant :
+
+    det(AB ; AC) = xAB × yAC - yAB × xAC
+    det = 6 × (-2) - 2 × 8
+    det = -12 - 16
+    det = -28
+
+Le déterminant n'est pas nul.
+
+    CONCLUSION : les vecteurs AB et AC ne sont pas colinéaires, donc les
+    points A, B et C ne sont PAS alignés.
+
+Ils forment donc un vrai triangle.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le parallélogramme du géomètre',
+        ordre: 2,
+        difficulte: Difficulte.difficile,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé, l'unité étant le mètre.
+
+Un géomètre relève quatre bornes d'un terrain à Abobo :
+
+    A(1 ; 2)    B(7 ; 4)    C(9 ; 8)    D(3 ; 6)
+
+1) Démontre que le quadrilatère ABCD est un parallélogramme.
+2) Calcule les coordonnées du point d'intersection de ses diagonales.
+3) Calcule les longueurs AB et AD.
+4) Le terrain est-il un losange ? Justifie.
+''',
+        solution: r'''
+1) ABCD EST-IL UN PARALLÉLOGRAMME ?
+
+Un quadrilatère ABCD est un parallélogramme si et seulement si AB = DC.
+
+Calculons les coordonnées de ces deux vecteurs.
+
+    AB (xB - xA ; yB - yA) = (7 - 1 ; 4 - 2) = AB (6 ; 2)
+
+    DC (xC - xD ; yC - yD) = (9 - 3 ; 8 - 6) = DC (6 ; 2)
+
+Les deux vecteurs ont exactement les mêmes coordonnées :
+
+    AB = DC
+
+    CONCLUSION : le quadrilatère ABCD est un PARALLÉLOGRAMME.
+
+Attention à l'ordre des lettres : on compare bien AB et DC, pas AB et CD.
+
+
+2) INTERSECTION DES DIAGONALES
+
+Dans un parallélogramme, les diagonales se coupent en leur milieu. Le
+point d'intersection est donc le milieu de [AC], qui est aussi celui de
+[BD].
+
+Milieu de [AC], avec A(1 ; 2) et C(9 ; 8) :
+
+    x = (1 + 9) / 2 = 5
+    y = (2 + 8) / 2 = 5
+
+    Le point d'intersection est (5 ; 5).
+
+Vérifions avec la diagonale [BD], B(7 ; 4) et D(3 ; 6) :
+
+    x = (7 + 3) / 2 = 5
+    y = (4 + 6) / 2 = 5
+
+On retrouve bien (5 ; 5). Le résultat est confirmé, et cela valide aussi
+la question 1.
+
+
+3) LONGUEURS AB ET AD
+
+Le repère est orthonormé.
+
+    AB = √[(7-1)² + (4-2)²]
+    AB = √[36 + 4]
+    AB = √40 = 2√10
+
+    AD = √[(3-1)² + (6-2)²]
+    AD = √[4 + 16]
+    AD = √20 = 2√5
+
+    AB = 2√10 m   (environ 6,32 m)
+    AD = 2√5 m    (environ 4,47 m)
+
+
+4) LE TERRAIN EST-IL UN LOSANGE ?
+
+Un losange est un parallélogramme dont tous les côtés ont la même
+longueur. Il suffit donc de comparer deux côtés consécutifs.
+
+    AB = 2√10 ≈ 6,32
+    AD = 2√5  ≈ 4,47
+
+Ces deux longueurs sont différentes.
+
+    CONCLUSION : le terrain n'est PAS un losange. C'est un
+    parallélogramme quelconque.
+
+
+CE QU'IL FAUT RETENIR
+Pour identifier précisément un quadrilatère :
+    parallélogramme  →  AB = DC
+    losange          →  parallélogramme + deux côtés consécutifs égaux
+    rectangle        →  parallélogramme + diagonales de même longueur
+    carré            →  les deux conditions à la fois
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Coordonnées — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+COORDONNÉES D'UN VECTEUR
+
+    AB (xB - xA ; yB - yA)
+
+ARRIVÉE moins DÉPART. La seconde lettre du nom vient en premier.
+
+
+MILIEU D'UN SEGMENT
+
+    I ((xA + xB)/2 ; (yA + yB)/2)
+
+On ADDITIONNE et on divise par 2. À ne pas confondre avec le vecteur, où
+l'on soustrait.
+
+
+DISTANCE (repère ORTHONORMÉ uniquement)
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+
+C'est Pythagore. Les carrés rendent l'ordre indifférent.
+Ne pas oublier la racine, ni de simplifier le radical.
+
+
+NORME D'UN VECTEUR
+
+    ‖u‖ = √(x² + y²)
+
+
+OPÉRATIONS
+
+    u + v  →  (x + x' ; y + y')
+    ku     →  (kx ; ky)
+
+Coordonnée par coordonnée.
+
+
+COLINÉARITÉ : LE DÉTERMINANT
+
+    det(u ; v) = xy' - yx'
+
+    det = 0  →  colinéaires
+    det ≠ 0  →  non colinéaires
+
+Multiplication en croix, puis soustraction.
+
+
+LES TROIS DÉMONSTRATIONS TYPES
+
+    A, B, C alignés      →  det(AB ; AC) = 0
+    (AB) // (CD)         →  det(AB ; CD) = 0
+    ABCD parallélogramme →  AB = DC
+                            ou [AC] et [BD] ont le même milieu
+
+
+IDENTIFIER UN QUADRILATÈRE
+
+    parallélogramme  →  AB = DC
+    losange          →  + deux côtés consécutifs égaux
+    rectangle        →  + diagonales de même longueur
+    carré            →  les deux
+
+
+LES PIÈGES
+
+- soustraire dans le mauvais sens
+- confondre formule du vecteur et formule du milieu
+- oublier la racine carrée dans une distance
+- utiliser la distance dans un repère non orthonormé
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les coordonnées',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'co1',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Soient A(2 ; 5) et B(7 ; 1). Quelles sont les coordonnées du '
+                'vecteur AB ?',
+            choix: ['(5 ; -4)', '(-5 ; 4)', '(9 ; 6)', '(4,5 ; 3)'],
+            bonnesReponses: [0],
+            explication:
+                'AB (xB - xA ; yB - yA) = (7 - 2 ; 1 - 5) = (5 ; -4). '
+                'La réponse (4,5 ; 3) correspondrait au MILIEU, pas au vecteur.',
+          ),
+          QuestionQuiz(
+            id: 'co2',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Soient A(0 ; 0) et B(6 ; 8) dans un repère orthonormé. '
+                'Combien vaut la distance AB ? (Écris seulement le nombre)',
+            reponseAttendue: '10',
+            explication:
+                'AB = √(6² + 8²) = √(36 + 64) = √100 = 10. On reconnaît le '
+                'triplet 6 — 8 — 10.',
+          ),
+          QuestionQuiz(
+            id: 'co3',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Les vecteurs u(3 ; 6) et v(2 ; 4) sont-ils colinéaires ?',
+            choix: [
+              'Oui, car le déterminant vaut 0',
+              'Non, car leurs coordonnées sont différentes',
+              'Oui, car ils ont la même norme',
+              'On ne peut pas le savoir',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'det = 3×4 - 6×2 = 12 - 12 = 0, donc les vecteurs sont '
+                'colinéaires. On vérifie d\'ailleurs que u = 1,5 v.',
+          ),
+          QuestionQuiz(
+            id: 'co4',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Le milieu du segment [AB] avec A(1 ; 3) et B(5 ; 7) a pour '
+                'coordonnées (3 ; 5).',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'x = (1+5)/2 = 3 et y = (3+7)/2 = 5. Les coordonnées du milieu '
+                'sont bien comprises entre celles de A et celles de B.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 13 : EQUATIONS DE DROITES
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch13': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Équations de droites',
+        ordre: 1,
+        contenu: r'''
+1. LES DEUX FORMES D'ÉQUATION
+
+Dans un repère du plan, toute droite admet une équation.
+
+Cas général — la droite n'est pas verticale :
+
+    y = ax + b
+
+    a est le COEFFICIENT DIRECTEUR
+    b est l'ORDONNÉE À L'ORIGINE
+
+Cas particulier — la droite est VERTICALE :
+
+    x = c
+
+Une droite verticale n'a pas de coefficient directeur : elle ne peut pas
+s'écrire sous la forme y = ax + b.
+
+Cas particulier — la droite est HORIZONTALE :
+
+    y = b       (c'est-à-dire a = 0)
+
+
+2. CALCULER LE COEFFICIENT DIRECTEUR
+
+Si la droite passe par deux points A(xA ; yA) et B(xB ; yB) avec
+xA ≠ xB :
+
+    a = (yB - yA) / (xB - xA)
+
+C'est la variation des ordonnées divisée par la variation des abscisses.
+
+Exemple : A(1 ; 3) et B(4 ; 9).
+
+    a = (9 - 3) / (4 - 1) = 6 / 3 = 2
+
+
+3. TROUVER L'ORDONNÉE À L'ORIGINE
+
+Une fois a connu, on remplace les coordonnées d'un point dans l'équation.
+
+Avec A(1 ; 3) et a = 2 :
+
+    3 = 2 × 1 + b
+    3 = 2 + b
+    b = 1
+
+    L'équation de la droite (AB) est   y = 2x + 1
+
+VÉRIFICATION : on teste avec l'AUTRE point.
+    Pour x = 4 : y = 2×4 + 1 = 9. C'est bien l'ordonnée de B.
+
+
+4. SIGNIFICATION GRAPHIQUE
+
+b est l'ordonnée du point où la droite coupe l'axe des ordonnées : le
+point (0 ; b).
+
+a indique la pente : quand on avance de 1 vers la droite, on monte de a.
+
+    a > 0  →  la droite monte
+    a < 0  →  la droite descend
+    a = 0  →  la droite est horizontale
+
+
+5. APPARTENANCE D'UN POINT À UNE DROITE
+
+Un point M(x ; y) appartient à la droite d'équation y = ax + b si et
+seulement si ses coordonnées VÉRIFIENT l'équation.
+
+Exemple : le point M(3 ; 7) appartient-il à la droite y = 2x + 1 ?
+
+    2 × 3 + 1 = 7
+
+Oui, l'égalité est vérifiée : M appartient à la droite.
+
+Pour N(5 ; 10) :
+    2 × 5 + 1 = 11 ≠ 10
+Non, N n'appartient pas à la droite.
+
+
+6. DROITES PARALLÈLES
+
+Deux droites non verticales sont PARALLÈLES si et seulement si elles ont
+le MÊME COEFFICIENT DIRECTEUR.
+
+    y = ax + b   et   y = a'x + b'   sont parallèles  ⟺  a = a'
+
+Si de plus b = b', les droites sont confondues.
+
+Exemple : y = 3x + 2 et y = 3x - 5 sont parallèles, mais distinctes.
+
+
+7. DROITES PERPENDICULAIRES
+
+Dans un repère ORTHONORMÉ, deux droites non verticales sont
+PERPENDICULAIRES si et seulement si le produit de leurs coefficients
+directeurs vaut -1 :
+
+    a × a' = -1
+
+Autrement dit :
+
+    a' = -1 / a
+
+Exemple : la perpendiculaire à y = 2x + 3 a pour coefficient directeur
+-1/2, soit -0,5.
+
+Moyen mnémotechnique : on prend l'INVERSE et on change le SIGNE.
+
+    a = 3     →  a' = -1/3
+    a = -1/4  →  a' = 4
+    a = 1     →  a' = -1
+
+
+8. POSITIONS RELATIVES DE DEUX DROITES
+
+    a ≠ a'              →  les droites sont SÉCANTES, en un point unique
+    a = a' et b ≠ b'    →  elles sont PARALLÈLES et distinctes
+    a = a' et b = b'    →  elles sont CONFONDUES
+
+Pour trouver le point d'intersection de deux droites sécantes, on résout
+le système formé par leurs deux équations. C'est exactement ce qu'on a vu
+au chapitre des systèmes.
+
+
+9. TRACER UNE DROITE
+
+Deux points suffisent.
+
+Le plus rapide : partir de (0 ; b), puis avancer de 1 vers la droite et
+monter de a. On obtient (1 ; a + b).
+
+Pour une droite verticale x = c, on trace la parallèle à l'axe des
+ordonnées passant par le point (c ; 0).
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Trouver et comparer des équations de droites',
+        ordre: 1,
+        contenu: r'''
+LA MÉTHODE EN DEUX TEMPS
+
+Trouver l'équation d'une droite passant par deux points, c'est toujours la
+même chose.
+
+    Temps 1 : calculer a
+    Temps 2 : trouver b
+
+Rien d'autre. Prenons A(2 ; 1) et B(5 ; 7).
+
+Temps 1 :
+    a = (7 - 1) / (5 - 2) = 6 / 3 = 2
+
+Temps 2 : je remplace avec le point A.
+    1 = 2 × 2 + b
+    1 = 4 + b
+    b = -3
+
+    L'équation est y = 2x - 3
+
+Temps 3, facultatif mais vivement conseillé : vérifie avec B.
+    2 × 5 - 3 = 7. C'est bien l'ordonnée de B. Parfait.
+
+
+LE PIÈGE DU CALCUL DE a
+
+    a = (yB - yA) / (xB - xA)
+
+Les y EN HAUT, les x EN BAS. Beaucoup d'élèves inversent.
+
+Le moyen de retenir : a représente « de combien on MONTE quand on avance
+de 1 ». La montée, ce sont les y ; l'avancée, ce sont les x. Montée
+divisée par avancée.
+
+Autre point de vigilance : garde le MÊME ordre en haut et en bas. Si tu
+écris yB - yA au numérateur, tu dois écrire xB - xA au dénominateur, pas
+l'inverse. Sinon tu obtiens l'opposé du bon résultat.
+
+Vérification visuelle : si la droite monte, a doit être positif.
+
+
+PARALLÈLES OU PERPENDICULAIRES : LE RÉFLEXE
+
+    PARALLÈLES        →  a = a'          (même pente)
+    PERPENDICULAIRES  →  a × a' = -1     (inverse et signe changé)
+
+Pour trouver le coefficient d'une perpendiculaire, deux gestes :
+    1. je retourne la fraction
+    2. je change le signe
+
+    a = 4      →  1/4  →  a' = -1/4
+    a = -2/3   →  -3/2 →  a' = 3/2
+    a = -1     →  -1   →  a' = 1
+
+Contrôle : multiplie les deux, tu dois trouver exactement -1.
+
+
+UN POINT APPARTIENT-IL À LA DROITE ?
+
+Ne réfléchis pas, calcule. Remplace x par l'abscisse du point dans
+l'équation, et compare le résultat à l'ordonnée.
+
+    Droite y = 3x - 4, point M(2 ; 2)
+    3 × 2 - 4 = 2
+    L'ordonnée de M est 2. Donc M appartient à la droite.
+
+Si les deux nombres diffèrent, le point n'y est pas. C'est aussi simple
+que cela.
+
+
+TROUVER LE POINT D'INTERSECTION DE DEUX DROITES
+
+C'est un système à deux équations. Le plus rapide : égaler les deux
+expressions de y.
+
+    y = 2x + 1   et   y = -x + 7
+
+    2x + 1 = -x + 7
+    3x = 6
+    x = 2
+
+Puis on remplace dans l'une des deux équations :
+    y = 2 × 2 + 1 = 5
+
+    Le point d'intersection est (2 ; 5).
+
+Vérifie dans la SECONDE équation : -2 + 7 = 5. Correct.
+
+
+LA DROITE VERTICALE, LE CAS OUBLIÉ
+
+Si xA = xB, la droite est VERTICALE. Le calcul de a donnerait une division
+par zéro : impossible.
+
+Son équation est simplement x = c, où c est l'abscisse commune.
+
+    A(3 ; 1) et B(3 ; 8)  →  la droite (AB) a pour équation x = 3
+
+Si dans un exercice tu obtiens une division par zéro, ne cherche pas
+l'erreur : c'est que la droite est verticale.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : inverser les y et les x dans le calcul de a.
+Erreur 2 : oublier de vérifier avec le second point.
+Erreur 3 : pour une perpendiculaire, changer le signe sans inverser la
+fraction, ou l'inverse.
+Erreur 4 : appliquer la règle a × a' = -1 dans un repère non orthonormé.
+Erreur 5 : oublier le cas de la droite verticale.
+
+
+CONSEIL POUR LE BEPC
+
+Après avoir trouvé une équation, teste-la toujours avec les deux points de
+l'énoncé. Cette vérification prend vingt secondes et te garantit tous les
+points de la question.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Déterminer une équation de droite',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé.
+
+1) Détermine l'équation de la droite (AB) passant par A(1 ; 4) et
+   B(3 ; 10).
+
+2) Le point M(5 ; 15) appartient-il à cette droite ? Justifie.
+
+3) Les droites d'équations y = 3x - 2 et y = 3x + 7 sont-elles parallèles ?
+   Justifie.
+
+4) Donne le coefficient directeur d'une droite perpendiculaire à la droite
+   d'équation y = -4x + 1.
+''',
+        solution: r'''
+1) ÉQUATION DE LA DROITE (AB)
+
+Étape 1 — le coefficient directeur.
+
+    a = (yB - yA) / (xB - xA)
+    a = (10 - 4) / (3 - 1)
+    a = 6 / 2
+    a = 3
+
+Étape 2 — l'ordonnée à l'origine. On remplace avec le point A(1 ; 4) dans
+l'équation y = 3x + b :
+
+    4 = 3 × 1 + b
+    4 = 3 + b
+    b = 1
+
+    L'équation de la droite (AB) est   y = 3x + 1
+
+Vérification avec le point B :
+    3 × 3 + 1 = 10. C'est bien l'ordonnée de B. ✓
+
+
+2) LE POINT M APPARTIENT-IL À LA DROITE ?
+
+On remplace x par 5 dans l'équation de la droite :
+
+    y = 3 × 5 + 1 = 15 + 1 = 16
+
+Or l'ordonnée de M est 15, et non 16.
+
+    CONCLUSION : le point M(5 ; 15) n'appartient PAS à la droite (AB).
+
+
+3) LES DROITES SONT-ELLES PARALLÈLES ?
+
+    Pour y = 3x - 2, le coefficient directeur est a = 3.
+    Pour y = 3x + 7, le coefficient directeur est a' = 3.
+
+Les deux coefficients directeurs sont égaux.
+
+    CONCLUSION : les deux droites sont PARALLÈLES.
+
+Elles sont de plus distinctes, puisque leurs ordonnées à l'origine
+diffèrent : -2 et 7.
+
+
+4) COEFFICIENT DIRECTEUR D'UNE PERPENDICULAIRE
+
+Le repère étant orthonormé, deux droites sont perpendiculaires si le
+produit de leurs coefficients directeurs vaut -1 :
+
+    a × a' = -1
+
+Ici a = -4, donc :
+
+    -4 × a' = -1
+    a' = -1 / (-4)
+    a' = 1/4
+
+    Le coefficient directeur cherché est 1/4, soit 0,25.
+
+Vérification : -4 × 1/4 = -1. ✓
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le tracé de la route',
+        ordre: 2,
+        difficulte: Difficulte.examen,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé, l'unité représentant 100 mètres.
+
+Un ingénieur étudie le tracé de deux routes à Grand-Bassam.
+
+    La route (D1) passe par les points A(-2 ; 1) et B(2 ; 9).
+    La route (D2) a pour équation y = -0,5x + 6.
+
+1) Détermine l'équation de la droite (D1).
+2) Ces deux routes se croisent-elles ? Justifie.
+3) Détermine les coordonnées du carrefour, c'est-à-dire du point
+   d'intersection.
+4) Les deux routes se coupent-elles à angle droit ? Justifie.
+5) Un rond-point doit être construit sur (D1), à l'endroit où la route
+   coupe l'axe des ordonnées. Donne ses coordonnées.
+''',
+        solution: r'''
+1) ÉQUATION DE LA DROITE (D1)
+
+Coefficient directeur, avec A(-2 ; 1) et B(2 ; 9) :
+
+    a = (9 - 1) / (2 - (-2))
+    a = 8 / 4
+    a = 2
+
+Ordonnée à l'origine, en remplaçant avec A(-2 ; 1) :
+
+    1 = 2 × (-2) + b
+    1 = -4 + b
+    b = 5
+
+    L'équation de (D1) est   y = 2x + 5
+
+Vérification avec B : 2 × 2 + 5 = 9. ✓
+
+
+2) LES ROUTES SE CROISENT-ELLES ?
+
+    Coefficient directeur de (D1) : a = 2
+    Coefficient directeur de (D2) : a' = -0,5
+
+Comme 2 ≠ -0,5, les coefficients directeurs sont différents.
+
+    CONCLUSION : les droites ne sont pas parallèles, elles sont donc
+    SÉCANTES. Les deux routes se croisent bien, en un unique point.
+
+
+3) COORDONNÉES DU CARREFOUR
+
+Au point d'intersection, les deux équations donnent la même ordonnée. On
+égale donc les deux expressions de y :
+
+    2x + 5 = -0,5x + 6
+
+On regroupe les x à gauche et les nombres à droite :
+
+    2x + 0,5x = 6 - 5
+    2,5x = 1
+    x = 1 / 2,5
+    x = 0,4
+
+On remplace dans l'équation de (D1) :
+
+    y = 2 × 0,4 + 5
+    y = 0,8 + 5
+    y = 5,8
+
+    Le carrefour se situe au point de coordonnées (0,4 ; 5,8).
+
+Vérification avec (D2) :
+    -0,5 × 0,4 + 6 = -0,2 + 6 = 5,8 ✓
+
+En unités réelles, le carrefour se trouve à 40 m et 580 m de l'origine.
+
+
+4) LES ROUTES SE COUPENT-ELLES À ANGLE DROIT ?
+
+Le repère est orthonormé. Deux droites sont perpendiculaires si et
+seulement si le produit de leurs coefficients directeurs vaut -1.
+
+    a × a' = 2 × (-0,5) = -1
+
+Le produit vaut exactement -1.
+
+    CONCLUSION : les deux routes se coupent bien À ANGLE DROIT.
+
+
+5) POSITION DU ROND-POINT
+
+Le rond-point est situé à l'intersection de (D1) avec l'axe des ordonnées.
+Sur cet axe, l'abscisse est nulle : x = 0.
+
+    y = 2 × 0 + 5 = 5
+
+    Le rond-point se situe au point de coordonnées (0 ; 5).
+
+On retrouve simplement l'ordonnée à l'origine b = 5, ce qui est logique :
+b est par définition l'ordonnée du point où la droite coupe l'axe des
+ordonnées.
+
+En unités réelles, le rond-point se trouve à 500 m de l'origine sur l'axe
+vertical.
+
+
+CE QU'IL FAUT RETENIR POUR LE BEPC
+Cet exercice enchaîne toutes les compétences du chapitre : déterminer une
+équation, comparer des coefficients directeurs, résoudre un système par
+égalisation, tester la perpendicularité, interpréter l'ordonnée à
+l'origine. C'est la structure typique du dernier exercice du sujet.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Équations de droites — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+LES FORMES D'ÉQUATION
+
+    y = ax + b     droite non verticale
+    x = c          droite VERTICALE (pas de coefficient directeur)
+    y = b          droite horizontale (a = 0)
+
+
+LE COEFFICIENT DIRECTEUR
+
+    a = (yB - yA) / (xB - xA)
+
+Les y en HAUT, les x en BAS. Même ordre des deux côtés.
+
+    a > 0  →  la droite monte
+    a < 0  →  la droite descend
+    a = 0  →  droite horizontale
+
+
+TROUVER L'ÉQUATION EN DEUX TEMPS
+
+    1. calculer a
+    2. remplacer les coordonnées d'un point pour trouver b
+    3. VÉRIFIER avec le second point
+
+
+UN POINT APPARTIENT-IL À LA DROITE ?
+
+Remplacer x dans l'équation et comparer le résultat à l'ordonnée du point.
+
+
+PARALLÈLES
+
+    a = a'                → parallèles
+    a = a' et b = b'      → confondues
+    a ≠ a'                → sécantes
+
+
+PERPENDICULAIRES (repère orthonormé)
+
+    a × a' = -1      soit      a' = -1/a
+
+On INVERSE la fraction et on CHANGE le signe.
+
+    a = 3     →  a' = -1/3
+    a = -0,5  →  a' = 2
+
+
+POINT D'INTERSECTION
+
+On égale les deux expressions de y, on résout, puis on remplace pour
+trouver y. On vérifie dans la seconde équation.
+
+
+SIGNIFICATION DE b
+
+b est l'ordonnée du point où la droite coupe l'axe des ordonnées : (0 ; b).
+
+
+LES PIÈGES
+
+- inverser les x et les y dans le calcul de a
+- oublier de vérifier avec le second point
+- changer le signe sans inverser la fraction pour une perpendiculaire
+- oublier le cas de la droite verticale, quand xA = xB
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les équations de droites',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'dr1',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Une droite passe par A(0 ; 1) et B(2 ; 7). Quel est son '
+                'coefficient directeur ? (Écris seulement le nombre)',
+            reponseAttendue: '3',
+            explication:
+                'a = (7 - 1) / (2 - 0) = 6 / 2 = 3. Comme A a pour abscisse 0, '
+                'on lit directement b = 1 : l\'équation est y = 3x + 1.',
+          ),
+          QuestionQuiz(
+            id: 'dr2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Quel est le coefficient directeur d\'une droite '
+                'perpendiculaire à la droite d\'équation y = 5x - 2 ?',
+            choix: ['-5', '5', '-1/5', '1/5'],
+            bonnesReponses: [2],
+            explication:
+                'On inverse la fraction et on change le signe : a\' = -1/5. '
+                'Vérification : 5 × (-1/5) = -1. ✓',
+          ),
+          QuestionQuiz(
+            id: 'dr3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Les droites d\'équations y = -2x + 3 et y = -2x - 8 sont '
+                'parallèles.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'Elles ont le même coefficient directeur, -2. Elles sont donc '
+                'parallèles, et distinctes puisque leurs ordonnées à l\'origine '
+                'diffèrent.',
+          ),
+          QuestionQuiz(
+            id: 'dr4',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Deux points A et B ont la même abscisse : A(4 ; 1) et B(4 ; 9). '
+                'Quelle est l\'équation de la droite (AB) ?',
+            choix: ['y = 4', 'x = 4', 'y = 4x', 'y = 2x + 1'],
+            bonnesReponses: [1],
+            explication:
+                'Les deux points ont la même abscisse : la droite est '
+                'VERTICALE. Elle n\'a pas de coefficient directeur et son '
+                'équation est x = 4.',
           ),
         ],
       ),

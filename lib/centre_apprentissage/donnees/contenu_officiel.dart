@@ -91,7 +91,7 @@ class ContenuOfficiel {
     }
 
     // Recherche par identite du chapitre : le numero est extrait de l'ID.
-    final match = RegExp(r'^(.+?)_(.+?)_ch(\\d+)$').firstMatch(chapitreId);
+    final match = RegExp(r'^(.+?)_(.+?)_ch(\d+)$').firstMatch(chapitreId);
     if (match == null) return false;
     final niveau = match.group(1)!;
     final matiereId = match.group(2)!;
@@ -120,7 +120,7 @@ class ContenuOfficiel {
     final direct = _catalogue[chapitreId];
     if (direct != null) return direct;
 
-    final match = RegExp(r'^(.+?)_(.+?)_ch(\\d+)$').firstMatch(chapitreId);
+    final match = RegExp(r'^(.+?)_(.+?)_ch(\d+)$').firstMatch(chapitreId);
     if (match == null) return const [];
 
     final niveau = match.group(1)!;
@@ -184,6 +184,9 @@ class ContenuOfficiel {
 
   /// Cree toutes les ressources du chapitre, en brouillon.
   ///
+  /// L'installation est idempotente : chaque ressource reçoit un identifiant
+  /// stable et une ressource deja presente n'est pas ecrasee.
+  ///
   /// Les ressources sont liees au chapitre Firestore, qui porte maintenant
   /// les metadonnees annee/programme/serie/theme. On ne duplique donc pas
   /// ces champs dans chaque ressource.
@@ -205,10 +208,21 @@ class ContenuOfficiel {
     );
 
     int crees = 0;
-    for (final r in ressourcesChapitre) {
+    for (var i = 0; i < ressourcesChapitre.length; i++) {
+      final r = ressourcesChapitre[i];
+
+      // Identifiant stable : relancer l'installation ne crée pas de doublon.
+      final ressourceId =
+          'ca_${chapitre.id}_r${r.type.index}_${r.ordre}_${i + 1}';
+
+      // Si la ressource existe déjà, on la conserve telle quelle.
+      // Cela protège notamment une ressource déjà relue ou publiée.
+      final dejaPresente = await ContenuService.ressource(ressourceId);
+      if (dejaPresente != null) continue;
+
       final res = await ContenuService.creerRessource(
         Ressource(
-          id: '',
+          id: ressourceId,
           type: r.type,
           titre: r.titre,
           ordre: r.ordre,

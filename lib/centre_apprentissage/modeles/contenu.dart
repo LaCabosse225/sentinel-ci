@@ -581,7 +581,6 @@ class Ressource {
         'titre': titre,
         'ordre': ordre,
         'chapitreId': chapitreId,
-        'code': code.isNotEmpty ? code : id,
         'niveau': niveau,
         'matiereId': matiereId,
         'ecoleId': ecoleId,

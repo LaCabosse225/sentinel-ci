@@ -20,15 +20,52 @@ class ChapitreOfficiel {
   final int ordre;
   final String titre;
   final String description;
-  const ChapitreOfficiel(this.ordre, this.titre, this.description);
+  final String theme;
+
+  const ChapitreOfficiel(
+    this.ordre,
+    this.titre,
+    this.description, {
+    this.theme = '',
+  });
 }
 
 class ProgrammeOfficiel {
   ProgrammeOfficiel._();
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  //  IDENTITE DU PROGRAMME
+  //
+  //  Un meme niveau/matiere peut changer de programme au fil des annees.
+  //  La cle interne reste lisible, mais les metadonnees sont maintenant
+  //  explicites afin de pouvoir conserver plusieurs versions cote Firestore.
+  // ==========================================================================
+
+  static const String anneeCourante = '2026-2027';
+  static const String programmeCourant = 'dpfc';
+
+  /// Niveaux secondaires pris en charge par Sentinelle CI.
+  static const List<String> niveauxSecondaire = NiveauxCI.tous;
+
+  /// Series utilisees au lycee dans l'architecture actuelle.
+  static const List<String> seriesLycee = ProgrammesCI.seriesLycee;
+
+  /// Retourne vrai si le niveau est concerne par une serie.
+  static bool niveauAUneSerie(String niveau) =>
+      ProgrammesCI.niveauAUneSerie(niveau);
+
+  /// Series attendues pour un niveau.
+  static List<String> seriesPour(String niveau) =>
+      ProgrammesCI.seriesPour(niveau);
+
+  // ==========================================================================
   //  CATALOGUE
-  // --------------------------------------------------------------------------
+  //
+  //  IMPORTANT :
+  //  Le catalogue ci-dessous contient uniquement les donnees deja presentes
+  //  dans le fichier d'origine. Les nouveaux niveaux/matieres seront ajoutes
+  //  apres verification des documents DPFC correspondants.
+  // ==========================================================================
 
   static const Map<String, List<ChapitreOfficiel>> _programmes = {
     // ════════════════════════════════════════════════════════════════════
@@ -64,51 +101,165 @@ class ProgrammeOfficiel {
       ChapitreOfficiel(13, 'Equations de droites',
           'Equation d une droite, coefficient directeur, droites paralleles et perpendiculaires.'),
     ],
-
-    // Prochains programmes a ajouter ici : '3e_pc', '3e_svt', '3e_franc',
-    // 'Tle_math', etc. Meme structure, rien d autre a modifier dans le code.
   };
 
-  // --------------------------------------------------------------------------
-  //  ACCES
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  //  CLES ET ACCES
+  // ==========================================================================
 
-  static String _cle(String niveau, String matiereId) => '${niveau}_$matiereId';
+  static String _cle(
+    String niveau,
+    String matiereId, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    return '${anneeScolaire}_${programmeVersion}_${niveau}_${serie}_$matiereId';
+  }
 
-  /// Vrai si un programme officiel est disponible pour ce couple.
-  static bool existe(String niveau, String matiereId) =>
-      _programmes.containsKey(_cle(niveau, matiereId));
+  /// Compatibilite avec l'ancien format de cle du catalogue.
+  static String _ancienneCle(String niveau, String matiereId) =>
+      '${niveau}_$matiereId';
 
-  /// Les lecons du programme, ou une liste vide s il n y en a pas.
-  static List<ChapitreOfficiel> chapitres(String niveau, String matiereId) =>
-      _programmes[_cle(niveau, matiereId)] ?? const [];
+  static bool existe(
+    String niveau,
+    String matiereId, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    return _programmes.containsKey(_cle(
+          niveau,
+          matiereId,
+          anneeScolaire: anneeScolaire,
+          programmeVersion: programmeVersion,
+          serie: serie,
+        )) ||
+        _programmes.containsKey(_ancienneCle(niveau, matiereId));
+  }
 
-  // --------------------------------------------------------------------------
+  /// Les lecons du programme.
+  ///
+  /// La recherche utilise d'abord la cle versionnee. Si le catalogue
+  /// historique n'a pas encore ete migre, l'ancienne cle est conservee.
+  static List<ChapitreOfficiel> chapitres(
+    String niveau,
+    String matiereId, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    return _programmes[_cle(
+          niveau,
+          matiereId,
+          anneeScolaire: anneeScolaire,
+          programmeVersion: programmeVersion,
+          serie: serie,
+        )] ??
+        _programmes[_ancienneCle(niveau, matiereId)] ??
+        const [];
+  }
+
+  /// Toutes les combinaisons programme/niveau/matiere actuellement
+  /// renseignees dans le catalogue.
+  static List<String> programmesDisponibles() {
+    final cles = <String>[];
+    for (final cle in _programmes.keys) {
+      cles.add(cle);
+    }
+    cles.sort();
+    return cles;
+  }
+
+  /// Liste des matieres disponibles pour un niveau dans le catalogue.
+  static List<String> matieresDisponibles(
+    String niveau, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    final prefixe =
+        '${anneeScolaire}_${programmeVersion}_${niveau}_${serie}_';
+    final resultat = <String>[];
+
+    for (final cle in _programmes.keys) {
+      if (cle.startsWith(prefixe)) {
+        resultat.add(cle.substring(prefixe.length));
+      }
+    }
+
+    // Compatibilite avec les anciennes cles.
+    if (resultat.isEmpty) {
+      final ancienPrefixe = '${niveau}_';
+      for (final cle in _programmes.keys) {
+        if (cle.startsWith(ancienPrefixe)) {
+          resultat.add(cle.substring(ancienPrefixe.length));
+        }
+      }
+    }
+
+    resultat.sort();
+    return resultat;
+  }
+
+  // ==========================================================================
   //  INSTALLATION
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   /// Cree dans Firestore tous les chapitres du programme officiel.
-  /// Les chapitres deja presents ne sont ni ecrases ni dupliques.
-  /// Renvoie le nombre de chapitres crees et le nombre ignores.
+  ///
+  /// Les metadonnees annee/programme/serie/theme sont ecrites dans chaque
+  /// chapitre. Cela permet de conserver plusieurs versions d'un programme
+  /// sans detruire l'historique.
+  ///
+  /// Le catalogue existant reste installable sans migration destructive.
   static Future<({int crees, int ignores})> installer(
-      String niveau, String matiereId) async {
+    String niveau,
+    String matiereId, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) async {
     int crees = 0;
     int ignores = 0;
-    for (final c in chapitres(niveau, matiereId)) {
-      final res = await ContenuService.creerChapitre(Chapitre(
-        id: '', // fabrique automatiquement : "3e_math_ch08"
-        niveau: niveau,
-        matiereId: matiereId,
-        titre: c.titre,
-        description: c.description,
-        ordre: c.ordre,
-      ));
+
+    for (final c in chapitres(
+      niveau,
+      matiereId,
+      anneeScolaire: anneeScolaire,
+      programmeVersion: programmeVersion,
+      serie: serie,
+    )) {
+      final res = await ContenuService.creerChapitre(
+        Chapitre(
+          id: '',
+          code: Chapitre.construireCode(
+            niveau,
+            matiereId,
+            c.ordre,
+            anneeScolaire: anneeScolaire,
+            programmeVersion: programmeVersion,
+            serie: serie,
+          ),
+          niveau: niveau,
+          matiereId: matiereId,
+          titre: c.titre,
+          description: c.description,
+          ordre: c.ordre,
+          anneeScolaire: anneeScolaire,
+          programmeVersion: programmeVersion,
+          serie: serie,
+          theme: c.theme,
+        ),
+      );
+
       if (res.startsWith('!')) {
-        ignores++; // le chapitre existe deja
+        ignores++;
       } else {
         crees++;
       }
     }
+
     return (crees: crees, ignores: ignores);
   }
 }

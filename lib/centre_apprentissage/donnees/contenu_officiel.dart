@@ -91,19 +91,44 @@ class ContenuOfficiel {
     }
 
     // Recherche par identite du chapitre : le numero est extrait de l'ID.
-    final match = RegExp(r'^(.+?)_(.+?)_ch(\d+)$').firstMatch(chapitreId);
-    if (match == null) return false;
-    final niveau = match.group(1)!;
-    final matiereId = match.group(2)!;
-    final ordre = int.tryParse(match.group(3)!) ?? 0;
+    // Ancienne cle : 3e_math_ch01
+    final ancienMatch = RegExp(r'^(.+?)_(.+?)_ch(\d+)$').firstMatch(chapitreId);
+    if (ancienMatch != null) {
+      final niveau = ancienMatch.group(1)!;
+      final matiereId = ancienMatch.group(2)!;
+      final ordre = int.tryParse(ancienMatch.group(3)!) ?? 0;
+      return _catalogue.containsKey(cle(
+        niveau,
+        matiereId,
+        ordre,
+        anneeScolaire: anneeScolaire ?? anneeCourante,
+        programmeVersion: programmeVersion ?? programmeCourant,
+        serie: serie ?? '',
+      ));
+    }
+
+    // Cle versionnee : 2026-2027_dpfc_3e___math_ch01
+    // ou 2026-2027_dpfc_1ere_A1__math_ch01
+    final sep = chapitreId.indexOf('__');
+    if (sep < 0) return false;
+    final prefix = chapitreId.substring(0, sep);
+    final suffix = chapitreId.substring(sep + 2);
+    final prefixParts = prefix.split('_');
+    if (prefixParts.length < 3) return false;
+    final niveau = prefixParts[2];
+    final serieVersion = prefixParts.length >= 4 ? prefixParts[3] : '';
+    final matiereMatch = RegExp(r'^_?(.+?)_ch(\d+)$').firstMatch(suffix);
+    if (matiereMatch == null) return false;
+    final matiereId = matiereMatch.group(1)!;
+    final ordre = int.tryParse(matiereMatch.group(2)!) ?? 0;
     return _catalogue.containsKey(cle(
       niveau,
       matiereId,
       ordre,
-      anneeScolaire: anneeScolaire ?? anneeCourante,
-      programmeVersion: programmeVersion ?? programmeCourant,
-      serie: serie ?? '',
-    ));
+      anneeScolaire: anneeScolaire ?? prefixParts[0],
+      programmeVersion: programmeVersion ?? prefixParts[1],
+      serie: serie ?? serieVersion,
+    )) || _catalogue.containsKey(ancienneCle(niveau, matiereId, ordre));
   }
 
   /// Retourne les ressources d'un chapitre.
@@ -120,20 +145,46 @@ class ContenuOfficiel {
     final direct = _catalogue[chapitreId];
     if (direct != null) return direct;
 
-    final match = RegExp(r'^(.+?)_(.+?)_ch(\d+)$').firstMatch(chapitreId);
-    if (match == null) return const [];
+    // Ancienne cle : 3e_math_ch01
+    final ancienMatch = RegExp(r'^(.+?)_(.+?)_ch(\d+)$').firstMatch(chapitreId);
+    if (ancienMatch != null) {
+      final niveau = ancienMatch.group(1)!;
+      final matiereId = ancienMatch.group(2)!;
+      final ordre = int.tryParse(ancienMatch.group(3)!) ?? 0;
+      return _catalogue[cle(
+            niveau,
+            matiereId,
+            ordre,
+            anneeScolaire: anneeScolaire ?? anneeCourante,
+            programmeVersion: programmeVersion ?? programmeCourant,
+            serie: serie ?? '',
+          )] ??
+          _catalogue[ancienneCle(niveau, matiereId, ordre)] ??
+          const [];
+    }
 
-    final niveau = match.group(1)!;
-    final matiereId = match.group(2)!;
-    final ordre = int.tryParse(match.group(3)!) ?? 0;
+    // Cle versionnee : 2026-2027_dpfc_3e___math_ch01
+    // ou 2026-2027_dpfc_1ere_A1__math_ch01
+    final sep = chapitreId.indexOf('__');
+    if (sep < 0) return const [];
+    final prefix = chapitreId.substring(0, sep);
+    final suffix = chapitreId.substring(sep + 2);
+    final prefixParts = prefix.split('_');
+    if (prefixParts.length < 3) return const [];
+    final niveau = prefixParts[2];
+    final serieVersion = prefixParts.length >= 4 ? prefixParts[3] : '';
+    final matiereMatch = RegExp(r'^_?(.+?)_ch(\d+)$').firstMatch(suffix);
+    if (matiereMatch == null) return const [];
+    final matiereId = matiereMatch.group(1)!;
+    final ordre = int.tryParse(matiereMatch.group(2)!) ?? 0;
 
     return _catalogue[cle(
           niveau,
           matiereId,
           ordre,
-          anneeScolaire: anneeScolaire ?? anneeCourante,
-          programmeVersion: programmeVersion ?? programmeCourant,
-          serie: serie ?? '',
+          anneeScolaire: anneeScolaire ?? prefixParts[0],
+          programmeVersion: programmeVersion ?? prefixParts[1],
+          serie: serie ?? serieVersion,
         )] ??
         _catalogue[ancienneCle(niveau, matiereId, ordre)] ??
         const [];

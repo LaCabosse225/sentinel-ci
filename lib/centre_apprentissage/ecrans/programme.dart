@@ -411,7 +411,8 @@ class ChapitresPage extends StatelessWidget {
                                     fontSize: 12, color: AppColors.textMuted)),
                           ],
                           const SizedBox(height: 4),
-                          Text(c.id,
+                          Text(
+  c.code.isEmpty ? c.id : c.code,
                               style: const TextStyle(
                                   fontSize: 10.5, color: AppColors.textMuted)),
                         ]),
@@ -739,15 +740,30 @@ Future<void> _dialogChapitre(
                               return;
                             }
                             setSt(() => envoi = true);
-                            final c = Chapitre(
-                              id: chapitre?.id ?? '',
-                              niveau: niveau,
-                              matiereId: matiere.id,
-                              titre: titre,
-                              description: descCtrl.text.trim(),
-                              ordre: creation ? ordre : chapitre.ordre,
-                              actif: chapitre?.actif ?? true,
-                            );
+                            final annee = chapitre?.anneeScolaire.isNotEmpty == true
+    ? chapitre!.anneeScolaire
+    : ProgrammesCI.anneeCourante;
+
+final programme = chapitre?.programmeVersion.isNotEmpty == true
+    ? chapitre!.programmeVersion
+    : ProgrammeOfficiel.programmeCourant;
+
+final serie = chapitre?.serie ?? '';
+
+final c = Chapitre(
+  id: chapitre?.id ?? '',
+  code: chapitre?.code ?? '',
+  niveau: niveau,
+  matiereId: matiere.id,
+  anneeScolaire: annee,
+  programmeVersion: programme,
+  serie: serie,
+  theme: chapitre?.theme ?? '',
+  titre: titre,
+  description: descCtrl.text.trim(),
+  ordre: creation ? ordre : chapitre.ordre,
+  actif: chapitre?.actif ?? true,
+);
                             if (creation) {
                               final res = await ContenuService.creerChapitre(c);
                               if (!ctx.mounted) return;

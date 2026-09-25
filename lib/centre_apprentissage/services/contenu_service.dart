@@ -149,40 +149,136 @@ class ContenuService {
   // ==========================================================================
 
   /// Flux temps reel des chapitres d'un niveau — pour le back-office.
-  static Stream<List<Chapitre>> streamChapitres(String niveau, {String? matiereId}) {
+  ///
+  /// Un seul filtre Firestore est conservé : [niveau].
+  /// Les filtres supplémentaires sont appliqués côté application pour éviter
+  /// les index composites et rester compatible avec l'architecture actuelle.
+  static Stream<List<Chapitre>> streamChapitres(
+    String niveau, {
+    String? matiereId,
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+    String? theme,
+  }) {
     return _db
         .collection(colChapitres)
         .where('niveau', isEqualTo: niveau)
         .snapshots()
         .map((s) {
       var l = s.docs.map((d) => Chapitre.depuisDoc(d)).toList();
+
       if (matiereId != null && matiereId.isNotEmpty) {
         l = l.where((c) => c.matiereId == matiereId).toList();
       }
+      if (anneeScolaire != null && anneeScolaire.isNotEmpty) {
+        l = l.where((c) => c.anneeScolaire == anneeScolaire).toList();
+      }
+      if (programmeVersion != null && programmeVersion.isNotEmpty) {
+        l = l.where((c) => c.programmeVersion == programmeVersion).toList();
+      }
+      if (serie != null && serie.isNotEmpty) {
+        l = l.where((c) => c.serie == serie).toList();
+      }
+      if (theme != null && theme.isNotEmpty) {
+        l = l.where((c) => c.theme == theme).toList();
+      }
+
       l.sort((a, b) {
-        final c = a.matiereId.compareTo(b.matiereId);
-        return c != 0 ? c : a.ordre.compareTo(b.ordre);
+        final m = a.matiereId.compareTo(b.matiereId);
+        if (m != 0) return m;
+
+        final o = a.ordre.compareTo(b.ordre);
+        if (o != 0) return o;
+
+        return a.titre.toLowerCase().compareTo(b.titre.toLowerCase());
       });
       return l;
     });
   }
 
   /// Chapitres actifs d'un niveau et d'une matiere — lecture mise en cache.
-  static Future<List<Chapitre>> chapitres(String niveau, String matiereId) async {
+  ///
+  /// Les nouveaux filtres sont optionnels : les appels existants continuent
+  /// donc de fonctionner sans modification.
+  static Future<List<Chapitre>> chapitres(
+    String niveau,
+    String matiereId, {
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+    String? theme,
+  }) async {
     await verifierVersion();
+
     if (!_cacheChapitres.containsKey(niveau)) {
-      final s = await _db.collection(colChapitres)
-          .where('niveau', isEqualTo: niveau).get();
+      final s = await _db
+          .collection(colChapitres)
+          .where('niveau', isEqualTo: niveau)
+          .get();
+
       final l = s.docs.map((d) => Chapitre.depuisDoc(d)).toList();
+
       l.sort((a, b) {
-        final c = a.matiereId.compareTo(b.matiereId);
-        return c != 0 ? c : a.ordre.compareTo(b.ordre);
+        final m = a.matiereId.compareTo(b.matiereId);
+        if (m != 0) return m;
+
+        final o = a.ordre.compareTo(b.ordre);
+        if (o != 0) return o;
+
+        return a.titre.toLowerCase().compareTo(b.titre.toLowerCase());
       });
+
       _cacheChapitres[niveau] = l;
     }
-    return _cacheChapitres[niveau]!
+
+    var l = _cacheChapitres[niveau]!
         .where((c) => c.actif && c.matiereId == matiereId)
         .toList();
+
+    if (anneeScolaire != null && anneeScolaire.isNotEmpty) {
+      l = l.where((c) => c.anneeScolaire == anneeScolaire).toList();
+    }
+    if (programmeVersion != null && programmeVersion.isNotEmpty) {
+      l = l.where((c) => c.programmeVersion == programmeVersion).toList();
+    }
+    if (serie != null && serie.isNotEmpty) {
+      l = l.where((c) => c.serie == serie).toList();
+    }
+    if (theme != null && theme.isNotEmpty) {
+      l = l.where((c) => c.theme == theme).toList();
+    }
+
+    return l;
+  }
+
+  /// Thèmes distincts d'un niveau et d'une matière.
+  ///
+  /// Utile pour construire les menus du back-office sans nouvelle requête
+  /// Firestore : on réutilise le cache des chapitres.
+  static Future<List<String>> themes(
+    String niveau,
+    String matiereId, {
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+  }) async {
+    final chapitresFiltres = await chapitres(
+      niveau,
+      matiereId,
+      anneeScolaire: anneeScolaire,
+      programmeVersion: programmeVersion,
+      serie: serie,
+    );
+
+    final valeurs = chapitresFiltres
+        .map((c) => c.theme.trim())
+        .where((t) => t.isNotEmpty)
+        .toSet()
+        .toList();
+
+    valeurs.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return valeurs;
   }
 
   /// Un chapitre precis (utile pour la revision personnalisee).
@@ -195,21 +291,50 @@ class ContenuService {
     }
   }
 
-  /// Cree un chapitre. Si [c.id] est vide, un identifiant lisible est
-  /// fabrique automatiquement : "6e_math_ch03".
-  /// Renvoie l'identifiant cree, ou un message d'erreur prefixe par "!".
+  /// Cree un chapitre sans casser les anciens documents.
+  ///
+  /// - Si [c.id] est renseigne, il est conserve (compatibilite historique).
+  /// - Sinon Firestore genere un id aleatoire.
+  /// - [c.code] porte l'identite pedagogique stable et evite les collisions
+  ///   entre annees/versions/series.
   static Future<String> creerChapitre(Chapitre c) async {
     try {
-      final id = c.id.isNotEmpty
-          ? c.id
-          : Chapitre.construireId(c.niveau, c.matiereId, c.ordre);
-      final ref = _db.collection(colChapitres).doc(id);
-      if ((await ref.get()).exists) {
-        return '!Un chapitre porte deja l identifiant $id (verifiez le numero d ordre).';
+      final code = c.code.isNotEmpty
+          ? c.code
+          : Chapitre.construireCode(
+              c.niveau,
+              c.matiereId,
+              c.ordre,
+              anneeScolaire: c.anneeScolaire,
+              programmeVersion: c.programmeVersion,
+              serie: c.serie,
+            );
+
+      // Une seule condition Firestore : niveau. Le reste est filtre cote app.
+      final existants = await _db
+          .collection(colChapitres)
+          .where('niveau', isEqualTo: c.niveau)
+          .get();
+      final dejaLa = existants.docs.any((d) {
+        final chapitre = Chapitre.depuisDoc(d);
+        return chapitre.code == code;
+      });
+      if (dejaLa) {
+        return '!Un chapitre porte deja le code pedagogique $code.';
       }
-      await ref.set(c.versMap());
+
+      final ref = c.id.isNotEmpty
+          ? _db.collection(colChapitres).doc(c.id)
+          : _db.collection(colChapitres).doc();
+
+      if (c.id.isNotEmpty && (await ref.get()).exists) {
+        return '!Le document Firestore ${c.id} existe deja.';
+      }
+
+      final chapitre = c.copierAvec(code: code);
+      await ref.set(chapitre.versMap());
       await _signalerChangement();
-      return id;
+      return ref.id;
     } catch (e) {
       return '!Erreur : $e';
     }
@@ -240,6 +365,46 @@ class ContenuService {
     total += 1;
     await _signalerChangement();
     return total;
+  }
+
+  /// Séries disponibles pour un niveau, selon les données actuellement
+  /// présentes dans Firestore.
+  ///
+  /// Les valeurs vides sont ignorées. Cette méthode ne crée aucune donnée.
+  static Future<List<String>> series(
+    String niveau, {
+    String? anneeScolaire,
+    String? programmeVersion,
+  }) async {
+    await verifierVersion();
+
+    if (!_cacheChapitres.containsKey(niveau)) {
+      final s = await _db
+          .collection(colChapitres)
+          .where('niveau', isEqualTo: niveau)
+          .get();
+
+      _cacheChapitres[niveau] =
+          s.docs.map((d) => Chapitre.depuisDoc(d)).toList();
+    }
+
+    var l = _cacheChapitres[niveau]!.where((c) => c.actif).toList();
+
+    if (anneeScolaire != null && anneeScolaire.isNotEmpty) {
+      l = l.where((c) => c.anneeScolaire == anneeScolaire).toList();
+    }
+    if (programmeVersion != null && programmeVersion.isNotEmpty) {
+      l = l.where((c) => c.programmeVersion == programmeVersion).toList();
+    }
+
+    final valeurs = l
+        .map((c) => c.serie.trim())
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList();
+
+    valeurs.sort();
+    return valeurs;
   }
 
   // ==========================================================================

@@ -547,7 +547,28 @@ class ContenuService {
       return '!Erreur : $e';
     }
   }
+/// Crée une ressource uniquement si son ID n'existe pas encore.
+/// Permet de relancer les imports sans créer de doublons.
+static Future<bool> creerRessourceSiAbsente(Ressource r) async {
+  try {
+    final ref = r.id.isNotEmpty
+        ? _db.collection(colRessources).doc(r.id)
+        : _db.collection(colRessources).doc();
 
+    final existante = await ref.get();
+
+    if (existante.exists) {
+      return false;
+    }
+
+    await ref.set(r.versMap(creation: true));
+    await _signalerChangement();
+
+    return true;
+  } catch (e) {
+    throw Exception('Erreur création ressource : $e');
+  }
+}
   static Future<void> modifierRessource(Ressource r) async {
     await _db.collection(colRessources).doc(r.id).set(r.versMap(), SetOptions(merge: true));
     await _signalerChangement();

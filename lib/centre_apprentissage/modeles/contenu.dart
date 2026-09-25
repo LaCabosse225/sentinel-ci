@@ -217,8 +217,20 @@ class Matiere {
 
 class Chapitre {
   final String id;
+  /// Identifiant pedagogique stable. L'id Firestore peut etre auto-genere.
+  /// Les anciens documents utilisent leur ancien id comme code de secours.
+  final String code;
   final String niveau; // '6e', '3e', 'Tle'...
   final String matiereId; // 'math', 'franc'...
+
+  // --- Contexte du programme ---
+  // Ces champs permettent de conserver plusieurs versions du programme
+  // sans écraser les anciennes données.
+  final String anneeScolaire; // ex. '2026-2027'
+  final String programmeVersion; // ex. 'DPFC-2026'
+  final String serie; // vide pour les classes sans série : 'A1', 'A2', 'C', 'D'...
+  final String theme; // thème pédagogique auquel le chapitre appartient
+
   final String titre;
   final String description;
   final int ordre; // position dans le programme
@@ -227,8 +239,17 @@ class Chapitre {
 
   const Chapitre({
     required this.id,
+    this.code = '',
     required this.niveau,
     required this.matiereId,
+
+    // Compatibilité : les anciens chapitres peuvent rester sans ces
+    // informations jusqu'à leur mise à jour.
+    this.anneeScolaire = '',
+    this.programmeVersion = '',
+    this.serie = '',
+    this.theme = '',
+
     required this.titre,
     this.description = '',
     this.ordre = 0,
@@ -236,19 +257,46 @@ class Chapitre {
     this.dateMaj,
   });
 
-  /// Fabrique l'identifiant lisible du chapitre.
-  /// Exemple : Chapitre.construireId('6e', 'math', 3) → "6e_math_ch03"
-  static String construireId(String niveau, String matiereId, int ordre) {
+  /// Construit le code pedagogique stable du chapitre.
+  /// Exemple historique : 3e_math_ch03
+  /// Exemple versionne : 2026-2027_dpfc_3e_math_ch03
+  ///
+  /// Le code n'est PAS l'id Firestore : plusieurs versions peuvent ainsi
+  /// coexister sans renommer ni migrer les documents existants.
+  static String construireCode(
+    String niveau,
+    String matiereId,
+    int ordre, {
+    String anneeScolaire = '',
+    String programmeVersion = '',
+    String serie = '',
+  }) {
     final n = ordre.toString().padLeft(2, '0');
-    return '${niveau}_${matiereId}_ch$n';
+    final annee = anneeScolaire.trim();
+    final programme = programmeVersion.trim();
+    final s = serie.trim();
+    if (annee.isEmpty && programme.isEmpty && s.isEmpty) {
+      return '${niveau}_${matiereId}_ch$n';
+    }
+    final seriePart = s.isEmpty ? '' : '_${s}';
+    return '${annee}_${programme}_${niveau}${seriePart}_${matiereId}_ch$n';
   }
+
+  /// Compatibilite avec l'ancien nom de methode.
+  static String construireId(String niveau, String matiereId, int ordre) =>
+      construireCode(niveau, matiereId, ordre);
 
   factory Chapitre.depuisDoc(DocumentSnapshot doc) {
     final d = (doc.data() as Map<String, dynamic>?) ?? {};
     return Chapitre(
       id: doc.id,
+      code: d['code'] as String? ?? doc.id,
       niveau: d['niveau'] as String? ?? '',
       matiereId: d['matiereId'] as String? ?? '',
+      anneeScolaire: d['anneeScolaire'] as String? ?? '',
+      programmeVersion: d['programmeVersion'] as String? ?? '',
+      serie: d['serie'] as String? ?? '',
+      theme: d['theme'] as String? ?? '',
       titre: d['titre'] as String? ?? '',
       description: d['description'] as String? ?? '',
       ordre: (d['ordre'] as num?)?.toInt() ?? 0,
@@ -258,8 +306,13 @@ class Chapitre {
   }
 
   Map<String, dynamic> versMap() => {
+        'code': code.isNotEmpty ? code : id,
         'niveau': niveau,
         'matiereId': matiereId,
+        'anneeScolaire': anneeScolaire,
+        'programmeVersion': programmeVersion,
+        'serie': serie,
+        'theme': theme,
         'titre': titre,
         'description': description,
         'ordre': ordre,
@@ -268,8 +321,13 @@ class Chapitre {
       };
 
   Chapitre copierAvec({
+    String? code,
     String? niveau,
     String? matiereId,
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+    String? theme,
     String? titre,
     String? description,
     int? ordre,
@@ -277,8 +335,13 @@ class Chapitre {
   }) {
     return Chapitre(
       id: id,
+      code: code ?? this.code,
       niveau: niveau ?? this.niveau,
       matiereId: matiereId ?? this.matiereId,
+      anneeScolaire: anneeScolaire ?? this.anneeScolaire,
+      programmeVersion: programmeVersion ?? this.programmeVersion,
+      serie: serie ?? this.serie,
+      theme: theme ?? this.theme,
       titre: titre ?? this.titre,
       description: description ?? this.description,
       ordre: ordre ?? this.ordre,
@@ -289,7 +352,40 @@ class Chapitre {
 }
 
 // ============================================================================
-//  6. QUESTION DE QUIZ
+//  6. CONTEXTE DU PROGRAMME
+// ============================================================================
+//
+//  Valeurs normalisées utilisées par le Centre d'Apprentissage.
+//  Les listes restent volontairement simples : elles pourront être enrichies
+//  plus tard depuis Firestore sans modifier le modèle Chapitre.
+//
+//  IMPORTANT :
+//  - une série vide signifie que la classe n'est pas découpée par série ;
+//  - l'année scolaire et la version du programme sont optionnelles pour les
+//    anciennes données afin de conserver la compatibilité avec Firestore.
+// ============================================================================
+
+class ProgrammesCI {
+  static const String anneeCourante = '2026-2027';
+
+  static const List<String> seriesLycee = [
+    'A1',
+    'A2',
+    'C',
+    'D',
+  ];
+
+  static bool niveauAUneSerie(String niveau) {
+    return niveau == '1ere' || niveau == 'Tle';
+  }
+
+  static List<String> seriesPour(String niveau) {
+    return niveauAUneSerie(niveau) ? seriesLycee : const [];
+  }
+}
+
+// ============================================================================
+//  7. QUESTION DE QUIZ
 //  Stockée en tableau à l'intérieur du document Ressource (pas de collection
 //  séparée : un quiz se lit ainsi en UNE seule lecture Firestore).
 // ============================================================================
@@ -367,7 +463,7 @@ class QuestionQuiz {
 }
 
 // ============================================================================
-//  7. RESSOURCE — le cœur du module
+//  8. RESSOURCE — le cœur du module
 //  Collection Firestore : /ressources/{ressourceId}
 //
 //  UNE seule collection pour les 9 types de contenu.
@@ -485,6 +581,7 @@ class Ressource {
         'titre': titre,
         'ordre': ordre,
         'chapitreId': chapitreId,
+        'code': code.isNotEmpty ? code : id,
         'niveau': niveau,
         'matiereId': matiereId,
         'ecoleId': ecoleId,
@@ -545,6 +642,7 @@ class Ressource {
     String? titre,
     int? ordre,
     String? chapitreId,
+    String? code,
     String? niveau,
     String? matiereId,
     String? ecoleId,
@@ -595,7 +693,7 @@ class Ressource {
 }
 
 // ============================================================================
-//  8. VERSION DU CATALOGUE (horloge du cache)
+//  9. VERSION DU CATALOGUE (horloge du cache)
 //  Document Firestore unique : /parametres_contenu/version
 //
 //  À chaque publication, le back-office incrémente ce numéro.

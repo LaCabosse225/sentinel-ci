@@ -378,7 +378,7 @@ class ContenuService {
       //
       // Une seule requete Firestore : chapitreId.
       // Les criteres complementaires sont verifies cote application.
-      if (r.id.isEmpty && r.chapitreId.isNotEmpty) {
+    if (r.chapitreId.isNotEmpty) {
         final existantes = await _db
             .collection(colRessources)
             .where('chapitreId', isEqualTo: r.chapitreId)

@@ -8,8 +8,8 @@
 //  Un bouton du back-office installe tout un chapitre d'un seul geste.
 //
 //  POUR AJOUTER UN CHAPITRE
-//  Ajouter une entree dans _catalogue, avec pour cle l'identifiant du
-//  chapitre ("3e_math_ch09"). Rien d'autre a modifier dans le code.
+//  Ajouter une entree dans _catalogue avec pour cle le code pedagogique
+//  du chapitre. Les anciens codes ("3e_math_ch09") restent compatibles.
 //
 //  Les ressources sont installees en BROUILLON : elles restent invisibles
 //  pour les eleves jusqu'a relecture et publication par un adulte.
@@ -50,33 +50,181 @@ class ContenuOfficiel {
   //  ACCES
   // ==========================================================================
 
-  static bool existe(String chapitreId) => _catalogue.containsKey(chapitreId);
+  // ==========================================================================
+  //  VERSIONNAGE DU CONTENU
+  // ==========================================================================
 
-  static List<RessourceOfficielle> ressources(String chapitreId) =>
-      _catalogue[chapitreId] ?? const [];
+  static const String anneeCourante = '2026-2027';
+  static const String programmeCourant = 'dpfc';
+
+  /// Construit une cle versionnee, par exemple :
+  /// 2026-2027_dpfc_3e__math_ch01
+  ///
+  /// Le double underscore avant la matiere permet de distinguer clairement
+  /// le niveau/serie de la matiere.
+  static String cle(
+    String niveau,
+    String matiereId,
+    int ordre, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    final seriePart = serie.trim();
+    final chapitre = 'ch${ordre.toString().padLeft(2, '0')}';
+    return '${anneeScolaire}_${programmeVersion}_${niveau}_${seriePart}__${matiereId}_$chapitre';
+  }
+
+  /// Compatibilite avec les anciennes cles du fichier.
+  static String ancienneCle(String niveau, String matiereId, int ordre) =>
+      '${niveau}_${matiereId}_ch${ordre.toString().padLeft(2, '0')}';
+
+  static bool existe(
+    String chapitreId, {
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+  }) {
+    if (_catalogue.containsKey(chapitreId)) return true;
+    if (anneeScolaire == null && programmeVersion == null && serie == null) {
+      return false;
+    }
+
+    // Recherche par identite du chapitre : le numero est extrait de l'ID.
+    final match = RegExp(r'^(.+?)_(.+?)_ch(\\d+)$').firstMatch(chapitreId);
+    if (match == null) return false;
+    final niveau = match.group(1)!;
+    final matiereId = match.group(2)!;
+    final ordre = int.tryParse(match.group(3)!) ?? 0;
+    return _catalogue.containsKey(cle(
+      niveau,
+      matiereId,
+      ordre,
+      anneeScolaire: anneeScolaire ?? anneeCourante,
+      programmeVersion: programmeVersion ?? programmeCourant,
+      serie: serie ?? '',
+    ));
+  }
+
+  /// Retourne les ressources d'un chapitre.
+  ///
+  /// La cle historique reste prioritaire pour ne rien casser dans la base
+  /// actuelle. Une cle versionnee peut ensuite etre ajoutee sans supprimer
+  /// l'ancien contenu.
+  static List<RessourceOfficielle> ressources(
+    String chapitreId, {
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+  }) {
+    final direct = _catalogue[chapitreId];
+    if (direct != null) return direct;
+
+    final match = RegExp(r'^(.+?)_(.+?)_ch(\\d+)$').firstMatch(chapitreId);
+    if (match == null) return const [];
+
+    final niveau = match.group(1)!;
+    final matiereId = match.group(2)!;
+    final ordre = int.tryParse(match.group(3)!) ?? 0;
+
+    return _catalogue[cle(
+          niveau,
+          matiereId,
+          ordre,
+          anneeScolaire: anneeScolaire ?? anneeCourante,
+          programmeVersion: programmeVersion ?? programmeCourant,
+          serie: serie ?? '',
+        )] ??
+        _catalogue[ancienneCle(niveau, matiereId, ordre)] ??
+        const [];
+  }
+
+  /// Indique si le catalogue contient des ressources pour le niveau/matiere.
+  static bool existePour(
+    String niveau,
+    String matiereId, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    final prefixe = '${anneeScolaire}_${programmeVersion}_${niveau}_${serie}__${matiereId}_';
+    return _catalogue.keys.any((k) => k.startsWith(prefixe)) ||
+        _catalogue.keys.any((k) => k.startsWith('${niveau}_${matiereId}_ch'));
+  }
+
+  /// Liste les chapitres du catalogue pour un niveau/matiere.
+  static List<String> chapitresDisponibles(
+    String niveau,
+    String matiereId, {
+    String anneeScolaire = anneeCourante,
+    String programmeVersion = programmeCourant,
+    String serie = '',
+  }) {
+    final prefixe = '${anneeScolaire}_${programmeVersion}_${niveau}_${serie}__${matiereId}_';
+    final resultat = <String>[];
+
+    for (final k in _catalogue.keys) {
+      if (k.startsWith(prefixe)) {
+        resultat.add(k);
+      }
+    }
+
+    // Compatibilite avec les anciennes cles.
+    if (resultat.isEmpty) {
+      for (final k in _catalogue.keys) {
+        if (k.startsWith('${niveau}_${matiereId}_ch')) {
+          resultat.add(k);
+        }
+      }
+    }
+
+    resultat.sort();
+    return resultat;
+  }
 
   /// Cree toutes les ressources du chapitre, en brouillon.
+  ///
+  /// Les ressources sont liees au chapitre Firestore, qui porte maintenant
+  /// les metadonnees annee/programme/serie/theme. On ne duplique donc pas
+  /// ces champs dans chaque ressource.
+  ///
   /// Renvoie le nombre de ressources creees.
-  static Future<int> installer(Chapitre chapitre, String auteurUid) async {
+  static Future<int> installer(
+    Chapitre chapitre,
+    String auteurUid, {
+    String? anneeScolaire,
+    String? programmeVersion,
+    String? serie,
+  }) async {
+    final cleChapitre = chapitre.code.isNotEmpty ? chapitre.code : chapitre.id;
+    final ressourcesChapitre = ressources(
+      cleChapitre,
+      anneeScolaire: anneeScolaire ?? chapitre.anneeScolaire,
+      programmeVersion: programmeVersion ?? chapitre.programmeVersion,
+      serie: serie ?? chapitre.serie,
+    );
+
     int crees = 0;
-    for (final r in ressources(chapitre.id)) {
-      final res = await ContenuService.creerRessource(Ressource(
-        id: '',
-        type: r.type,
-        titre: r.titre,
-        ordre: r.ordre,
-        chapitreId: chapitre.id,
-        niveau: chapitre.niveau,
-        matiereId: chapitre.matiereId,
-        contenu: r.contenu,
-        enonce: r.enonce,
-        solution: r.solution,
-        difficulte: r.difficulte,
-        dureeMinutes: r.dureeMinutes,
-        questions: r.questions,
-        actif: false, // brouillon : relecture obligatoire
-        auteur: auteurUid,
-      ));
+    for (final r in ressourcesChapitre) {
+      final res = await ContenuService.creerRessource(
+        Ressource(
+          id: '',
+          type: r.type,
+          titre: r.titre,
+          ordre: r.ordre,
+          chapitreId: chapitre.id,
+          niveau: chapitre.niveau,
+          matiereId: chapitre.matiereId,
+          contenu: r.contenu,
+          enonce: r.enonce,
+          solution: r.solution,
+          difficulte: r.difficulte,
+          dureeMinutes: r.dureeMinutes,
+          questions: r.questions,
+          actif: false, // brouillon : relecture obligatoire
+          auteur: auteurUid,
+        ),
+      );
       if (!res.startsWith('!')) crees++;
     }
     return crees;

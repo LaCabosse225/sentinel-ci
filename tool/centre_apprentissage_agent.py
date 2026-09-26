@@ -15,7 +15,9 @@ CONTENU = Path("lib/centre_apprentissage/donnees/contenu_officiel.dart")
 REPORT = Path("tool/centre_apprentissage_agent_report.json")
 MODEL = os.getenv("CENTRE_AGENT_MODEL", "gpt-5.6-luna")
 BATCH_SIZE = int(os.getenv("CENTRE_AGENT_BATCH_SIZE", "3"))
-GENERATE = "--generate" in sys.argv and bool(os.getenv("OPENAI_API_KEY"))
+REQUEST_GENERATE = "--generate" in sys.argv
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+GENERATE = REQUEST_GENERATE and bool(OPENAI_API_KEY)
 
 def parse_programmes(text):
     out = {}
@@ -158,6 +160,9 @@ def append_entries(source, entries):
     return source[:end] + insertion + source[end:]
 
 def main():
+    if REQUEST_GENERATE and not OPENAI_API_KEY:
+        print("AGENT: ERREUR — --generate demande le secret OPENAI_API_KEY.")
+        return 2
     programmes = parse_programmes(PROGRAMME.read_text(encoding="utf-8"))
     content_text = CONTENU.read_text(encoding="utf-8")
     existing = parse_content_keys(content_text)

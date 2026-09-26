@@ -7224,5 +7224,942 @@ CÔNE
         ],
       ),
     ],
+    '6e_math_ch01': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Nombres entiers naturels — cours",
+        contenu: r'''Décomposer, comparer, ordonner et calculer avec les nombres entiers naturels. Dans une division euclidienne, dividende = diviseur × quotient + reste, avec un reste strictement inférieur au diviseur.
+
+À RETENIR
+Exemple : 248 = 12 × 20 + 8. Le quotient est 20 et le reste 8.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Nombres entiers naturels — comprendre facilement",
+        contenu: r'''Exemple : 248 = 12 × 20 + 8. Le quotient est 20 et le reste 8.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres entiers naturels — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''248 + 375''',
+        solution: r'''248 = 12 × 20 + 8''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres entiers naturels — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Nombres entiers naturels. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Nombres entiers naturels — fiche de révision",
+        contenu: r'''MOTS-CLÉS : entiers • comparaison • opérations • division euclidienne
+
+FORMULE / MÉTHODE : Exemple : 248 = 12 × 20 + 8. Le quotient est 20 et le reste 8.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Nombres entiers naturels — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e1q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Nombres entiers naturels ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e1q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Nombres entiers naturels permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e1q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch02': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Droites et points — cours",
+        contenu: r'''Reconnaître et utiliser point, droite, segment et demi-droite. Deux points distincts déterminent une unique droite. Trois points sont alignés lorsqu'ils appartiennent à une même droite.
+
+À RETENIR
+La notation (AB) désigne une droite ; [AB] un segment ; [AB) une demi-droite d'origine A passant par B.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Droites et points — comprendre facilement",
+        contenu: r'''La notation (AB) désigne une droite ; [AB] un segment ; [AB) une demi-droite d'origine A passant par B.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Droites et points — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Deux points A et B déterminent combien de droites ?''',
+        solution: r'''Une seule droite : (AB).''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Droites et points — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Droites et points. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Droites et points — fiche de révision",
+        contenu: r'''MOTS-CLÉS : point • droite • segment • demi-droite
+
+FORMULE / MÉTHODE : La notation (AB) désigne une droite ; [AB] un segment ; [AB) une demi-droite d'origine A passant par B.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Droites et points — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e2q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Droites et points ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e2q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Droites et points permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e2q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch03': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Nombres décimaux relatifs — cours",
+        contenu: r'''Repérer, comparer et calculer avec les nombres décimaux relatifs. La valeur absolue |a| est la distance de a à zéro. Pour soustraire, on ajoute l'opposé.
+
+À RETENIR
+Pour comparer des nombres négatifs, le plus proche de zéro est le plus grand. Exemple : −3 > −8.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Nombres décimaux relatifs — comprendre facilement",
+        contenu: r'''Pour comparer des nombres négatifs, le plus proche de zéro est le plus grand. Exemple : −3 > −8.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres décimaux relatifs — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''−7 + 12 − 5''',
+        solution: r'''0''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres décimaux relatifs — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Nombres décimaux relatifs. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Nombres décimaux relatifs — fiche de révision",
+        contenu: r'''MOTS-CLÉS : relatifs • opposé • valeur absolue • droite graduée
+
+FORMULE / MÉTHODE : Pour comparer des nombres négatifs, le plus proche de zéro est le plus grand. Exemple : −3 > −8.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Nombres décimaux relatifs — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e3q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Nombres décimaux relatifs ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e3q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Nombres décimaux relatifs permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e3q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch04': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Segments — cours",
+        contenu: r'''Connaître la longueur d'un segment, son milieu et sa médiatrice. Le milieu M vérifie AM = MB. La médiatrice est perpendiculaire au segment en son milieu.
+
+À RETENIR
+Tout point de la médiatrice d'un segment est à égale distance des deux extrémités.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Segments — comprendre facilement",
+        contenu: r'''Tout point de la médiatrice d'un segment est à égale distance des deux extrémités.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Segments — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''AB = 10 cm, M milieu : AM = ?''',
+        solution: r'''5 cm''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Segments — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Segments. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Segments — fiche de révision",
+        contenu: r'''MOTS-CLÉS : segment • milieu • médiatrice • distance
+
+FORMULE / MÉTHODE : Tout point de la médiatrice d'un segment est à égale distance des deux extrémités.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Segments — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e4q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Segments ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e4q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Segments permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e4q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch05': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Pavés droits et cylindres droits — cours",
+        contenu: r'''Calculer le volume d'un pavé droit V = L×l×h et d'un cylindre V = πr²h. Pour un cylindre, le diamètre vaut 2r. Les unités doivent être cohérentes.
+
+À RETENIR
+Exemple : un pavé 8×5×3 a un volume de 120 cm³. Un cylindre de r=2 et h=10 a un volume de 40π cm³.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Pavés droits et cylindres droits — comprendre facilement",
+        contenu: r'''Exemple : un pavé 8×5×3 a un volume de 120 cm³. Un cylindre de r=2 et h=10 a un volume de 40π cm³.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Pavés droits et cylindres droits — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Volume d'un pavé 8×5×3''',
+        solution: r'''120 cm³''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Pavés droits et cylindres droits — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Pavés droits et cylindres droits. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Pavés droits et cylindres droits — fiche de révision",
+        contenu: r'''MOTS-CLÉS : pavé • cylindre • volume • rayon
+
+FORMULE / MÉTHODE : Exemple : un pavé 8×5×3 a un volume de 120 cm³. Un cylindre de r=2 et h=10 a un volume de 40π cm³.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Pavés droits et cylindres droits — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e5q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Pavés droits et cylindres droits ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e5q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Pavés droits et cylindres droits permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e5q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch06': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Fractions — cours",
+        contenu: r'''Lire, simplifier, comparer et additionner des fractions. Pour une addition, mettre au même dénominateur si nécessaire. Pour multiplier, multiplier numérateurs et dénominateurs.
+
+À RETENIR
+Exemple : 18/24 = 3/4. Pour 2/3 + 1/6, on obtient 4/6 + 1/6 = 5/6.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Fractions — comprendre facilement",
+        contenu: r'''Exemple : 18/24 = 3/4. Pour 2/3 + 1/6, on obtient 4/6 + 1/6 = 5/6.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Fractions — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Simplifie 18/24''',
+        solution: r'''3/4''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Fractions — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Fractions. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Fractions — fiche de révision",
+        contenu: r'''MOTS-CLÉS : numérateur • dénominateur • simplification • fractions équivalentes
+
+FORMULE / MÉTHODE : Exemple : 18/24 = 3/4. Pour 2/3 + 1/6, on obtient 4/6 + 1/6 = 5/6.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Fractions — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e6q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Fractions ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e6q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Fractions permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e6q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch07': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Cercles et disques — cours",
+        contenu: r'''Identifier centre, rayon, diamètre et disque. Le diamètre d=2r. La longueur du cercle vaut 2πr et l'aire du disque πr².
+
+À RETENIR
+Ne confonds pas périmètre et aire : la longueur du cercle est en unités de longueur, l'aire du disque en unités carrées.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Cercles et disques — comprendre facilement",
+        contenu: r'''Ne confonds pas périmètre et aire : la longueur du cercle est en unités de longueur, l'aire du disque en unités carrées.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Cercles et disques — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Rayon 5 cm : aire du disque ?''',
+        solution: r'''25π cm²''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Cercles et disques — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Cercles et disques. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Cercles et disques — fiche de révision",
+        contenu: r'''MOTS-CLÉS : centre • rayon • diamètre • aire • longueur
+
+FORMULE / MÉTHODE : Ne confonds pas périmètre et aire : la longueur du cercle est en unités de longueur, l'aire du disque en unités carrées.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Cercles et disques — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e7q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Cercles et disques ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e7q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Cercles et disques permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e7q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch08': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Angles — cours",
+        contenu: r'''Mesurer et construire des angles en degrés. Aigu <90°, droit =90°, obtus entre 90° et 180°, plat =180°. Deux angles complémentaires totalisent 90° et deux supplémentaires 180°.
+
+À RETENIR
+Avec un rapporteur, place son centre sur le sommet et une graduation zéro sur un côté de l'angle.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Angles — comprendre facilement",
+        contenu: r'''Avec un rapporteur, place son centre sur le sommet et une graduation zéro sur un côté de l'angle.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Angles — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Complément de 28° ?''',
+        solution: r'''62°''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Angles — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Angles. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Angles — fiche de révision",
+        contenu: r'''MOTS-CLÉS : aigu • droit • obtus • complémentaire • supplémentaire
+
+FORMULE / MÉTHODE : Avec un rapporteur, place son centre sur le sommet et une graduation zéro sur un côté de l'angle.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Angles — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e8q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Angles ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e8q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Angles permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e8q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch09': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Triangles — cours",
+        contenu: r'''Un triangle a trois angles dont la somme est 180°. Un équilatéral a trois côtés égaux, un isocèle au moins deux, un rectangle possède un angle droit.
+
+À RETENIR
+Dans un triangle, l'angle inconnu vaut 180° moins la somme des deux angles connus. Dans un isocèle, les angles à la base sont égaux.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Triangles — comprendre facilement",
+        contenu: r'''Dans un triangle, l'angle inconnu vaut 180° moins la somme des deux angles connus. Dans un isocèle, les angles à la base sont égaux.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Triangles — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Angles 48° et 67° : troisième angle ?''',
+        solution: r'''65°''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Triangles — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Triangles. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Triangles — fiche de révision",
+        contenu: r'''MOTS-CLÉS : triangle • équilatéral • isocèle • rectangle
+
+FORMULE / MÉTHODE : Dans un triangle, l'angle inconnu vaut 180° moins la somme des deux angles connus. Dans un isocèle, les angles à la base sont égaux.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Triangles — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e9q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Triangles ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e9q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Triangles permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e9q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch10': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Proportionnalité — cours",
+        contenu: r'''Deux grandeurs sont proportionnelles si un même coefficient permet de passer de l'une à l'autre. On peut utiliser passage à l'unité, tableau ou produit en croix.
+
+À RETENIR
+Exemple : 4 kg coûtent 2 400 F ; 1 kg coûte 600 F et 7 kg coûtent 4 200 F.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Proportionnalité — comprendre facilement",
+        contenu: r'''Exemple : 4 kg coûtent 2 400 F ; 1 kg coûte 600 F et 7 kg coûtent 4 200 F.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Proportionnalité — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''4 kg = 2 400 F ; 7 kg = ?''',
+        solution: r'''4 200 F''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Proportionnalité — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Proportionnalité. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Proportionnalité — fiche de révision",
+        contenu: r'''MOTS-CLÉS : coefficient • tableau • pourcentage • produit en croix
+
+FORMULE / MÉTHODE : Exemple : 4 kg coûtent 2 400 F ; 1 kg coûte 600 F et 7 kg coûtent 4 200 F.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Proportionnalité — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e10q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Proportionnalité ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e10q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Proportionnalité permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e10q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch11': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Figures symétriques par rapport à un point — cours",
+        contenu: r'''Dans une symétrie centrale de centre O, A devient A' avec O milieu de [AA']. La transformation conserve longueurs, angles et parallélisme.
+
+À RETENIR
+Pour construire A', trace (AO) puis reporte OA de l'autre côté de O. Ainsi OA = OA'.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Figures symétriques par rapport à un point — comprendre facilement",
+        contenu: r'''Pour construire A', trace (AO) puis reporte OA de l'autre côté de O. Ainsi OA = OA'.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Figures symétriques par rapport à un point — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''OA = 4 cm : où placer A' ?''',
+        solution: r'''À 4 cm de O sur la droite (AO), de l'autre côté de O.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Figures symétriques par rapport à un point — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Figures symétriques par rapport à un point. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Figures symétriques par rapport à un point — fiche de révision",
+        contenu: r'''MOTS-CLÉS : symétrie centrale • centre • image • milieu
+
+FORMULE / MÉTHODE : Pour construire A', trace (AO) puis reporte OA de l'autre côté de O. Ainsi OA = OA'.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Figures symétriques par rapport à un point — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e11q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Figures symétriques par rapport à un point ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e11q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Figures symétriques par rapport à un point permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e11q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch12': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Statistique — cours",
+        contenu: r'''Une série statistique contient une population, un caractère et des effectifs. L'effectif total est la somme des effectifs. La fréquence est effectif ÷ effectif total.
+
+À RETENIR
+Exemple : 12 élèves sur 30 viennent à pied. Fréquence = 12/30 = 40 %.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Statistique — comprendre facilement",
+        contenu: r'''Exemple : 12 élèves sur 30 viennent à pied. Fréquence = 12/30 = 40 %.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Statistique — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''12 élèves sur 30 : fréquence ?''',
+        solution: r'''40 %''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Statistique — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Statistique. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Statistique — fiche de révision",
+        contenu: r'''MOTS-CLÉS : population • caractère • effectif • fréquence
+
+FORMULE / MÉTHODE : Exemple : 12 élèves sur 30 viennent à pied. Fréquence = 12/30 = 40 %.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Statistique — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e12q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Statistique ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e12q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Statistique permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e12q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch13': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Parallélogramme — cours",
+        contenu: r'''Un parallélogramme est un quadrilatère dont les côtés opposés sont parallèles. Les côtés opposés ont même longueur et les diagonales se coupent en leur milieu.
+
+À RETENIR
+Deux angles consécutifs sont supplémentaires. Rectangle, losange et carré sont des parallélogrammes particuliers.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Parallélogramme — comprendre facilement",
+        contenu: r'''Deux angles consécutifs sont supplémentaires. Rectangle, losange et carré sont des parallélogrammes particuliers.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Parallélogramme — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''ABCD parallélogramme, AB=7 cm : CD = ?''',
+        solution: r'''7 cm''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Parallélogramme — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Parallélogramme. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Parallélogramme — fiche de révision",
+        contenu: r'''MOTS-CLÉS : côtés opposés • diagonales • parallélisme • angles
+
+FORMULE / MÉTHODE : Deux angles consécutifs sont supplémentaires. Rectangle, losange et carré sont des parallélogrammes particuliers.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Parallélogramme — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e13q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Parallélogramme ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e13q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Parallélogramme permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e13q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+
   };
 }

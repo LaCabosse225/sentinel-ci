@@ -382,6 +382,12 @@ class ProgrammeOfficiel {
     int crees = 0;
     int ignores = 0;
 
+    // On regarde d'abord ce qui existe déjà pour ce niveau/matière.
+    // Cela évite de recréer un chapitre historique (ex. 6e_math_ch01)
+    // lorsqu'on installe maintenant la version 2026-2027.
+    final existants = await ContenuService.chapitres(niveau, matiereId);
+    final ordresExistants = existants.map((e) => e.ordre).toSet();
+
     for (final c in chapitres(
       niveau,
       matiereId,
@@ -389,6 +395,11 @@ class ProgrammeOfficiel {
       programmeVersion: programmeVersion,
       serie: serie,
     )) {
+      if (ordresExistants.contains(c.ordre)) {
+        ignores++;
+        continue;
+      }
+
       final res = await ContenuService.creerChapitre(
         Chapitre(
           id: '',

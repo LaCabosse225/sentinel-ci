@@ -799,7 +799,7 @@ résultat. Si les deux valeurs diffèrent, il y a une erreur.
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 2 : RACINES CARREES
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch02': [
+    '3e_math_ch09': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Les racines carrées',
@@ -1279,7 +1279,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 3 : CALCUL NUMERIQUE
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch03': [
+    '3e_math_ch05': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Intervalles, encadrements et arrondis',
@@ -1805,7 +1805,7 @@ le nombre de gauche doit toujours être le plus petit.
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 4 : EQUATIONS ET INEQUATIONS DANS R
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch04': [
+    '3e_math_ch08': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Équations et inéquations du premier degré dans ℝ',
@@ -2359,7 +2359,7 @@ LES RÉFLEXES QUI SAUVENT
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 5 : SYSTEMES DANS R x R
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch05': [
+    '3e_math_ch14': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Systèmes de deux équations à deux inconnues',
@@ -2909,7 +2909,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 6 : APPLICATIONS AFFINES
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch06': [
+    '3e_math_ch13': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Applications affines et linéaires',
@@ -3414,7 +3414,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 7 : STATISTIQUE
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch07': [
+    '3e_math_ch10': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Statistique : effectifs, fréquences et médiane',
@@ -4003,7 +4003,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 9 : PROPRIETES DE THALES
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch09': [
+    '3e_math_ch02': [
       // ---------- COURS ----------
       RessourceOfficielle(
         type: TypeRessource.cours,
@@ -4535,7 +4535,7 @@ d'après la réciproque de la propriété de Thalès, (MN) // (BC). »
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 10 : ANGLES INSCRITS
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch10': [
+    '3e_math_ch06': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Angles inscrits et angles au centre',
@@ -5012,7 +5012,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 11 : VECTEURS
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch11': [
+    '3e_math_ch07': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Les vecteurs du plan',
@@ -5591,7 +5591,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 12 : COORDONNEES D'UN VECTEUR
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch12': [
+    '3e_math_ch11': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Coordonnées dans un repère',
@@ -6167,7 +6167,7 @@ LES PIÈGES
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 13 : EQUATIONS DE DROITES
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch13': [
+    '3e_math_ch12': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Équations de droites',
@@ -6764,6 +6764,462 @@ LES PIÈGES
                 'Les deux points ont la même abscisse : la droite est '
                 'VERTICALE. Elle n\'a pas de coefficient directeur et son '
                 'équation est x = 4.',
+          ),
+        ],
+      ),
+    ],
+    
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 4 : TRIANGLE RECTANGLE
+    //  ════════════════════════════════════════════════════════════════════
+    '3e_math_ch04': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Triangle rectangle : Pythagore et trigonométrie',
+        ordre: 1,
+        contenu: r'''
+1. LE THÉORÈME DE PYTHAGORE
+
+Dans un triangle rectangle, le carré de la longueur de l'hypoténuse est
+égal à la somme des carrés des longueurs des deux autres côtés.
+
+Si ABC est rectangle en A, alors l'hypoténuse est [BC] et :
+
+    BC² = AB² + AC²
+
+L'hypoténuse est toujours le côté opposé à l'angle droit.
+
+
+2. CALCULER UNE LONGUEUR
+
+Si l'hypoténuse est connue et qu'un seul côté de l'angle droit est inconnu :
+
+    AB² = BC² - AC²
+    AB = √(BC² - AC²)
+
+Exemple :
+BC = 13 cm et AC = 5 cm.
+
+    AB² = 13² - 5² = 169 - 25 = 144
+    AB = 12 cm
+
+
+3. LA RÉCIPROQUE DE PYTHAGORE
+
+Pour démontrer qu'un triangle est rectangle, on compare le carré du plus
+grand côté à la somme des carrés des deux autres.
+
+Si BC est le plus grand côté et si :
+
+    BC² = AB² + AC²
+
+alors le triangle ABC est rectangle en A.
+
+
+4. SINUS, COSINUS ET TANGENTE
+
+Dans un triangle rectangle, pour un angle aigu α :
+
+    sin(α) = côté opposé / hypoténuse
+    cos(α) = côté adjacent / hypoténuse
+    tan(α) = côté opposé / côté adjacent
+
+Méthode :
+1. repérer l'angle étudié ;
+2. identifier le côté opposé, le côté adjacent et l'hypoténuse ;
+3. choisir la relation qui contient les données et l'inconnue.
+
+
+5. CALCULER UN ANGLE
+
+Avec une calculatrice en mode degré :
+
+    α = sin⁻¹(opposé / hypoténuse)
+    α = cos⁻¹(adjacent / hypoténuse)
+    α = tan⁻¹(opposé / adjacent)
+
+Toujours vérifier que la calculatrice est en degrés.
+
+
+6. CONTRÔLE DE COHÉRENCE
+
+L'hypoténuse est le plus grand côté du triangle rectangle.
+Une longueur ne peut pas être négative.
+Pour un angle aigu, une mesure est comprise entre 0° et 90°.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Choisir entre Pythagore, sinus, cosinus et tangente',
+        ordre: 1,
+        contenu: r'''
+LE BON RÉFLEXE
+
+Tu dois d'abord regarder ce que l'exercice demande.
+
+• On connaît deux côtés et on cherche le troisième → pense Pythagore.
+• On cherche à prouver qu'un triangle est rectangle → pense réciproque de
+  Pythagore.
+• On connaît un angle aigu et un côté, et on cherche une autre longueur →
+  pense trigonométrie.
+• On connaît des longueurs et on cherche un angle → utilise une relation
+  trigonométrique puis la touche inverse de la calculatrice.
+
+ATTENTION AUX CÔTÉS
+
+L'hypoténuse est toujours opposée à l'angle droit.
+Le côté adjacent est celui qui touche l'angle étudié, mais qui n'est pas
+l'hypoténuse.
+Le côté opposé ne touche pas l'angle étudié.
+
+ASTUCE
+
+Écris toujours le petit tableau mental :
+
+    sin = opposé / hypoténuse
+    cos = adjacent / hypoténuse
+    tan = opposé / adjacent
+
+Puis choisis la formule qui contient les deux informations disponibles.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'La diagonale d’une cour',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Une cour rectangulaire mesure 12 m de longueur et 5 m de largeur.
+
+1) Modélise la diagonale par un triangle rectangle.
+2) Calcule la longueur de la diagonale.
+3) Donne une valeur au dixième près.
+''',
+        solution: r'''
+La diagonale est l'hypoténuse du triangle rectangle formé par la longueur
+et la largeur.
+
+D'après Pythagore :
+
+    d² = 12² + 5²
+       = 144 + 25
+       = 169
+
+Donc :
+
+    d = √169 = 13 m
+
+La diagonale mesure exactement 13 m, donc au dixième près : 13,0 m.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Une rampe pour l’accessibilité',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Une rampe forme un triangle rectangle. Elle mesure 5 m de longueur et
+permet de franchir une hauteur verticale de 1,2 m.
+
+On note α l'angle entre la rampe et le sol.
+
+1) Identifie l'hypoténuse et le côté opposé à α.
+2) Choisis la relation trigonométrique adaptée.
+3) Calcule α au degré près.
+''',
+        solution: r'''
+L'hypoténuse est la rampe : 5 m.
+Le côté opposé à α est la hauteur : 1,2 m.
+
+On utilise le sinus :
+
+    sin(α) = opposé / hypoténuse
+           = 1,2 / 5
+           = 0,24
+
+Donc :
+
+    α = sin⁻¹(0,24)
+    α ≈ 13,9°
+
+Au degré près :
+
+    α ≈ 14°
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Fiche express — Triangle rectangle',
+        ordre: 1,
+        contenu: r'''
+PYTHAGORE
+Triangle rectangle en A :
+    BC² = AB² + AC²
+
+RÉCIPROQUE
+Si BC est le plus grand côté et
+    BC² = AB² + AC²
+alors le triangle est rectangle en A.
+
+TRIGONOMÉTRIE
+    sin = opposé / hypoténuse
+    cos = adjacent / hypoténuse
+    tan = opposé / adjacent
+
+AVANT DE CALCULER
+• identifier l'angle droit ;
+• repérer l'hypoténuse ;
+• repérer l'angle étudié ;
+• choisir la formule ;
+• vérifier le mode degré de la calculatrice.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Quiz — Triangle rectangle',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'tr01',
+            type: TypeQuestion.qcm,
+            enonce: 'Dans un triangle rectangle, comment appelle-t-on le côté opposé à l’angle droit ?',
+            choix: ['La médiane', 'L’hypoténuse', 'La hauteur', 'La bissectrice'],
+            bonnesReponses: [1],
+            explication: 'L’hypoténuse est le côté opposé à l’angle droit.',
+          ),
+          QuestionQuiz(
+            id: 'tr02',
+            type: TypeQuestion.qcm,
+            enonce: 'Si BC est l’hypoténuse, quelle relation est correcte pour un triangle rectangle en A ?',
+            choix: ['BC = AB + AC', 'BC² = AB² + AC²', 'AB² = BC² + AC²', 'BC² = AB² - AC²'],
+            bonnesReponses: [1],
+            explication: 'C’est le théorème de Pythagore.',
+          ),
+          QuestionQuiz(
+            id: 'tr03',
+            type: TypeQuestion.qcm,
+            enonce: 'Pour un angle α, le sinus est égal à :',
+            choix: ['adjacent / hypoténuse', 'opposé / hypoténuse', 'opposé / adjacent', 'hypoténuse / opposé'],
+            bonnesReponses: [1],
+            explication: 'sin(α) = côté opposé / hypoténuse.',
+          ),
+          QuestionQuiz(
+            id: 'tr04',
+            type: TypeQuestion.qcm,
+            enonce: 'Avec AB = 6 cm et AC = 8 cm dans un triangle rectangle en A, BC vaut :',
+            choix: ['10 cm', '12 cm', '14 cm', '2 cm'],
+            bonnesReponses: [0],
+            explication: 'BC² = 6² + 8² = 100, donc BC = 10 cm.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 9 : PYRAMIDES ET CÔNES
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch09': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Pyramides et cônes',
+        ordre: 1,
+        contenu: r'''
+1. LA PYRAMIDE
+
+Une pyramide est un solide dont une face est un polygone appelé base et dont
+les autres faces sont des triangles ayant un sommet commun : le sommet de
+la pyramide.
+
+Une pyramide régulière possède une base régulière et un sommet placé sur la
+perpendiculaire passant par le centre de la base.
+
+
+2. PATRON D’UNE PYRAMIDE
+
+Un patron permet de déplier le solide sur le plan.
+Il comprend la base et les faces latérales.
+
+Pour construire un patron, il faut respecter les longueurs des arêtes et
+les dimensions des faces.
+
+
+3. VOLUME D’UNE PYRAMIDE
+
+Le volume d'une pyramide est :
+
+    V = (1/3) × Aire de la base × hauteur
+
+La hauteur est la distance perpendiculaire entre le sommet et le plan de
+la base.
+
+
+4. LE CÔNE DE RÉVOLUTION
+
+Un cône de révolution possède un disque comme base et un sommet situé sur
+la perpendiculaire au centre de ce disque.
+
+On distingue :
+• r : rayon de la base ;
+• h : hauteur ;
+• g : génératrice.
+
+
+5. VOLUME DU CÔNE
+
+L'aire de la base vaut πr².
+
+Donc :
+
+    V = (1/3)πr²h
+
+
+6. UNITÉS
+
+Si les longueurs sont en cm, le volume est en cm³.
+Si elles sont en m, le volume est en m³.
+
+Avant d'utiliser une formule, convertis toutes les longueurs dans une même
+unité.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Bien distinguer hauteur, rayon et génératrice',
+        ordre: 1,
+        contenu: r'''
+NE CONFONDS PAS LES LONGUEURS
+
+Dans un cône :
+• le rayon va du centre du disque au bord du disque ;
+• la hauteur est perpendiculaire à la base ;
+• la génératrice relie le sommet à un point du cercle.
+
+La génératrice n'est pas la hauteur.
+
+POUR LE VOLUME
+
+Pyramide :
+    V = (1/3) × B × h
+
+Cône :
+    V = (1/3) × π × r² × h
+
+Le facteur 1/3 est commun aux deux solides.
+
+PIÈGE CLASSIQUE
+
+Si le rayon est donné en cm et la hauteur en m, ne remplace pas directement
+dans la formule. Convertis d'abord les deux longueurs dans la même unité.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Une pyramide à base carrée',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Une pyramide possède une base carrée de côté 6 cm et une hauteur de 10 cm.
+
+Calcule son volume.
+''',
+        solution: r'''
+Aire de la base :
+
+    B = 6 × 6 = 36 cm²
+
+Volume :
+
+    V = (1/3) × 36 × 10
+      = 120 cm³
+
+Le volume de la pyramide est donc 120 cm³.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le volume d’un cône',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Un cône de révolution a un rayon de base de 3 cm et une hauteur de 8 cm.
+
+1) Écris la formule de son volume.
+2) Calcule une valeur exacte en fonction de π.
+3) Donne une valeur approchée au dixième près.
+''',
+        solution: r'''
+La formule est :
+
+    V = (1/3)πr²h
+
+Avec r = 3 et h = 8 :
+
+    V = (1/3) × π × 3² × 8
+      = (1/3) × π × 9 × 8
+      = 24π cm³
+
+Avec π ≈ 3,14159 :
+
+    V ≈ 75,4 cm³
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Fiche express — Pyramides et cônes',
+        ordre: 1,
+        contenu: r'''
+PYRAMIDE
+    V = (1/3) × aire de la base × hauteur
+
+CÔNE
+    V = (1/3)πr²h
+
+À RETENIR
+• hauteur = distance perpendiculaire à la base ;
+• rayon = centre du disque vers le cercle ;
+• génératrice ≠ hauteur ;
+• utiliser des unités cohérentes ;
+• conserver π dans une valeur exacte avant l'approximation.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Quiz — Pyramides et cônes',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'pc01',
+            type: TypeQuestion.qcm,
+            enonce: 'Quelle est la formule du volume d’une pyramide ?',
+            choix: ['B × h', '(1/2) × B × h', '(1/3) × B × h', '3 × B × h'],
+            bonnesReponses: [2],
+            explication: 'Le volume d’une pyramide vaut un tiers de l’aire de sa base multipliée par sa hauteur.',
+          ),
+          QuestionQuiz(
+            id: 'pc02',
+            type: TypeQuestion.qcm,
+            enonce: 'Le volume d’un cône de rayon r et de hauteur h est :',
+            choix: ['πrh', '(1/3)πr²h', '2πrh', 'πr²h'],
+            bonnesReponses: [1],
+            explication: 'La formule est V = (1/3)πr²h.',
+          ),
+          QuestionQuiz(
+            id: 'pc03',
+            type: TypeQuestion.qcm,
+            enonce: 'Dans un cône, la hauteur est :',
+            choix: ['toujours la génératrice', 'perpendiculaire à la base', 'le diamètre', 'le rayon'],
+            bonnesReponses: [1],
+            explication: 'La hauteur est la distance perpendiculaire du sommet au plan de la base.',
+          ),
+          QuestionQuiz(
+            id: 'pc04',
+            type: TypeQuestion.qcm,
+            enonce: 'Une base carrée de côté 4 cm a quelle aire ?',
+            choix: ['8 cm²', '12 cm²', '16 cm²', '20 cm²'],
+            bonnesReponses: [2],
+            explication: '4 × 4 = 16 cm².',
           ),
         ],
       ),

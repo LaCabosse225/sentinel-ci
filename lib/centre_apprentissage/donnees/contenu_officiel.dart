@@ -5999,10 +5999,4256 @@ point.
 
 Erreur 3 : confondre la propriété et la réciproque.
 La propriété : on SAIT que c'est parallèle, on calcule une longueur.
+La réciproque : on calcule des rapports, on DÉMONTRE que c'est parallèle.
+
+Erreur 4 : oublier la condition d'ordre dans la réciproque.
+En devoir, cette phrase rapporte des points. Ne la saute pas.
+
+Erreur 5 : garder une fraction non simplifiée.
+6/9 doit devenir 2/3. C'est plus propre et cela évite les erreurs de calcul.
+
+
+CONSEIL POUR LE BEPC
+
+Repasse les droites parallèles au crayon de couleur sur ta figure. Tu
+verras immédiatement quel triangle est le petit et quel triangle est le
+grand.
+''',
+      ),
+
+      // ---------- EXERCICE 1 ----------
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'La largeur de la lagune',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Pour mesurer la largeur d'une lagune à Grand-Bassam sans la traverser, un
+géomètre a réalisé le relevé suivant.
+
+Il note A un point sur la rive, B et C deux repères de l'autre côté.
+Il place M sur [AB] et N sur [AC] de façon que (MN) soit parallèle à (BC).
+
+Il mesure :
+    AM = 12 m,  AB = 48 m,  MN = 9 m.
+
+Quelle est la largeur BC de la lagune ?
+''',
+        solution: r'''
+On sait que M appartient à [AB], N appartient à [AC] et que (MN) est
+parallèle à (BC).
+
+D'après la propriété de Thalès :
+
+    AM / AB = AN / AC = MN / BC
+
+On utilise les deux rapports qui contiennent les longueurs connues :
+
+    AM / AB = MN / BC
+
+On remplace :
+
+    12 / 48 = 9 / BC
+
+On simplifie la fraction de gauche :
+
+    12 / 48 = 1 / 4
+
+Donc :
+
+    1 / 4 = 9 / BC
+
+Par produit en croix :
+
+    1 × BC = 4 × 9
+    BC = 36
+
+
+CONCLUSION : la lagune mesure 36 m de large.
+
+
+VÉRIFICATION
+Le rapport de réduction est 1/4 : le petit triangle est quatre fois plus
+petit que le grand. MN = 9 et BC = 36, ce qui est bien quatre fois plus
+grand. Le résultat est cohérent.
+''',
+      ),
+
+      // ---------- EXERCICE 2 ----------
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Les poteaux du terrain',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Sur un terrain de sport à Bouaké, deux poteaux verticaux sont plantés le
+long d'une même ligne droite partant d'un piquet A.
+
+On note :
+    B et C les pieds des deux poteaux, alignés avec A ;
+    M et N les sommets des deux poteaux.
+
+On mesure :
+    AB = 5 m,  AC = 8 m,  BM = 3 m,  CN = 4,5 m.
+
+Les deux poteaux sont verticaux, donc (BM) et (CN) sont parallèles.
+
+Les points A, M et N sont-ils alignés ? Justifie ta réponse.
+''',
+        solution: r'''
+Les poteaux sont verticaux, donc (BM) et (CN) sont parallèles.
+
+Si A, M et N étaient alignés, on serait dans une configuration de Thalès
+avec le sommet A, et on aurait :
+
+    AB / AC = BM / CN
+
+
+On calcule séparément les deux rapports.
+
+D'une part :
+
+    AB / AC = 5 / 8 = 0,625
+
+D'autre part :
+
+    BM / CN = 3 / 4,5 = 0,666...
+
+
+Les deux rapports ne sont pas égaux :
+
+    5 / 8 ≠ 3 / 4,5
+
+
+CONCLUSION : les points A, M et N ne sont pas alignés.
+
+
+REMARQUE IMPORTANTE
+On a utilisé ici la CONSÉQUENCE de la propriété de Thalès : quand les
+rapports ne sont pas égaux, la configuration de Thalès n'est pas vérifiée.
+
+Concrètement, cela signifie que le sommet du deuxième poteau ne se trouve
+pas exactement dans le prolongement de la ligne qui joint A au sommet du
+premier. Le deuxième poteau est légèrement trop haut.
+''',
+      ),
+
+      // ---------- EXERCICE 3 ----------
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le partage du champ',
+        ordre: 3,
+        difficulte: Difficulte.examen,
+        enonce: r'''
+Un planteur de Daloa possède un champ triangulaire ABC.
+
+Il mesure :
+    AB = 60 m,  AC = 45 m,  BC = 50 m.
+
+Il souhaite séparer une parcelle pour son fils. Pour cela, il place un
+piquet M sur [AB] tel que AM = 24 m, puis un piquet N sur [AC] tel que
+AN = 18 m. Il tend une corde entre M et N.
+
+1) Démontre que la corde (MN) est parallèle au côté (BC).
+2) Calcule la longueur de la corde MN.
+3) Le fils reçoit la parcelle AMN. Quelle fraction du périmètre du champ
+   représente le périmètre de sa parcelle ?
+''',
+        solution: r'''
+1) LA CORDE EST-ELLE PARALLÈLE À (BC) ?
+
+Les points A, M, B sont alignés dans cet ordre, ainsi que A, N, C.
+
+On calcule séparément les deux rapports.
+
+D'une part :
+
+    AM / AB = 24 / 60 = 2 / 5
+
+D'autre part :
+
+    AN / AC = 18 / 45 = 2 / 5
+
+On constate que :
+
+    AM / AB = AN / AC
+
+D'après la RÉCIPROQUE de la propriété de Thalès, les droites (MN) et (BC)
+sont parallèles.
+
+
+2) LONGUEUR DE LA CORDE
+
+Puisque (MN) est parallèle à (BC), la propriété de Thalès s'applique :
+
+    AM / AB = MN / BC
+
+On remplace :
+
+    2 / 5 = MN / 50
+
+Par produit en croix :
+
+    5 × MN = 2 × 50
+    5 × MN = 100
+    MN = 20
+
+CONCLUSION : la corde mesure 20 m.
+
+
+3) FRACTION DU PÉRIMÈTRE
+
+Périmètre du champ ABC :
+
+    60 + 45 + 50 = 155 m
+
+Périmètre de la parcelle AMN :
+
+    AM + AN + MN = 24 + 18 + 20 = 62 m
+
+Fraction :
+
+    62 / 155 = 2 / 5
+
+
+CONCLUSION : le périmètre de la parcelle représente les 2/5 du périmètre
+du champ.
+
+
+CE QU'IL FAUT RETENIR
+Le rapport de réduction est 2/5, et il se retrouve partout : sur chaque
+côté, et donc sur le périmètre entier. C'est une propriété très utile en
+devoir, et elle tombe régulièrement au BEPC.
+
+Attention en revanche : cela ne marche PAS pour les aires. L'aire est
+multipliée par le carré du rapport, soit ici (2/5)² = 4/25.
+''',
+      ),
+
+      // ---------- FICHE ----------
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Thalès — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+QUAND UTILISER THALÈS
+
+Deux droites parallèles coupées par deux sécantes qui se croisent en un
+point. Pas de parallèles → pas de Thalès.
+
+
+LA PROPRIÉTÉ (pour CALCULER une longueur)
+
+Dans le triangle ABC, avec M sur (AB), N sur (AC) et (MN) // (BC) :
+
+    AM / AB = AN / AC = MN / BC
+
+
+LA RÉCIPROQUE (pour DÉMONTRER un parallélisme)
+
+Si les points sont dans le même ordre et si :
+
+    AM / AB = AN / AC
+
+alors (MN) // (BC).
+
+
+LA CONSÉQUENCE (pour DÉMONTRER un NON-parallélisme)
+
+Si AM / AB ≠ AN / AC, alors (MN) et (BC) ne sont pas parallèles.
+
+
+LA RÈGLE D'ÉCRITURE
+
+Tous les numérateurs partent du sommet commun.
+    AM / AB = AN / AC        correct
+    MA / AB = AN / AC        faux
+
+
+LE RAPPORT DE RÉDUCTION
+
+Le rapport k se retrouve sur TOUS les côtés, et donc sur le périmètre.
+Mais les aires sont multipliées par k², pas par k.
+
+
+THALÈS OU PYTHAGORE ?
+
+    Angle droit         → Pythagore
+    Droites parallèles  → Thalès
+
+
+LES PIÈGES
+
+- Vérifier que les parallèles sont bien données ou démontrées.
+- Ne jamais oublier la condition d'ordre des points dans la réciproque.
+- Simplifier les fractions avant le produit en croix.
+- Écrire l'unité dans la conclusion.
+
+
+LA PHRASE TYPE À RECOPIER EN DEVOIR
+
+« Les points A, M, B d'une part et A, N, C d'autre part sont alignés dans
+le même ordre. De plus (MN) // (BC). D'après la propriété de Thalès :
+AM / AB = AN / AC = MN / BC. »
+
+« D'une part AM / AB = ... D'autre part AN / AC = ...
+Donc AM / AB = AN / AC. Les points étant alignés dans le même ordre,
+d'après la réciproque de la propriété de Thalès, (MN) // (BC). »
+''',
+      ),
+
+      // ---------- QUIZ ----------
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les propriétés de Thalès',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'th1',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Quelle condition est indispensable pour appliquer la propriété de Thalès ?',
+            choix: [
+              'Le triangle doit avoir un angle droit',
+              'Deux droites de la figure doivent être parallèles',
+              'Le triangle doit être isocèle',
+              'Les trois côtés doivent être connus',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'Thalès repose sur le parallélisme. Sans droites parallèles, '
+                'la propriété ne s\'applique pas. L\'angle droit, lui, renvoie '
+                'à Pythagore.',
+          ),
+          QuestionQuiz(
+            id: 'th2',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Dans un triangle ABC avec M sur [AB], N sur [AC] et (MN) parallèle '
+                'à (BC), on peut écrire : AM / AB = AN / AC.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'C\'est exactement l\'écriture correcte : les deux numérateurs '
+                'partent du sommet commun A, et les deux dénominateurs aussi.',
+          ),
+          QuestionQuiz(
+            id: 'th3',
+            type: TypeQuestion.qcm,
+            enonce: 'À quoi sert la réciproque de la propriété de Thalès ?',
+            choix: [
+              'À calculer la longueur d\'un côté',
+              'À démontrer que deux droites sont parallèles',
+              'À calculer une aire',
+              'À mesurer un angle',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'La propriété calcule des longueurs quand on sait déjà que '
+                'c\'est parallèle. La réciproque fait l\'inverse : elle démontre '
+                'le parallélisme à partir de rapports égaux.',
+          ),
+          QuestionQuiz(
+            id: 'th4',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Dans une configuration de Thalès, AM / AB = 1/3 et BC = 21 cm. '
+                'Combien mesure MN, en centimètres ? (Écris seulement le nombre)',
+            reponseAttendue: '7',
+            explication:
+                'MN / BC = AM / AB = 1/3, donc MN = 21 × 1/3 = 7 cm.',
+          ),
+          QuestionQuiz(
+            id: 'th5',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Le rapport de réduction d\'une configuration de Thalès est 1/2. '
+                'Par combien l\'aire du petit triangle est-elle multipliée par '
+                'rapport au grand ?',
+            choix: ['1/2', '1/4', '2', '1/8'],
+            bonnesReponses: [1],
+            explication:
+                'Les longueurs sont multipliées par k, mais les aires par k². '
+                'Ici k = 1/2, donc l\'aire est multipliée par (1/2)² = 1/4. '
+                'C\'est un piège classique au BEPC.',
+          ),
+        ],
+      ),
+    ],
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 10 : ANGLES INSCRITS
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch06': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Angles inscrits et angles au centre',
+        ordre: 1,
+        contenu: r'''
+1. LE VOCABULAIRE DU CERCLE
+
+Une CORDE est un segment dont les deux extrémités sont sur le cercle.
+
+Une corde partage le cercle en deux ARCS : le petit et le grand.
+
+Le rayon relie le centre à un point du cercle. Le diamètre est une corde
+qui passe par le centre.
+
+
+2. L'ANGLE AU CENTRE
+
+Un angle au centre a son SOMMET AU CENTRE du cercle.
+
+L'angle au centre AOB, où O est le centre, INTERCEPTE l'arc AB.
+
+
+3. L'ANGLE INSCRIT
+
+Un angle inscrit a son SOMMET SUR LE CERCLE, et ses deux côtés coupent le
+cercle en deux autres points.
+
+L'angle AMB, avec M sur le cercle, intercepte l'arc AB qui ne contient
+pas M.
+
+Pour reconnaître un angle inscrit, deux conditions :
+    le sommet est SUR le cercle
+    les deux côtés recoupent le cercle
+
+
+4. LA PROPRIÉTÉ FONDAMENTALE
+
+Dans un cercle, l'angle au centre est le DOUBLE de tout angle inscrit qui
+intercepte le même arc.
+
+    mes AOB = 2 × mes AMB
+
+Autrement dit, l'angle inscrit vaut la MOITIÉ de l'angle au centre :
+
+    mes AMB = mes AOB / 2
+
+Exemple : si l'angle au centre AOB mesure 80°, alors tout angle inscrit
+interceptant l'arc AB mesure 40°.
+
+
+5. CONSÉQUENCE : DEUX ANGLES INSCRITS ÉGAUX
+
+Deux angles inscrits qui interceptent le MÊME ARC ont la même mesure.
+
+C'est logique : ils valent tous les deux la moitié du même angle au
+centre.
+
+    si M et N sont sur le cercle, du même côté de la corde [AB],
+    alors mes AMB = mes ANB
+
+C'est une propriété très utile : peu importe où l'on place le sommet sur
+l'arc, l'angle ne change pas.
+
+
+6. CAS PARTICULIER : L'ANGLE DROIT
+
+Si [AB] est un DIAMÈTRE du cercle, alors l'angle au centre AOB est un
+angle plat, donc il mesure 180°.
+
+Tout angle inscrit interceptant ce diamètre mesure donc 180 / 2 = 90°.
+
+PROPRIÉTÉ : si M est un point d'un cercle de diamètre [AB], distinct de A
+et de B, alors le triangle AMB est RECTANGLE en M.
+
+La réciproque est vraie aussi : si un triangle AMB est rectangle en M,
+alors M appartient au cercle de diamètre [AB].
+
+C'est le lien entre ce chapitre et le triangle rectangle.
+
+
+7. À QUOI CELA SERT
+
+Ces propriétés permettent de calculer des angles sans rapporteur, de
+démontrer qu'un triangle est rectangle, ou de prouver que quatre points
+appartiennent à un même cercle.
+
+Elles reviennent très régulièrement au BEPC, souvent combinées avec la
+propriété de Pythagore ou celle de Thalès.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Reconnaître les angles sur un cercle',
+        ordre: 1,
+        contenu: r'''
+LA QUESTION À SE POSER DEVANT LA FIGURE
+
+Où est le SOMMET de l'angle ?
+
+    au CENTRE du cercle  →  angle au centre
+    SUR le cercle        →  angle inscrit
+    ailleurs             →  ni l'un ni l'autre, la propriété ne s'applique
+                            pas
+
+C'est la première chose à vérifier, avant tout calcul.
+
+
+REPÉRER L'ARC INTERCEPTÉ
+
+L'arc intercepté est celui qui se trouve « à l'intérieur » de l'angle,
+entre ses deux côtés.
+
+Astuce : place ton doigt au sommet de l'angle, suis les deux côtés jusqu'au
+cercle. L'arc situé en face, entre les deux points d'arrivée et sans
+passer par ton doigt, c'est l'arc intercepté.
+
+
+LA PROPRIÉTÉ, DANS LE BON SENS
+
+    angle au centre = 2 × angle inscrit
+    angle inscrit = angle au centre ÷ 2
+
+Le CENTRE voit toujours plus GRAND. Retiens cela et tu ne te tromperas
+jamais de sens.
+
+    Angle au centre de 100° → angle inscrit de 50°
+    Angle inscrit de 35°    → angle au centre de 70°
+
+Si tu trouves un angle inscrit plus grand que l'angle au centre, tu as
+divisé au lieu de multiplier, ou l'inverse.
+
+
+DEUX ANGLES INSCRITS SUR LE MÊME ARC
+
+Si tu vois plusieurs sommets sur le cercle, mais que les côtés aboutissent
+aux MÊMES deux points, tous ces angles sont ÉGAUX.
+
+    mes AMB = mes ANB = mes APB
+
+C'est souvent la clé d'un exercice : un angle qu'on ne connaît pas est
+égal à un angle qu'on connaît, parce qu'ils interceptent le même arc.
+
+
+LE RÉFLEXE DU DIAMÈTRE
+
+Dès que tu vois un DIAMÈTRE dans un exercice avec un cercle, pense
+immédiatement : ANGLE DROIT.
+
+    M sur le cercle de diamètre [AB]  →  triangle AMB rectangle en M
+
+Et une fois que tu sais que le triangle est rectangle, tu peux utiliser
+Pythagore et la trigonométrie. C'est très souvent le but caché de
+l'exercice.
+
+La réciproque sert dans l'autre sens : pour démontrer qu'un point est sur
+un cercle, il suffit de montrer qu'il voit le diamètre sous un angle droit.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : appliquer la propriété à un angle dont le sommet n'est ni au
+centre ni sur le cercle. Vérifie toujours la position du sommet.
+
+Erreur 2 : multiplier au lieu de diviser. Le centre voit plus grand.
+
+Erreur 3 : comparer deux angles inscrits qui n'interceptent PAS le même
+arc. Ils n'ont alors aucune raison d'être égaux.
+
+Erreur 4 : oublier de citer la propriété dans la rédaction. En géométrie,
+la justification vaut autant que le résultat.
+
+
+CONSEIL POUR LE BEPC
+
+Sur ta figure, repasse en couleur l'arc intercepté. Tu verras
+immédiatement quels angles se rapportent au même arc, et l'exercice se
+déroulera tout seul.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Angles dans un cercle',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Sur un cercle de centre O, on place trois points A, B et M.
+
+L'angle au centre AOB mesure 76°, et le point M appartient au grand arc AB.
+
+1) Quelle est la nature de l'angle AMB ? Justifie.
+2) Calcule la mesure de l'angle AMB.
+3) On place un quatrième point N sur le grand arc AB, distinct de M.
+   Que peut-on dire de l'angle ANB ? Justifie.
+''',
+        solution: r'''
+1) NATURE DE L'ANGLE AMB
+
+Le point M appartient au cercle, et les deux côtés [MA) et [MB) de l'angle
+recoupent le cercle en A et en B.
+
+    L'angle AMB est un ANGLE INSCRIT dans le cercle.
+
+Il intercepte l'arc AB qui ne contient pas M, c'est-à-dire le petit arc,
+celui-là même qu'intercepte l'angle au centre AOB.
+
+
+2) MESURE DE L'ANGLE AMB
+
+L'angle au centre AOB et l'angle inscrit AMB interceptent le même arc AB.
+
+D'après la propriété de l'angle inscrit, l'angle au centre est le double
+de l'angle inscrit :
+
+    mes AOB = 2 × mes AMB
+
+Donc :
+
+    mes AMB = mes AOB / 2
+    mes AMB = 76 / 2
+    mes AMB = 38°
+
+    L'angle AMB mesure 38°.
+
+
+3) L'ANGLE ANB
+
+Le point N appartient lui aussi au cercle, sur le même arc que M. L'angle
+ANB est donc également un angle inscrit, et il intercepte le MÊME arc AB
+que l'angle AMB.
+
+Deux angles inscrits qui interceptent le même arc ont la même mesure.
+
+    mes ANB = mes AMB = 38°
+
+    L'angle ANB mesure également 38°.
+
+
+CE QU'IL FAUT RETENIR
+La position exacte du sommet sur l'arc n'a aucune importance : tant qu'il
+reste sur le même arc, l'angle inscrit garde la même mesure. C'est ce qui
+rend cette propriété si puissante.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le triangle caché dans le cercle',
+        ordre: 2,
+        difficulte: Difficulte.difficile,
+        enonce: r'''
+Soit un cercle de centre O et de diamètre [AB] tel que AB = 10 cm.
+
+M est un point du cercle, distinct de A et de B, tel que AM = 6 cm.
+
+1) Démontre que le triangle AMB est rectangle en M.
+2) Calcule la longueur MB.
+3) Calcule la mesure de l'angle MAB, arrondie au degré.
+   On donne : cos 53° ≈ 0,6.
+''',
+        solution: r'''
+1) LE TRIANGLE EST-IL RECTANGLE ?
+
+Le point M appartient au cercle de diamètre [AB], et il est distinct de A
+et de B.
+
+D'après la propriété de l'angle inscrit dans un demi-cercle :
+
+    si M est un point d'un cercle de diamètre [AB], distinct de A et B,
+    alors le triangle AMB est rectangle en M.
+
+    Le triangle AMB est donc RECTANGLE EN M.
+
+On peut aussi le justifier autrement : [AB] étant un diamètre, l'angle au
+centre AOB est un angle plat, il mesure 180°. L'angle inscrit AMB, qui
+intercepte le même arc, mesure donc 180 / 2 = 90°.
+
+
+2) LONGUEUR MB
+
+Le triangle AMB est rectangle en M. D'après la propriété de Pythagore :
+
+    AB² = AM² + MB²
+
+On remplace par les valeurs connues :
+
+    10² = 6² + MB²
+    100 = 36 + MB²
+
+On isole MB² :
+
+    MB² = 100 - 36
+    MB² = 64
+
+Donc :
+
+    MB = √64 = 8
+
+    MB mesure 8 cm.
+
+On reconnaît d'ailleurs le triplet 6 — 8 — 10, qui est un multiple du
+triplet 3 — 4 — 5.
+
+
+3) MESURE DE L'ANGLE MAB
+
+Plaçons-nous dans le triangle AMB, rectangle en M, et considérons l'angle
+en A.
+
+    [AM] est le côté ADJACENT à cet angle
+    [AB] est l'HYPOTÉNUSE
+
+On utilise donc le cosinus :
+
+    cos(MAB) = AM / AB
+    cos(MAB) = 6 / 10
+    cos(MAB) = 0,6
+
+Or l'énoncé donne cos 53° ≈ 0,6.
+
+    L'angle MAB mesure environ 53°.
+
+
+VÉRIFICATION
+La somme des angles d'un triangle vaut 180°. Ici :
+    90° (en M) + 53° (en A) = 143°
+Il reste 37° pour l'angle en B, ce qui est cohérent avec un triangle
+rectangle dont les deux angles aigus sont complémentaires.
+
+
+MÉTHODE À RETENIR POUR LE BEPC
+Cet exercice enchaîne trois chapitres : angle inscrit pour établir l'angle
+droit, Pythagore pour la longueur, trigonométrie pour l'angle. C'est la
+structure typique d'un exercice de géométrie au BEPC. Dès que vous voyez
+un diamètre, cherchez l'angle droit : il ouvre tout le reste.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Angles inscrits — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+RECONNAÎTRE LES ANGLES
+
+    sommet AU CENTRE  →  angle au centre
+    sommet SUR le cercle, côtés recoupant le cercle  →  angle inscrit
+
+
+LA PROPRIÉTÉ FONDAMENTALE
+
+Pour un même arc intercepté :
+
+    angle au centre = 2 × angle inscrit
+    angle inscrit = angle au centre ÷ 2
+
+Le CENTRE voit toujours plus GRAND.
+
+
+DEUX ANGLES INSCRITS SUR LE MÊME ARC
+
+Ils ont la même mesure.
+
+    mes AMB = mes ANB   si M et N sont sur le même arc
+
+La position du sommet sur l'arc n'a pas d'importance.
+
+
+LE CAS DU DIAMÈTRE
+
+Si [AB] est un diamètre et M un point du cercle distinct de A et B :
+
+    le triangle AMB est RECTANGLE EN M
+
+Réciproque : si AMB est rectangle en M, alors M appartient au cercle de
+diamètre [AB].
+
+
+LE RÉFLEXE
+
+Diamètre dans un exercice  →  angle droit  →  Pythagore et trigonométrie
+deviennent utilisables.
+
+
+LA PHRASE TYPE À RECOPIER
+
+« Les angles AOB et AMB interceptent le même arc AB. D'après la propriété
+de l'angle inscrit, mes AOB = 2 × mes AMB. »
+
+« M appartient au cercle de diamètre [AB] et est distinct de A et de B.
+Donc le triangle AMB est rectangle en M. »
+
+
+LES PIÈGES
+
+- appliquer la propriété à un sommet qui n'est ni au centre ni sur le
+  cercle
+- multiplier au lieu de diviser
+- comparer deux angles inscrits qui n'interceptent pas le même arc
+- oublier de justifier : en géométrie, la propriété citée vaut des points
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les angles inscrits',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'ai1',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Dans un cercle, un angle au centre mesure 110°. Combien mesure '
+                'un angle inscrit interceptant le même arc ? (Écris seulement '
+                'le nombre de degrés)',
+            reponseAttendue: '55',
+            explication:
+                'L\'angle inscrit vaut la moitié de l\'angle au centre : '
+                '110 / 2 = 55°.',
+          ),
+          QuestionQuiz(
+            id: 'ai2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'À quoi reconnaît-on un angle inscrit dans un cercle ?',
+            choix: [
+              'Son sommet est au centre du cercle',
+              'Son sommet est sur le cercle et ses côtés recoupent le cercle',
+              'Ses côtés sont deux rayons',
+              'Il mesure toujours 90°',
+            ],
+            bonnesReponses: [1],
+            explication:
+                'Deux conditions : le sommet est SUR le cercle, et les deux '
+                'côtés le recoupent. Si le sommet est au centre, c\'est un '
+                'angle au centre.',
+          ),
+          QuestionQuiz(
+            id: 'ai3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Si M est un point d\'un cercle de diamètre [AB], distinct de A '
+                'et de B, alors le triangle AMB est rectangle en M.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'Le diamètre correspond à un angle au centre de 180°. L\'angle '
+                'inscrit vaut donc 180 / 2 = 90°. C\'est une propriété très '
+                'utilisée au BEPC.',
+          ),
+          QuestionQuiz(
+            id: 'ai4',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Deux angles inscrits interceptent le même arc d\'un cercle. '
+                'Que peut-on dire de leurs mesures ?',
+            choix: [
+              'Elles sont égales',
+              'L\'une est le double de l\'autre',
+              'Leur somme vaut 180°',
+              'On ne peut rien dire',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'Chacun vaut la moitié du même angle au centre : ils sont donc '
+                'égaux, quelle que soit la position de leur sommet sur l\'arc.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 11 : VECTEURS
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch07': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Les vecteurs du plan',
+        ordre: 1,
+        contenu: r'''
+1. QU'EST-CE QU'UN VECTEUR
+
+Un vecteur représente un DÉPLACEMENT. Il est défini par trois éléments :
+
+    sa DIRECTION   : la droite selon laquelle on se déplace
+    son SENS       : dans quel sens on parcourt cette droite
+    sa NORME       : la longueur du déplacement
+
+Le vecteur qui va du point A au point B se note AB, avec une flèche.
+Sa norme est la longueur AB.
+
+
+2. ÉGALITÉ DE DEUX VECTEURS
+
+Deux vecteurs sont ÉGAUX s'ils ont la même direction, le même sens et la
+même norme.
+
+Un vecteur ne dépend PAS de l'endroit où on le dessine. On peut le
+déplacer librement dans le plan : il reste le même.
+
+Propriété très utile :
+
+    AB = DC   équivaut à dire que ABCD est un PARALLÉLOGRAMME
+
+Attention à l'ordre des lettres : AB = DC, et non AB = CD.
+
+
+3. LE VECTEUR NUL ET LE VECTEUR OPPOSÉ
+
+Le vecteur nul, noté 0, est le vecteur AA : on ne se déplace pas.
+
+L'opposé du vecteur AB est le vecteur BA : même direction, même norme,
+mais SENS CONTRAIRE.
+
+    BA = -AB
+
+
+4. LA SOMME DE DEUX VECTEURS
+
+Additionner deux vecteurs, c'est enchaîner deux déplacements.
+
+LA RELATION DE CHASLES :
+
+    AB + BC = AC
+
+On part de A, on passe par B, on arrive en C. Le point intermédiaire
+disparaît.
+
+C'est la règle la plus utilisée du chapitre. Repérez-la : la lettre de fin
+du premier vecteur doit être la lettre de début du second.
+
+Autre méthode, la règle du parallélogramme : si les deux vecteurs partent
+du même point, leur somme est la diagonale du parallélogramme qu'ils
+forment.
+
+
+5. LA DIFFÉRENCE DE DEUX VECTEURS
+
+Soustraire un vecteur, c'est additionner son opposé :
+
+    u - v = u + (-v)
+
+Cas fréquent :
+
+    AB - AC = AB + CA = CA + AB = CB
+
+
+6. LE PRODUIT D'UN VECTEUR PAR UN NOMBRE RÉEL
+
+Multiplier un vecteur u par un nombre réel k donne le vecteur ku.
+
+    la DIRECTION reste la même
+    la NORME est multipliée par |k|
+    le SENS est conservé si k > 0, inversé si k < 0
+
+Exemples :
+    2u  : même sens, deux fois plus long
+    -u  : sens contraire, même longueur
+    0,5u : même sens, deux fois plus court
+
+
+7. VECTEURS COLINÉAIRES
+
+Deux vecteurs non nuls sont COLINÉAIRES s'ils ont la même DIRECTION,
+autrement dit s'ils sont portés par des droites parallèles.
+
+Traduction mathématique :
+
+    u et v sont colinéaires   s'il existe un réel k tel que   v = ku
+
+À quoi cela sert :
+
+    AB et AC colinéaires  →  les points A, B et C sont ALIGNÉS
+    AB et CD colinéaires  →  les droites (AB) et (CD) sont PARALLÈLES
+
+C'est l'outil pour démontrer un alignement ou un parallélisme.
+
+
+8. VECTEURS ORTHOGONAUX
+
+Deux vecteurs sont ORTHOGONAUX si leurs directions sont perpendiculaires.
+
+    AB et CD orthogonaux  →  les droites (AB) et (CD) sont
+                             PERPENDICULAIRES
+
+
+9. LE MILIEU D'UN SEGMENT
+
+I est le milieu de [AB] si et seulement si :
+
+    AI = IB
+
+ou encore :
+
+    IA + IB = 0
+
+Cette dernière écriture est souvent la plus pratique dans les
+démonstrations.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Chasles et colinéarité, pas à pas',
+        ordre: 1,
+        contenu: r'''
+UN VECTEUR N'EST PAS UN POINT
+
+C'est l'obstacle numéro un. Un vecteur, ce n'est pas un endroit : c'est un
+DÉPLACEMENT, une instruction du type « avance de 3 vers la droite et de 2
+vers le haut ».
+
+Conséquence : le même vecteur peut être dessiné à des endroits différents
+du plan. Deux flèches parallèles, de même longueur et de même sens,
+représentent le MÊME vecteur.
+
+
+LA RELATION DE CHASLES : L'IMAGE DU VOYAGE
+
+    AB + BC = AC
+
+Tu vas d'Abidjan à Yamoussoukro, puis de Yamoussoukro à Bouaké. Au total,
+tu es allé d'Abidjan à Bouaké. Le point de passage disparaît.
+
+LA RÈGLE DE RECONNAISSANCE : la lettre de FIN du premier vecteur doit être
+la lettre de DÉBUT du second.
+
+    AB + BC   →  le B se touche, ça marche  →  AC
+    AB + CD   →  B et C ne se touchent pas  →  on ne peut pas simplifier
+
+CHASLES DANS L'AUTRE SENS
+On peut aussi COUPER un vecteur en insérant un point de passage :
+
+    AC = AB + BC
+
+C'est très utile quand on veut faire apparaître un point particulier dans
+une démonstration.
+
+
+LA DIFFÉRENCE : TRANSFORMER EN ADDITION
+
+Ne cherche jamais à soustraire directement. Transforme d'abord.
+
+    AB - AC
+
+Remplace -AC par CA, son opposé :
+
+    AB - AC = AB + CA
+
+Puis réorganise pour que les lettres se touchent :
+
+    = CA + AB = CB
+
+Retiens ce résultat, il revient souvent : AB - AC = CB.
+
+
+LE PRODUIT PAR UN RÉEL
+
+    2u    deux fois plus long, même sens
+    -u    même longueur, sens opposé
+    -3u   trois fois plus long, sens opposé
+    0,5u  moitié moins long, même sens
+
+Le SIGNE gère le sens, la VALEUR ABSOLUE gère la longueur.
+
+
+DÉMONTRER UN ALIGNEMENT
+
+C'est l'exercice type. Pour montrer que A, B et C sont alignés :
+
+Étape 1 — exprime les vecteurs AB et AC.
+Étape 2 — cherche un réel k tel que AC = k AB.
+Étape 3 — s'il existe, les vecteurs sont colinéaires, donc les points sont
+alignés.
+
+    Si AC = 3 AB, alors A, B et C sont alignés.
+
+ATTENTION : les deux vecteurs doivent partir du MÊME point. AB et AC, ou
+BA et BC, mais pas AB et CD.
+
+
+DÉMONTRER UN PARALLÉLISME
+
+Même principe, mais avec deux vecteurs qui ne partagent pas de point.
+
+    Si CD = 2 AB, alors (AB) et (CD) sont parallèles.
+
+
+DÉMONTRER QU'UN QUADRILATÈRE EST UN PARALLÉLOGRAMME
+
+Il suffit de montrer que deux côtés opposés sont représentés par des
+vecteurs égaux.
+
+    AB = DC   →   ABCD est un parallélogramme
+
+ATTENTION À L'ORDRE DES LETTRES. Pour ABCD, c'est AB = DC. Écrire AB = CD
+donnerait un quadrilatère croisé, ce qui est faux.
+
+Le moyen de contrôle : parcours le quadrilatère dans l'ordre A, B, C, D.
+Les côtés [AB] et [DC] sont bien opposés et parcourus dans le même sens.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : appliquer Chasles quand les lettres ne se touchent pas.
+Erreur 2 : écrire AB = CD au lieu de AB = DC pour un parallélogramme.
+Erreur 3 : confondre le vecteur AB et la longueur AB. Le vecteur a une
+flèche, la longueur est un nombre positif.
+Erreur 4 : oublier que les vecteurs doivent partir du même point pour
+conclure à un alignement.
+
+
+CONSEIL POUR LE BEPC
+
+Quand tu bloques, écris tous les vecteurs de l'énoncé en fonction de deux
+vecteurs de base, souvent AB et AC. Presque tous les exercices se
+débloquent ainsi.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Relation de Chasles et parallélogramme',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+1) Simplifie les expressions vectorielles suivantes :
+   a) AB + BC
+   b) MN + NP + PQ
+   c) AB - AC
+
+2) ABCD est un parallélogramme.
+   a) Cite deux vecteurs égaux dans cette figure.
+   b) Que vaut AB + AD ? Justifie.
+
+3) Soit I le milieu du segment [AB].
+   Écris une égalité vectorielle traduisant cette situation.
+''',
+        solution: r'''
+1) SIMPLIFICATIONS
+
+a) AB + BC
+
+La lettre de fin du premier vecteur est B, et c'est aussi la lettre de
+début du second. La relation de Chasles s'applique :
+
+    AB + BC = AC
+
+
+b) MN + NP + PQ
+
+On applique Chasles deux fois de suite :
+
+    MN + NP = MP
+    puis MP + PQ = MQ
+
+    MN + NP + PQ = MQ
+
+Tous les points intermédiaires disparaissent : il ne reste que le premier
+et le dernier.
+
+
+c) AB - AC
+
+On transforme la soustraction en addition, en remplaçant -AC par CA :
+
+    AB - AC = AB + CA
+
+On réorganise pour que les lettres se touchent :
+
+    = CA + AB
+    = CB
+
+    AB - AC = CB
+
+
+2) LE PARALLÉLOGRAMME ABCD
+
+a) Dans un parallélogramme ABCD, les côtés opposés sont parallèles et de
+même longueur, et parcourus dans le même sens :
+
+    AB = DC        et        AD = BC
+
+Attention à l'ordre des lettres : c'est bien AB = DC, et non AB = CD.
+
+
+b) Calculons AB + AD.
+
+D'après la question précédente, AD = BC. Remplaçons :
+
+    AB + AD = AB + BC
+
+Les lettres se touchent, on applique Chasles :
+
+    AB + AD = AC
+
+    La somme AB + AD est égale au vecteur AC, c'est-à-dire à la DIAGONALE
+    du parallélogramme issue de A.
+
+C'est la règle du parallélogramme : la somme de deux vecteurs issus d'un
+même point est la diagonale du parallélogramme qu'ils construisent.
+
+
+3) LE MILIEU
+
+I est le milieu de [AB] signifie que le déplacement de A vers I est
+exactement le même que celui de I vers B :
+
+    AI = IB
+
+On peut aussi l'écrire sous la forme :
+
+    IA + IB = 0
+
+Les deux écritures sont acceptées. La seconde est souvent plus commode
+dans les démonstrations.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Démontrer un alignement',
+        ordre: 2,
+        difficulte: Difficulte.difficile,
+        enonce: r'''
+Soient A, B et C trois points non alignés du plan.
+
+On définit les points M et N par :
+
+    AM = 2 AB
+    AN = 2 AC
+
+1) Exprime le vecteur MN en fonction de AB et AC.
+2) Exprime le vecteur BC en fonction de AB et AC.
+3) Démontre que les droites (MN) et (BC) sont parallèles.
+4) Quelle relation existe-t-il entre les longueurs MN et BC ?
+''',
+        solution: r'''
+1) EXPRESSION DE MN
+
+Pour faire apparaître le point A, dont on connaît les relations, on
+utilise la relation de Chasles en insérant A comme point de passage :
+
+    MN = MA + AN
+
+Or MA est l'opposé de AM :
+
+    MA = -AM = -2 AB
+
+Et par hypothèse :
+
+    AN = 2 AC
+
+Donc :
+
+    MN = -2 AB + 2 AC
+
+On peut factoriser par 2 :
+
+    MN = 2(AC - AB)
+
+
+2) EXPRESSION DE BC
+
+Même méthode, on insère le point A :
+
+    BC = BA + AC
+
+Or BA = -AB, donc :
+
+    BC = -AB + AC
+    BC = AC - AB
+
+
+3) PARALLÉLISME DES DROITES (MN) ET (BC)
+
+Comparons les deux résultats.
+
+    MN = 2(AC - AB)
+    BC = AC - AB
+
+On en déduit immédiatement :
+
+    MN = 2 BC
+
+Il existe donc un réel k, ici k = 2, tel que MN = k BC.
+
+Les vecteurs MN et BC sont donc COLINÉAIRES.
+
+Deux vecteurs colinéaires ont la même direction, ce qui signifie que leurs
+droites supports sont parallèles.
+
+    CONCLUSION : les droites (MN) et (BC) sont parallèles.
+
+
+4) RELATION ENTRE LES LONGUEURS
+
+L'égalité MN = 2 BC porte sur les vecteurs. En passant aux normes,
+c'est-à-dire aux longueurs :
+
+    MN = 2 × BC
+
+    La longueur MN est le DOUBLE de la longueur BC.
+
+
+REMARQUE IMPORTANTE
+On aurait pu obtenir le même résultat avec la propriété de Thalès : les
+points M et N sont les images de B et C dans un agrandissement de rapport
+2 de centre A. La méthode vectorielle est souvent plus rapide et se rédige
+en moins de lignes.
+
+MÉTHODE À RETENIR
+Pour démontrer un parallélisme ou un alignement, exprimez toujours les
+vecteurs en fonction de DEUX vecteurs de base, ici AB et AC. La relation
+entre eux apparaît alors d'elle-même.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Vecteurs — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+DÉFINITION
+
+Un vecteur est un DÉPLACEMENT, défini par :
+    une direction, un sens, une norme
+
+Il ne dépend pas de l'endroit où on le dessine.
+
+
+LA RELATION DE CHASLES
+
+    AB + BC = AC
+
+La lettre de fin du premier doit être la lettre de début du second.
+On peut aussi couper : AC = AB + BC, pour faire apparaître un point.
+
+
+LA DIFFÉRENCE
+
+    AB - AC = AB + CA = CB
+
+On transforme toujours la soustraction en addition.
+
+
+LE VECTEUR OPPOSÉ
+
+    BA = -AB
+
+
+LE PRODUIT PAR UN RÉEL
+
+    ku : même direction
+         norme multipliée par |k|
+         même sens si k > 0, sens opposé si k < 0
+
+
+COLINÉARITÉ
+
+    u et v colinéaires  ⟺  il existe k tel que v = ku
+
+    AB et AC colinéaires  →  A, B, C ALIGNÉS
+    AB et CD colinéaires  →  (AB) // (CD)
+
+
+PARALLÉLOGRAMME
+
+    ABCD est un parallélogramme  ⟺  AB = DC
+
+ATTENTION À L'ORDRE : AB = DC, jamais AB = CD.
+
+
+MILIEU
+
+    I milieu de [AB]  ⟺  AI = IB  ⟺  IA + IB = 0
+
+
+RÈGLE DU PARALLÉLOGRAMME
+
+    AB + AD = AC   dans le parallélogramme ABCD
+
+La somme de deux vecteurs issus d'un même point est la diagonale.
+
+
+LES PIÈGES
+
+- appliquer Chasles quand les lettres ne se touchent pas
+- écrire AB = CD au lieu de AB = DC
+- confondre le vecteur AB et la longueur AB
+- comparer des vecteurs qui ne partent pas du même point pour un
+  alignement
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les vecteurs',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'vec1',
+            type: TypeQuestion.qcm,
+            enonce: 'Que vaut la somme MN + NP ?',
+            choix: ['MP', 'NP', 'PM', 'On ne peut pas simplifier'],
+            bonnesReponses: [0],
+            explication:
+                'Relation de Chasles : la lettre de fin du premier vecteur (N) '
+                'est la lettre de début du second. Le point intermédiaire '
+                'disparaît, il reste MP.',
+          ),
+          QuestionQuiz(
+            id: 'vec2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'ABCD est un parallélogramme. Quelle égalité vectorielle est '
+                'correcte ?',
+            choix: ['AB = CD', 'AB = DC', 'AB = BC', 'AC = BD'],
+            bonnesReponses: [1],
+            explication:
+                'Dans le parallélogramme ABCD, les côtés [AB] et [DC] sont '
+                'opposés et parcourus dans le même sens : AB = DC. Écrire '
+                'AB = CD décrirait un quadrilatère croisé.',
+          ),
+          QuestionQuiz(
+            id: 'vec3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Si AC = 3 AB, alors les points A, B et C sont alignés.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'Les vecteurs AC et AB sont colinéaires, et ils partent du même '
+                'point A. Les trois points sont donc bien alignés.',
+          ),
+          QuestionQuiz(
+            id: 'vec4',
+            type: TypeQuestion.qcm,
+            enonce: 'À quoi est égal le vecteur AB - AC ?',
+            choix: ['BC', 'CB', 'AA', 'BA'],
+            bonnesReponses: [1],
+            explication:
+                'AB - AC = AB + CA = CA + AB = CB. Un résultat à mémoriser : '
+                'il revient très souvent dans les exercices.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 12 : COORDONNEES D'UN VECTEUR
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch11': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Coordonnées dans un repère',
+        ordre: 1,
+        contenu: r'''
+1. LE REPÈRE DU PLAN
+
+Un repère du plan est constitué d'un point O appelé ORIGINE et de deux
+axes gradués sécants en O.
+
+    l'axe horizontal est l'axe des ABSCISSES
+    l'axe vertical est l'axe des ORDONNÉES
+
+Tout point M du plan est alors repéré par un couple de nombres (x ; y)
+appelé ses COORDONNÉES.
+
+    x est l'abscisse, y est l'ordonnée
+
+On écrit M(x ; y), avec un point-virgule.
+
+Un repère est ORTHOGONAL si les deux axes sont perpendiculaires, et
+ORTHONORMÉ s'ils sont de plus gradués avec la même unité.
+
+
+2. COORDONNÉES D'UN VECTEUR
+
+Soient A(xA ; yA) et B(xB ; yB) deux points du plan.
+
+Les coordonnées du vecteur AB sont :
+
+    AB (xB - xA ; yB - yA)
+
+On soustrait TOUJOURS les coordonnées du point de DÉPART à celles du point
+d'ARRIVÉE. L'ordre compte.
+
+Exemple : A(1 ; 2) et B(5 ; 4).
+
+    AB (5 - 1 ; 4 - 2) = AB (4 ; 2)
+
+Lecture concrète : pour aller de A à B, on avance de 4 vers la droite et
+de 2 vers le haut.
+
+
+3. ÉGALITÉ DE DEUX VECTEURS
+
+Deux vecteurs sont égaux si et seulement si leurs coordonnées sont égales,
+une à une.
+
+    u (x ; y) = v (x' ; y')   ⟺   x = x'  et  y = y'
+
+
+4. OPÉRATIONS SUR LES COORDONNÉES
+
+Soient u (x ; y) et v (x' ; y') deux vecteurs, et k un réel.
+
+    u + v  a pour coordonnées  (x + x' ; y + y')
+    u - v  a pour coordonnées  (x - x' ; y - y')
+    ku     a pour coordonnées  (kx ; ky)
+
+Tout se fait coordonnée par coordonnée : les abscisses ensemble, les
+ordonnées ensemble.
+
+
+5. COORDONNÉES DU MILIEU D'UN SEGMENT
+
+Si I est le milieu de [AB], alors :
+
+    xI = (xA + xB) / 2
+    yI = (yA + yB) / 2
+
+Le milieu a pour coordonnées la MOYENNE des coordonnées des extrémités.
+
+Exemple : A(1 ; 2) et B(5 ; 4).
+
+    xI = (1 + 5)/2 = 3
+    yI = (2 + 4)/2 = 3
+
+    I(3 ; 3)
+
+
+6. DISTANCE DE DEUX POINTS
+
+Dans un repère ORTHONORMÉ, la distance entre A(xA ; yA) et B(xB ; yB) est :
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+
+Cette formule n'est rien d'autre que la propriété de Pythagore appliquée
+au triangle rectangle dont [AB] est l'hypoténuse.
+
+Exemple : A(1 ; 2) et B(5 ; 4).
+
+    AB = √[(5-1)² + (4-2)²]
+    AB = √[16 + 4]
+    AB = √20 = 2√5
+
+ATTENTION : cette formule n'est valable que dans un repère ORTHONORMÉ.
+
+
+7. NORME D'UN VECTEUR
+
+La norme d'un vecteur u (x ; y), notée ‖u‖, est sa longueur :
+
+    ‖u‖ = √(x² + y²)
+
+
+8. COLINÉARITÉ ET DÉTERMINANT
+
+Soient u (x ; y) et v (x' ; y').
+
+Le DÉTERMINANT de ces deux vecteurs est le nombre :
+
+    det(u ; v) = xy' - yx'
+
+PROPRIÉTÉ :
+
+    u et v sont colinéaires   ⟺   xy' - yx' = 0
+
+C'est le critère le plus rapide pour tester une colinéarité, donc un
+alignement ou un parallélisme.
+
+Exemple : u(2 ; 3) et v(4 ; 6).
+
+    det = 2×6 - 3×4 = 12 - 12 = 0
+
+Les vecteurs sont colinéaires. On vérifie d'ailleurs que v = 2u.
+
+Moyen mnémotechnique : on multiplie en CROIX, puis on soustrait.
+
+
+9. À QUOI CELA SERT
+
+Avec les coordonnées, la géométrie devient du calcul :
+
+    démontrer un alignement    →  déterminant nul
+    démontrer un parallélisme  →  déterminant nul
+    trouver un milieu          →  moyenne des coordonnées
+    calculer une longueur      →  formule de la distance
+    reconnaître un
+    parallélogramme            →  égalité de deux vecteurs
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Calculer avec les coordonnées',
+        ordre: 1,
+        contenu: r'''
+LE SENS DE LA SOUSTRACTION
+
+    AB (xB - xA ; yB - yA)
+
+ARRIVÉE moins DÉPART. Toujours dans cet ordre.
+
+Le moyen de ne jamais se tromper : dans le nom du vecteur AB, la SECONDE
+lettre est celle d'arrivée, et c'est elle qui vient EN PREMIER dans le
+calcul.
+
+Si tu inverses, tu obtiens le vecteur opposé, et tous tes résultats
+suivants seront faux d'un signe.
+
+Vérification rapide : regarde ta figure. Si B est à droite de A, l'abscisse
+de AB doit être POSITIVE. Si B est plus haut, l'ordonnée doit être
+positive.
+
+
+MILIEU OU VECTEUR : NE PAS CONFONDRE
+
+C'est l'erreur la plus fréquente du chapitre.
+
+    Coordonnées du VECTEUR AB   →  on SOUSTRAIT :  (xB - xA ; yB - yA)
+    Coordonnées du MILIEU de [AB] →  on ADDITIONNE et on DIVISE PAR 2 :
+                                     ((xA + xB)/2 ; (yA + yB)/2)
+
+Un vecteur peut avoir des coordonnées négatives. Un milieu est un POINT
+situé entre A et B : ses coordonnées sont comprises entre celles de A et
+celles de B. Si ce n'est pas le cas, tu as confondu les deux formules.
+
+
+LA DISTANCE, C'EST PYTHAGORE DÉGUISÉ
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+
+Pourquoi ? Parce qu'on construit un triangle rectangle : on avance
+horizontalement de (xB - xA), puis verticalement de (yB - yA). Le segment
+[AB] en est l'hypoténuse.
+
+Deux remarques :
+    les carrés rendent le résultat positif, donc l'ordre de soustraction
+    n'a AUCUNE importance ici
+    n'oublie jamais la racine carrée à la fin
+
+
+LE DÉTERMINANT : LA MULTIPLICATION EN CROIX
+
+Pour u(x ; y) et v(x' ; y') :
+
+    det = xy' - yx'
+
+Écris les coordonnées en colonnes :
+
+    x    x'
+    y    y'
+
+Puis multiplie en croix : x × y' d'abord, moins y × x'.
+
+    Si det = 0  →  les vecteurs sont COLINÉAIRES
+    Si det ≠ 0  →  ils ne le sont pas
+
+C'est plus rapide que de chercher le coefficient k, surtout avec des
+nombres qui ne tombent pas juste.
+
+
+LES TROIS DÉMONSTRATIONS TYPES
+
+Démontrer que A, B, C sont ALIGNÉS :
+    1. calcule les coordonnées de AB et AC
+    2. calcule le déterminant
+    3. s'il est nul, les vecteurs sont colinéaires, donc les points sont
+       alignés
+
+Démontrer que (AB) et (CD) sont PARALLÈLES :
+    même méthode, avec les vecteurs AB et CD
+
+Démontrer que ABCD est un PARALLÉLOGRAMME :
+    1. calcule les coordonnées de AB et de DC
+    2. si elles sont égales, alors AB = DC
+    3. donc ABCD est un parallélogramme
+
+    Autre méthode, souvent plus rapide : montre que [AC] et [BD] ont le
+    MÊME MILIEU. Les diagonales d'un parallélogramme se coupent en leur
+    milieu.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : soustraire dans le mauvais sens pour un vecteur.
+Erreur 2 : appliquer la formule du milieu pour un vecteur, ou l'inverse.
+Erreur 3 : oublier la racine carrée dans le calcul d'une distance.
+Erreur 4 : utiliser la formule de distance dans un repère qui n'est pas
+orthonormé. L'énoncé le précise toujours : lisez-le.
+Erreur 5 : oublier de simplifier le radical final. √20 doit devenir 2√5.
+
+
+CONSEIL POUR LE BEPC
+
+Trace toujours la figure dans le repère, même si l'énoncé ne le demande
+pas. Elle te permet de vérifier tous tes résultats d'un coup d'œil : un
+milieu mal placé ou un vecteur qui pointe dans le mauvais sens se voit
+immédiatement.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Vecteurs, milieu et distance',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé.
+
+On donne les points A(-2 ; 1), B(4 ; 3) et C(6 ; -1).
+
+1) Calcule les coordonnées des vecteurs AB et AC.
+2) Calcule les coordonnées du milieu I du segment [AB].
+3) Calcule la distance AB. Donne le résultat sous la forme la plus simple.
+4) Les points A, B et C sont-ils alignés ? Justifie par un calcul.
+''',
+        solution: r'''
+1) COORDONNÉES DES VECTEURS
+
+Rappel : AB (xB - xA ; yB - yA), soit arrivée moins départ.
+
+Pour AB, avec A(-2 ; 1) et B(4 ; 3) :
+
+    xAB = 4 - (-2) = 4 + 2 = 6
+    yAB = 3 - 1 = 2
+
+    AB (6 ; 2)
+
+Pour AC, avec A(-2 ; 1) et C(6 ; -1) :
+
+    xAC = 6 - (-2) = 8
+    yAC = -1 - 1 = -2
+
+    AC (8 ; -2)
+
+
+2) MILIEU DE [AB]
+
+Pour un milieu, on additionne et on divise par 2 :
+
+    xI = (xA + xB) / 2 = (-2 + 4) / 2 = 2 / 2 = 1
+    yI = (yA + yB) / 2 = (1 + 3) / 2 = 4 / 2 = 2
+
+    I(1 ; 2)
+
+Contrôle : les coordonnées de I sont bien comprises entre celles de A et
+celles de B. C'est cohérent.
+
+
+3) DISTANCE AB
+
+Le repère est orthonormé, on peut donc appliquer la formule :
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+    AB = √[6² + 2²]
+    AB = √[36 + 4]
+    AB = √40
+
+On simplifie le radical : 40 = 4 × 10, et 4 est un carré parfait.
+
+    AB = √4 × √10 = 2√10
+
+    AB = 2√10   (soit environ 6,32)
+
+
+4) ALIGNEMENT DE A, B ET C
+
+Les points A, B et C sont alignés si et seulement si les vecteurs AB et AC
+sont colinéaires.
+
+On calcule le déterminant :
+
+    det(AB ; AC) = xAB × yAC - yAB × xAC
+    det = 6 × (-2) - 2 × 8
+    det = -12 - 16
+    det = -28
+
+Le déterminant n'est pas nul.
+
+    CONCLUSION : les vecteurs AB et AC ne sont pas colinéaires, donc les
+    points A, B et C ne sont PAS alignés.
+
+Ils forment donc un vrai triangle.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le parallélogramme du géomètre',
+        ordre: 2,
+        difficulte: Difficulte.difficile,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé, l'unité étant le mètre.
+
+Un géomètre relève quatre bornes d'un terrain à Abobo :
+
+    A(1 ; 2)    B(7 ; 4)    C(9 ; 8)    D(3 ; 6)
+
+1) Démontre que le quadrilatère ABCD est un parallélogramme.
+2) Calcule les coordonnées du point d'intersection de ses diagonales.
+3) Calcule les longueurs AB et AD.
+4) Le terrain est-il un losange ? Justifie.
+''',
+        solution: r'''
+1) ABCD EST-IL UN PARALLÉLOGRAMME ?
+
+Un quadrilatère ABCD est un parallélogramme si et seulement si AB = DC.
+
+Calculons les coordonnées de ces deux vecteurs.
+
+    AB (xB - xA ; yB - yA) = (7 - 1 ; 4 - 2) = AB (6 ; 2)
+
+    DC (xC - xD ; yC - yD) = (9 - 3 ; 8 - 6) = DC (6 ; 2)
+
+Les deux vecteurs ont exactement les mêmes coordonnées :
+
+    AB = DC
+
+    CONCLUSION : le quadrilatère ABCD est un PARALLÉLOGRAMME.
+
+Attention à l'ordre des lettres : on compare bien AB et DC, pas AB et CD.
+
+
+2) INTERSECTION DES DIAGONALES
+
+Dans un parallélogramme, les diagonales se coupent en leur milieu. Le
+point d'intersection est donc le milieu de [AC], qui est aussi celui de
+[BD].
+
+Milieu de [AC], avec A(1 ; 2) et C(9 ; 8) :
+
+    x = (1 + 9) / 2 = 5
+    y = (2 + 8) / 2 = 5
+
+    Le point d'intersection est (5 ; 5).
+
+Vérifions avec la diagonale [BD], B(7 ; 4) et D(3 ; 6) :
+
+    x = (7 + 3) / 2 = 5
+    y = (4 + 6) / 2 = 5
+
+On retrouve bien (5 ; 5). Le résultat est confirmé, et cela valide aussi
+la question 1.
+
+
+3) LONGUEURS AB ET AD
+
+Le repère est orthonormé.
+
+    AB = √[(7-1)² + (4-2)²]
+    AB = √[36 + 4]
+    AB = √40 = 2√10
+
+    AD = √[(3-1)² + (6-2)²]
+    AD = √[4 + 16]
+    AD = √20 = 2√5
+
+    AB = 2√10 m   (environ 6,32 m)
+    AD = 2√5 m    (environ 4,47 m)
+
+
+4) LE TERRAIN EST-IL UN LOSANGE ?
+
+Un losange est un parallélogramme dont tous les côtés ont la même
+longueur. Il suffit donc de comparer deux côtés consécutifs.
+
+    AB = 2√10 ≈ 6,32
+    AD = 2√5  ≈ 4,47
+
+Ces deux longueurs sont différentes.
+
+    CONCLUSION : le terrain n'est PAS un losange. C'est un
+    parallélogramme quelconque.
+
+
+CE QU'IL FAUT RETENIR
+Pour identifier précisément un quadrilatère :
+    parallélogramme  →  AB = DC
+    losange          →  parallélogramme + deux côtés consécutifs égaux
+    rectangle        →  parallélogramme + diagonales de même longueur
+    carré            →  les deux conditions à la fois
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Coordonnées — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+COORDONNÉES D'UN VECTEUR
+
+    AB (xB - xA ; yB - yA)
+
+ARRIVÉE moins DÉPART. La seconde lettre du nom vient en premier.
+
+
+MILIEU D'UN SEGMENT
+
+    I ((xA + xB)/2 ; (yA + yB)/2)
+
+On ADDITIONNE et on divise par 2. À ne pas confondre avec le vecteur, où
+l'on soustrait.
+
+
+DISTANCE (repère ORTHONORMÉ uniquement)
+
+    AB = √[(xB - xA)² + (yB - yA)²]
+
+C'est Pythagore. Les carrés rendent l'ordre indifférent.
+Ne pas oublier la racine, ni de simplifier le radical.
+
+
+NORME D'UN VECTEUR
+
+    ‖u‖ = √(x² + y²)
+
+
+OPÉRATIONS
+
+    u + v  →  (x + x' ; y + y')
+    ku     →  (kx ; ky)
+
+Coordonnée par coordonnée.
+
+
+COLINÉARITÉ : LE DÉTERMINANT
+
+    det(u ; v) = xy' - yx'
+
+    det = 0  →  colinéaires
+    det ≠ 0  →  non colinéaires
+
+Multiplication en croix, puis soustraction.
+
+
+LES TROIS DÉMONSTRATIONS TYPES
+
+    A, B, C alignés      →  det(AB ; AC) = 0
+    (AB) // (CD)         →  det(AB ; CD) = 0
+    ABCD parallélogramme →  AB = DC
+                            ou [AC] et [BD] ont le même milieu
+
+
+IDENTIFIER UN QUADRILATÈRE
+
+    parallélogramme  →  AB = DC
+    losange          →  + deux côtés consécutifs égaux
+    rectangle        →  + diagonales de même longueur
+    carré            →  les deux
+
+
+LES PIÈGES
+
+- soustraire dans le mauvais sens
+- confondre formule du vecteur et formule du milieu
+- oublier la racine carrée dans une distance
+- utiliser la distance dans un repère non orthonormé
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les coordonnées',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'co1',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Soient A(2 ; 5) et B(7 ; 1). Quelles sont les coordonnées du '
+                'vecteur AB ?',
+            choix: ['(5 ; -4)', '(-5 ; 4)', '(9 ; 6)', '(4,5 ; 3)'],
+            bonnesReponses: [0],
+            explication:
+                'AB (xB - xA ; yB - yA) = (7 - 2 ; 1 - 5) = (5 ; -4). '
+                'La réponse (4,5 ; 3) correspondrait au MILIEU, pas au vecteur.',
+          ),
+          QuestionQuiz(
+            id: 'co2',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Soient A(0 ; 0) et B(6 ; 8) dans un repère orthonormé. '
+                'Combien vaut la distance AB ? (Écris seulement le nombre)',
+            reponseAttendue: '10',
+            explication:
+                'AB = √(6² + 8²) = √(36 + 64) = √100 = 10. On reconnaît le '
+                'triplet 6 — 8 — 10.',
+          ),
+          QuestionQuiz(
+            id: 'co3',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Les vecteurs u(3 ; 6) et v(2 ; 4) sont-ils colinéaires ?',
+            choix: [
+              'Oui, car le déterminant vaut 0',
+              'Non, car leurs coordonnées sont différentes',
+              'Oui, car ils ont la même norme',
+              'On ne peut pas le savoir',
+            ],
+            bonnesReponses: [0],
+            explication:
+                'det = 3×4 - 6×2 = 12 - 12 = 0, donc les vecteurs sont '
+                'colinéaires. On vérifie d\'ailleurs que u = 1,5 v.',
+          ),
+          QuestionQuiz(
+            id: 'co4',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Le milieu du segment [AB] avec A(1 ; 3) et B(5 ; 7) a pour '
+                'coordonnées (3 ; 5).',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'x = (1+5)/2 = 3 et y = (3+7)/2 = 5. Les coordonnées du milieu '
+                'sont bien comprises entre celles de A et celles de B.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 13 : EQUATIONS DE DROITES
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch12': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Équations de droites',
+        ordre: 1,
+        contenu: r'''
+1. LES DEUX FORMES D'ÉQUATION
+
+Dans un repère du plan, toute droite admet une équation.
+
+Cas général — la droite n'est pas verticale :
+
+    y = ax + b
+
+    a est le COEFFICIENT DIRECTEUR
+    b est l'ORDONNÉE À L'ORIGINE
+
+Cas particulier — la droite est VERTICALE :
+
+    x = c
+
+Une droite verticale n'a pas de coefficient directeur : elle ne peut pas
+s'écrire sous la forme y = ax + b.
+
+Cas particulier — la droite est HORIZONTALE :
+
+    y = b       (c'est-à-dire a = 0)
+
+
+2. CALCULER LE COEFFICIENT DIRECTEUR
+
+Si la droite passe par deux points A(xA ; yA) et B(xB ; yB) avec
+xA ≠ xB :
+
+    a = (yB - yA) / (xB - xA)
+
+C'est la variation des ordonnées divisée par la variation des abscisses.
+
+Exemple : A(1 ; 3) et B(4 ; 9).
+
+    a = (9 - 3) / (4 - 1) = 6 / 3 = 2
+
+
+3. TROUVER L'ORDONNÉE À L'ORIGINE
+
+Une fois a connu, on remplace les coordonnées d'un point dans l'équation.
+
+Avec A(1 ; 3) et a = 2 :
+
+    3 = 2 × 1 + b
+    3 = 2 + b
+    b = 1
+
+    L'équation de la droite (AB) est   y = 2x + 1
+
+VÉRIFICATION : on teste avec l'AUTRE point.
+    Pour x = 4 : y = 2×4 + 1 = 9. C'est bien l'ordonnée de B.
+
+
+4. SIGNIFICATION GRAPHIQUE
+
+b est l'ordonnée du point où la droite coupe l'axe des ordonnées : le
+point (0 ; b).
+
+a indique la pente : quand on avance de 1 vers la droite, on monte de a.
+
+    a > 0  →  la droite monte
+    a < 0  →  la droite descend
+    a = 0  →  la droite est horizontale
+
+
+5. APPARTENANCE D'UN POINT À UNE DROITE
+
+Un point M(x ; y) appartient à la droite d'équation y = ax + b si et
+seulement si ses coordonnées VÉRIFIENT l'équation.
+
+Exemple : le point M(3 ; 7) appartient-il à la droite y = 2x + 1 ?
+
+    2 × 3 + 1 = 7
+
+Oui, l'égalité est vérifiée : M appartient à la droite.
+
+Pour N(5 ; 10) :
+    2 × 5 + 1 = 11 ≠ 10
+Non, N n'appartient pas à la droite.
+
+
+6. DROITES PARALLÈLES
+
+Deux droites non verticales sont PARALLÈLES si et seulement si elles ont
+le MÊME COEFFICIENT DIRECTEUR.
+
+    y = ax + b   et   y = a'x + b'   sont parallèles  ⟺  a = a'
+
+Si de plus b = b', les droites sont confondues.
+
+Exemple : y = 3x + 2 et y = 3x - 5 sont parallèles, mais distinctes.
+
+
+7. DROITES PERPENDICULAIRES
+
+Dans un repère ORTHONORMÉ, deux droites non verticales sont
+PERPENDICULAIRES si et seulement si le produit de leurs coefficients
+directeurs vaut -1 :
+
+    a × a' = -1
+
+Autrement dit :
+
+    a' = -1 / a
+
+Exemple : la perpendiculaire à y = 2x + 3 a pour coefficient directeur
+-1/2, soit -0,5.
+
+Moyen mnémotechnique : on prend l'INVERSE et on change le SIGNE.
+
+    a = 3     →  a' = -1/3
+    a = -1/4  →  a' = 4
+    a = 1     →  a' = -1
+
+
+8. POSITIONS RELATIVES DE DEUX DROITES
+
+    a ≠ a'              →  les droites sont SÉCANTES, en un point unique
+    a = a' et b ≠ b'    →  elles sont PARALLÈLES et distinctes
+    a = a' et b = b'    →  elles sont CONFONDUES
+
+Pour trouver le point d'intersection de deux droites sécantes, on résout
+le système formé par leurs deux équations. C'est exactement ce qu'on a vu
+au chapitre des systèmes.
+
+
+9. TRACER UNE DROITE
+
+Deux points suffisent.
+
+Le plus rapide : partir de (0 ; b), puis avancer de 1 vers la droite et
+monter de a. On obtient (1 ; a + b).
+
+Pour une droite verticale x = c, on trace la parallèle à l'axe des
+ordonnées passant par le point (c ; 0).
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Trouver et comparer des équations de droites',
+        ordre: 1,
+        contenu: r'''
+LA MÉTHODE EN DEUX TEMPS
+
+Trouver l'équation d'une droite passant par deux points, c'est toujours la
+même chose.
+
+    Temps 1 : calculer a
+    Temps 2 : trouver b
+
+Rien d'autre. Prenons A(2 ; 1) et B(5 ; 7).
+
+Temps 1 :
+    a = (7 - 1) / (5 - 2) = 6 / 3 = 2
+
+Temps 2 : je remplace avec le point A.
+    1 = 2 × 2 + b
+    1 = 4 + b
+    b = -3
+
+    L'équation est y = 2x - 3
+
+Temps 3, facultatif mais vivement conseillé : vérifie avec B.
+    2 × 5 - 3 = 7. C'est bien l'ordonnée de B. Parfait.
+
+
+LE PIÈGE DU CALCUL DE a
+
+    a = (yB - yA) / (xB - xA)
+
+Les y EN HAUT, les x EN BAS. Beaucoup d'élèves inversent.
+
+Le moyen de retenir : a représente « de combien on MONTE quand on avance
+de 1 ». La montée, ce sont les y ; l'avancée, ce sont les x. Montée
+divisée par avancée.
+
+Autre point de vigilance : garde le MÊME ordre en haut et en bas. Si tu
+écris yB - yA au numérateur, tu dois écrire xB - xA au dénominateur, pas
+l'inverse. Sinon tu obtiens l'opposé du bon résultat.
+
+Vérification visuelle : si la droite monte, a doit être positif.
+
+
+PARALLÈLES OU PERPENDICULAIRES : LE RÉFLEXE
+
+    PARALLÈLES        →  a = a'          (même pente)
+    PERPENDICULAIRES  →  a × a' = -1     (inverse et signe changé)
+
+Pour trouver le coefficient d'une perpendiculaire, deux gestes :
+    1. je retourne la fraction
+    2. je change le signe
+
+    a = 4      →  1/4  →  a' = -1/4
+    a = -2/3   →  -3/2 →  a' = 3/2
+    a = -1     →  -1   →  a' = 1
+
+Contrôle : multiplie les deux, tu dois trouver exactement -1.
+
+
+UN POINT APPARTIENT-IL À LA DROITE ?
+
+Ne réfléchis pas, calcule. Remplace x par l'abscisse du point dans
+l'équation, et compare le résultat à l'ordonnée.
+
+    Droite y = 3x - 4, point M(2 ; 2)
+    3 × 2 - 4 = 2
+    L'ordonnée de M est 2. Donc M appartient à la droite.
+
+Si les deux nombres diffèrent, le point n'y est pas. C'est aussi simple
+que cela.
+
+
+TROUVER LE POINT D'INTERSECTION DE DEUX DROITES
+
+C'est un système à deux équations. Le plus rapide : égaler les deux
+expressions de y.
+
+    y = 2x + 1   et   y = -x + 7
+
+    2x + 1 = -x + 7
+    3x = 6
+    x = 2
+
+Puis on remplace dans l'une des deux équations :
+    y = 2 × 2 + 1 = 5
+
+    Le point d'intersection est (2 ; 5).
+
+Vérifie dans la SECONDE équation : -2 + 7 = 5. Correct.
+
+
+LA DROITE VERTICALE, LE CAS OUBLIÉ
+
+Si xA = xB, la droite est VERTICALE. Le calcul de a donnerait une division
+par zéro : impossible.
+
+Son équation est simplement x = c, où c est l'abscisse commune.
+
+    A(3 ; 1) et B(3 ; 8)  →  la droite (AB) a pour équation x = 3
+
+Si dans un exercice tu obtiens une division par zéro, ne cherche pas
+l'erreur : c'est que la droite est verticale.
+
+
+LES ERREURS QUI COÛTENT DES POINTS
+
+Erreur 1 : inverser les y et les x dans le calcul de a.
+Erreur 2 : oublier de vérifier avec le second point.
+Erreur 3 : pour une perpendiculaire, changer le signe sans inverser la
+fraction, ou l'inverse.
+Erreur 4 : appliquer la règle a × a' = -1 dans un repère non orthonormé.
+Erreur 5 : oublier le cas de la droite verticale.
+
+
+CONSEIL POUR LE BEPC
+
+Après avoir trouvé une équation, teste-la toujours avec les deux points de
+l'énoncé. Cette vérification prend vingt secondes et te garantit tous les
+points de la question.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Déterminer une équation de droite',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé.
+
+1) Détermine l'équation de la droite (AB) passant par A(1 ; 4) et
+   B(3 ; 10).
+
+2) Le point M(5 ; 15) appartient-il à cette droite ? Justifie.
+
+3) Les droites d'équations y = 3x - 2 et y = 3x + 7 sont-elles parallèles ?
+   Justifie.
+
+4) Donne le coefficient directeur d'une droite perpendiculaire à la droite
+   d'équation y = -4x + 1.
+''',
+        solution: r'''
+1) ÉQUATION DE LA DROITE (AB)
+
+Étape 1 — le coefficient directeur.
+
+    a = (yB - yA) / (xB - xA)
+    a = (10 - 4) / (3 - 1)
+    a = 6 / 2
+    a = 3
+
+Étape 2 — l'ordonnée à l'origine. On remplace avec le point A(1 ; 4) dans
+l'équation y = 3x + b :
+
+    4 = 3 × 1 + b
+    4 = 3 + b
+    b = 1
+
+    L'équation de la droite (AB) est   y = 3x + 1
+
+Vérification avec le point B :
+    3 × 3 + 1 = 10. C'est bien l'ordonnée de B. ✓
+
+
+2) LE POINT M APPARTIENT-IL À LA DROITE ?
+
+On remplace x par 5 dans l'équation de la droite :
+
+    y = 3 × 5 + 1 = 15 + 1 = 16
+
+Or l'ordonnée de M est 15, et non 16.
+
+    CONCLUSION : le point M(5 ; 15) n'appartient PAS à la droite (AB).
+
+
+3) LES DROITES SONT-ELLES PARALLÈLES ?
+
+    Pour y = 3x - 2, le coefficient directeur est a = 3.
+    Pour y = 3x + 7, le coefficient directeur est a' = 3.
+
+Les deux coefficients directeurs sont égaux.
+
+    CONCLUSION : les deux droites sont PARALLÈLES.
+
+Elles sont de plus distinctes, puisque leurs ordonnées à l'origine
+diffèrent : -2 et 7.
+
+
+4) COEFFICIENT DIRECTEUR D'UNE PERPENDICULAIRE
+
+Le repère étant orthonormé, deux droites sont perpendiculaires si le
+produit de leurs coefficients directeurs vaut -1 :
+
+    a × a' = -1
+
+Ici a = -4, donc :
+
+    -4 × a' = -1
+    a' = -1 / (-4)
+    a' = 1/4
+
+    Le coefficient directeur cherché est 1/4, soit 0,25.
+
+Vérification : -4 × 1/4 = -1. ✓
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le tracé de la route',
+        ordre: 2,
+        difficulte: Difficulte.examen,
+        enonce: r'''
+Le plan est muni d'un repère orthonormé, l'unité représentant 100 mètres.
+
+Un ingénieur étudie le tracé de deux routes à Grand-Bassam.
+
+    La route (D1) passe par les points A(-2 ; 1) et B(2 ; 9).
+    La route (D2) a pour équation y = -0,5x + 6.
+
+1) Détermine l'équation de la droite (D1).
+2) Ces deux routes se croisent-elles ? Justifie.
+3) Détermine les coordonnées du carrefour, c'est-à-dire du point
+   d'intersection.
+4) Les deux routes se coupent-elles à angle droit ? Justifie.
+5) Un rond-point doit être construit sur (D1), à l'endroit où la route
+   coupe l'axe des ordonnées. Donne ses coordonnées.
+''',
+        solution: r'''
+1) ÉQUATION DE LA DROITE (D1)
+
+Coefficient directeur, avec A(-2 ; 1) et B(2 ; 9) :
+
+    a = (9 - 1) / (2 - (-2))
+    a = 8 / 4
+    a = 2
+
+Ordonnée à l'origine, en remplaçant avec A(-2 ; 1) :
+
+    1 = 2 × (-2) + b
+    1 = -4 + b
+    b = 5
+
+    L'équation de (D1) est   y = 2x + 5
+
+Vérification avec B : 2 × 2 + 5 = 9. ✓
+
+
+2) LES ROUTES SE CROISENT-ELLES ?
+
+    Coefficient directeur de (D1) : a = 2
+    Coefficient directeur de (D2) : a' = -0,5
+
+Comme 2 ≠ -0,5, les coefficients directeurs sont différents.
+
+    CONCLUSION : les droites ne sont pas parallèles, elles sont donc
+    SÉCANTES. Les deux routes se croisent bien, en un unique point.
+
+
+3) COORDONNÉES DU CARREFOUR
+
+Au point d'intersection, les deux équations donnent la même ordonnée. On
+égale donc les deux expressions de y :
+
+    2x + 5 = -0,5x + 6
+
+On regroupe les x à gauche et les nombres à droite :
+
+    2x + 0,5x = 6 - 5
+    2,5x = 1
+    x = 1 / 2,5
+    x = 0,4
+
+On remplace dans l'équation de (D1) :
+
+    y = 2 × 0,4 + 5
+    y = 0,8 + 5
+    y = 5,8
+
+    Le carrefour se situe au point de coordonnées (0,4 ; 5,8).
+
+Vérification avec (D2) :
+    -0,5 × 0,4 + 6 = -0,2 + 6 = 5,8 ✓
+
+En unités réelles, le carrefour se trouve à 40 m et 580 m de l'origine.
+
+
+4) LES ROUTES SE COUPENT-ELLES À ANGLE DROIT ?
+
+Le repère est orthonormé. Deux droites sont perpendiculaires si et
+seulement si le produit de leurs coefficients directeurs vaut -1.
+
+    a × a' = 2 × (-0,5) = -1
+
+Le produit vaut exactement -1.
+
+    CONCLUSION : les deux routes se coupent bien À ANGLE DROIT.
+
+
+5) POSITION DU ROND-POINT
+
+Le rond-point est situé à l'intersection de (D1) avec l'axe des ordonnées.
+Sur cet axe, l'abscisse est nulle : x = 0.
+
+    y = 2 × 0 + 5 = 5
+
+    Le rond-point se situe au point de coordonnées (0 ; 5).
+
+On retrouve simplement l'ordonnée à l'origine b = 5, ce qui est logique :
+b est par définition l'ordonnée du point où la droite coupe l'axe des
+ordonnées.
+
+En unités réelles, le rond-point se trouve à 500 m de l'origine sur l'axe
+vertical.
+
+
+CE QU'IL FAUT RETENIR POUR LE BEPC
+Cet exercice enchaîne toutes les compétences du chapitre : déterminer une
+équation, comparer des coefficients directeurs, résoudre un système par
+égalisation, tester la perpendicularité, interpréter l'ordonnée à
+l'origine. C'est la structure typique du dernier exercice du sujet.
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Équations de droites — l\'essentiel en 5 minutes',
+        ordre: 1,
+        contenu: r'''
+LES FORMES D'ÉQUATION
+
+    y = ax + b     droite non verticale
+    x = c          droite VERTICALE (pas de coefficient directeur)
+    y = b          droite horizontale (a = 0)
+
+
+LE COEFFICIENT DIRECTEUR
+
+    a = (yB - yA) / (xB - xA)
+
+Les y en HAUT, les x en BAS. Même ordre des deux côtés.
+
+    a > 0  →  la droite monte
+    a < 0  →  la droite descend
+    a = 0  →  droite horizontale
+
+
+TROUVER L'ÉQUATION EN DEUX TEMPS
+
+    1. calculer a
+    2. remplacer les coordonnées d'un point pour trouver b
+    3. VÉRIFIER avec le second point
+
+
+UN POINT APPARTIENT-IL À LA DROITE ?
+
+Remplacer x dans l'équation et comparer le résultat à l'ordonnée du point.
+
+
+PARALLÈLES
+
+    a = a'                → parallèles
+    a = a' et b = b'      → confondues
+    a ≠ a'                → sécantes
+
+
+PERPENDICULAIRES (repère orthonormé)
+
+    a × a' = -1      soit      a' = -1/a
+
+On INVERSE la fraction et on CHANGE le signe.
+
+    a = 3     →  a' = -1/3
+    a = -0,5  →  a' = 2
+
+
+POINT D'INTERSECTION
+
+On égale les deux expressions de y, on résout, puis on remplace pour
+trouver y. On vérifie dans la seconde équation.
+
+
+SIGNIFICATION DE b
+
+b est l'ordonnée du point où la droite coupe l'axe des ordonnées : (0 ; b).
+
+
+LES PIÈGES
+
+- inverser les x et les y dans le calcul de a
+- oublier de vérifier avec le second point
+- changer le signe sans inverser la fraction pour une perpendiculaire
+- oublier le cas de la droite verticale, quand xA = xB
+''',
+      ),
+
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Teste-toi : les équations de droites',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'dr1',
+            type: TypeQuestion.reponseCourte,
+            enonce:
+                'Une droite passe par A(0 ; 1) et B(2 ; 7). Quel est son '
+                'coefficient directeur ? (Écris seulement le nombre)',
+            reponseAttendue: '3',
+            explication:
+                'a = (7 - 1) / (2 - 0) = 6 / 2 = 3. Comme A a pour abscisse 0, '
+                'on lit directement b = 1 : l\'équation est y = 3x + 1.',
+          ),
+          QuestionQuiz(
+            id: 'dr2',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Quel est le coefficient directeur d\'une droite '
+                'perpendiculaire à la droite d\'équation y = 5x - 2 ?',
+            choix: ['-5', '5', '-1/5', '1/5'],
+            bonnesReponses: [2],
+            explication:
+                'On inverse la fraction et on change le signe : a\' = -1/5. '
+                'Vérification : 5 × (-1/5) = -1. ✓',
+          ),
+          QuestionQuiz(
+            id: 'dr3',
+            type: TypeQuestion.vraiFaux,
+            enonce:
+                'Les droites d\'équations y = -2x + 3 et y = -2x - 8 sont '
+                'parallèles.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication:
+                'Elles ont le même coefficient directeur, -2. Elles sont donc '
+                'parallèles, et distinctes puisque leurs ordonnées à l\'origine '
+                'diffèrent.',
+          ),
+          QuestionQuiz(
+            id: 'dr4',
+            type: TypeQuestion.qcm,
+            enonce:
+                'Deux points A et B ont la même abscisse : A(4 ; 1) et B(4 ; 9). '
+                'Quelle est l\'équation de la droite (AB) ?',
+            choix: ['y = 4', 'x = 4', 'y = 4x', 'y = 2x + 1'],
+            bonnesReponses: [1],
+            explication:
+                'Les deux points ont la même abscisse : la droite est '
+                'VERTICALE. Elle n\'a pas de coefficient directeur et son '
+                'équation est x = 4.',
+          ),
+        ],
+      ),
+    ],
+    
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 4 : TRIANGLE RECTANGLE
+    //  ════════════════════════════════════════════════════════════════════
+    '3e_math_ch04': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Triangle rectangle : Pythagore et trigonométrie',
+        ordre: 1,
+        contenu: r'''
+1. LE THÉORÈME DE PYTHAGORE
+
+Dans un triangle rectangle, le carré de la longueur de l'hypoténuse est
+égal à la somme des carrés des longueurs des deux autres côtés.
+
+Si ABC est rectangle en A, alors l'hypoténuse est [BC] et :
+
+    BC² = AB² + AC²
+
+L'hypoténuse est toujours le côté opposé à l'angle droit.
+
+
+2. CALCULER UNE LONGUEUR
+
+Si l'hypoténuse est connue et qu'un seul côté de l'angle droit est inconnu :
+
+    AB² = BC² - AC²
+    AB = √(BC² - AC²)
+
+Exemple :
+BC = 13 cm et AC = 5 cm.
+
+    AB² = 13² - 5² = 169 - 25 = 144
+    AB = 12 cm
+
+
+3. LA RÉCIPROQUE DE PYTHAGORE
+
+Pour démontrer qu'un triangle est rectangle, on compare le carré du plus
+grand côté à la somme des carrés des deux autres.
+
+Si BC est le plus grand côté et si :
+
+    BC² = AB² + AC²
+
+alors le triangle ABC est rectangle en A.
+
+
+4. SINUS, COSINUS ET TANGENTE
+
+Dans un triangle rectangle, pour un angle aigu α :
+
+    sin(α) = côté opposé / hypoténuse
+    cos(α) = côté adjacent / hypoténuse
+    tan(α) = côté opposé / côté adjacent
+
+Méthode :
+1. repérer l'angle étudié ;
+2. identifier le côté opposé, le côté adjacent et l'hypoténuse ;
+3. choisir la relation qui contient les données et l'inconnue.
+
+
+5. CALCULER UN ANGLE
+
+Avec une calculatrice en mode degré :
+
+    α = sin⁻¹(opposé / hypoténuse)
+    α = cos⁻¹(adjacent / hypoténuse)
+    α = tan⁻¹(opposé / adjacent)
+
+Toujours vérifier que la calculatrice est en degrés.
+
+
+6. CONTRÔLE DE COHÉRENCE
+
+L'hypoténuse est le plus grand côté du triangle rectangle.
+Une longueur ne peut pas être négative.
+Pour un angle aigu, une mesure est comprise entre 0° et 90°.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Choisir entre Pythagore, sinus, cosinus et tangente',
+        ordre: 1,
+        contenu: r'''
+LE BON RÉFLEXE
+
+Tu dois d'abord regarder ce que l'exercice demande.
+
+• On connaît deux côtés et on cherche le troisième → pense Pythagore.
+• On cherche à prouver qu'un triangle est rectangle → pense réciproque de
+  Pythagore.
+• On connaît un angle aigu et un côté, et on cherche une autre longueur →
+  pense trigonométrie.
+• On connaît des longueurs et on cherche un angle → utilise une relation
+  trigonométrique puis la touche inverse de la calculatrice.
+
+ATTENTION AUX CÔTÉS
+
+L'hypoténuse est toujours opposée à l'angle droit.
+Le côté adjacent est celui qui touche l'angle étudié, mais qui n'est pas
+l'hypoténuse.
+Le côté opposé ne touche pas l'angle étudié.
+
+ASTUCE
+
+Écris toujours le petit tableau mental :
+
+    sin = opposé / hypoténuse
+    cos = adjacent / hypoténuse
+    tan = opposé / adjacent
+
+Puis choisis la formule qui contient les deux informations disponibles.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'La diagonale d’une cour',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Une cour rectangulaire mesure 12 m de longueur et 5 m de largeur.
+
+1) Modélise la diagonale par un triangle rectangle.
+2) Calcule la longueur de la diagonale.
+3) Donne une valeur au dixième près.
+''',
+        solution: r'''
+La diagonale est l'hypoténuse du triangle rectangle formé par la longueur
+et la largeur.
+
+D'après Pythagore :
+
+    d² = 12² + 5²
+       = 144 + 25
+       = 169
+
+Donc :
+
+    d = √169 = 13 m
+
+La diagonale mesure exactement 13 m, donc au dixième près : 13,0 m.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Une rampe pour l’accessibilité',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Une rampe forme un triangle rectangle. Elle mesure 5 m de longueur et
+permet de franchir une hauteur verticale de 1,2 m.
+
+On note α l'angle entre la rampe et le sol.
+
+1) Identifie l'hypoténuse et le côté opposé à α.
+2) Choisis la relation trigonométrique adaptée.
+3) Calcule α au degré près.
+''',
+        solution: r'''
+L'hypoténuse est la rampe : 5 m.
+Le côté opposé à α est la hauteur : 1,2 m.
+
+On utilise le sinus :
+
+    sin(α) = opposé / hypoténuse
+           = 1,2 / 5
+           = 0,24
+
+Donc :
+
+    α = sin⁻¹(0,24)
+    α ≈ 13,9°
+
+Au degré près :
+
+    α ≈ 14°
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Fiche express — Triangle rectangle',
+        ordre: 1,
+        contenu: r'''
+PYTHAGORE
+Triangle rectangle en A :
+    BC² = AB² + AC²
+
+RÉCIPROQUE
+Si BC est le plus grand côté et
+    BC² = AB² + AC²
+alors le triangle est rectangle en A.
+
+TRIGONOMÉTRIE
+    sin = opposé / hypoténuse
+    cos = adjacent / hypoténuse
+    tan = opposé / adjacent
+
+AVANT DE CALCULER
+• identifier l'angle droit ;
+• repérer l'hypoténuse ;
+• repérer l'angle étudié ;
+• choisir la formule ;
+• vérifier le mode degré de la calculatrice.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Quiz — Triangle rectangle',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'tr01',
+            type: TypeQuestion.qcm,
+            enonce: 'Dans un triangle rectangle, comment appelle-t-on le côté opposé à l’angle droit ?',
+            choix: ['La médiane', 'L’hypoténuse', 'La hauteur', 'La bissectrice'],
+            bonnesReponses: [1],
+            explication: 'L’hypoténuse est le côté opposé à l’angle droit.',
+          ),
+          QuestionQuiz(
+            id: 'tr02',
+            type: TypeQuestion.qcm,
+            enonce: 'Si BC est l’hypoténuse, quelle relation est correcte pour un triangle rectangle en A ?',
+            choix: ['BC = AB + AC', 'BC² = AB² + AC²', 'AB² = BC² + AC²', 'BC² = AB² - AC²'],
+            bonnesReponses: [1],
+            explication: 'C’est le théorème de Pythagore.',
+          ),
+          QuestionQuiz(
+            id: 'tr03',
+            type: TypeQuestion.qcm,
+            enonce: 'Pour un angle α, le sinus est égal à :',
+            choix: ['adjacent / hypoténuse', 'opposé / hypoténuse', 'opposé / adjacent', 'hypoténuse / opposé'],
+            bonnesReponses: [1],
+            explication: 'sin(α) = côté opposé / hypoténuse.',
+          ),
+          QuestionQuiz(
+            id: 'tr04',
+            type: TypeQuestion.qcm,
+            enonce: 'Avec AB = 6 cm et AC = 8 cm dans un triangle rectangle en A, BC vaut :',
+            choix: ['10 cm', '12 cm', '14 cm', '2 cm'],
+            bonnesReponses: [0],
+            explication: 'BC² = 6² + 8² = 100, donc BC = 10 cm.',
+          ),
+        ],
+      ),
+    ],
+
+    // ════════════════════════════════════════════════════════════════════
+    //  3e MATHEMATIQUES — CHAPITRE 9 : PYRAMIDES ET CÔNES
+    // ════════════════════════════════════════════════════════════════════
+    '3e_math_ch09': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: 'Pyramides et cônes',
+        ordre: 1,
+        contenu: r'''
+1. LA PYRAMIDE
+
+Une pyramide est un solide dont une face est un polygone appelé base et dont
+les autres faces sont des triangles ayant un sommet commun : le sommet de
+la pyramide.
+
+Une pyramide régulière possède une base régulière et un sommet placé sur la
+perpendiculaire passant par le centre de la base.
+
+
+2. PATRON D’UNE PYRAMIDE
+
+Un patron permet de déplier le solide sur le plan.
+Il comprend la base et les faces latérales.
+
+Pour construire un patron, il faut respecter les longueurs des arêtes et
+les dimensions des faces.
+
+
+3. VOLUME D’UNE PYRAMIDE
+
+Le volume d'une pyramide est :
+
+    V = (1/3) × Aire de la base × hauteur
+
+La hauteur est la distance perpendiculaire entre le sommet et le plan de
+la base.
+
+
+4. LE CÔNE DE RÉVOLUTION
+
+Un cône de révolution possède un disque comme base et un sommet situé sur
+la perpendiculaire au centre de ce disque.
+
+On distingue :
+• r : rayon de la base ;
+• h : hauteur ;
+• g : génératrice.
+
+
+5. VOLUME DU CÔNE
+
+L'aire de la base vaut πr².
+
+Donc :
+
+    V = (1/3)πr²h
+
+
+6. UNITÉS
+
+Si les longueurs sont en cm, le volume est en cm³.
+Si elles sont en m, le volume est en m³.
+
+Avant d'utiliser une formule, convertis toutes les longueurs dans une même
+unité.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: 'Bien distinguer hauteur, rayon et génératrice',
+        ordre: 1,
+        contenu: r'''
+NE CONFONDS PAS LES LONGUEURS
+
+Dans un cône :
+• le rayon va du centre du disque au bord du disque ;
+• la hauteur est perpendiculaire à la base ;
+• la génératrice relie le sommet à un point du cercle.
+
+La génératrice n'est pas la hauteur.
+
+POUR LE VOLUME
+
+Pyramide :
+    V = (1/3) × B × h
+
+Cône :
+    V = (1/3) × π × r² × h
+
+Le facteur 1/3 est commun aux deux solides.
+
+PIÈGE CLASSIQUE
+
+Si le rayon est donné en cm et la hauteur en m, ne remplace pas directement
+dans la formule. Convertis d'abord les deux longueurs dans la même unité.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Une pyramide à base carrée',
+        ordre: 1,
+        difficulte: Difficulte.facile,
+        enonce: r'''
+Une pyramide possède une base carrée de côté 6 cm et une hauteur de 10 cm.
+
+Calcule son volume.
+''',
+        solution: r'''
+Aire de la base :
+
+    B = 6 × 6 = 36 cm²
+
+Volume :
+
+    V = (1/3) × 36 × 10
+      = 120 cm³
+
+Le volume de la pyramide est donc 120 cm³.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Le volume d’un cône',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''
+Un cône de révolution a un rayon de base de 3 cm et une hauteur de 8 cm.
+
+1) Écris la formule de son volume.
+2) Calcule une valeur exacte en fonction de π.
+3) Donne une valeur approchée au dixième près.
+''',
+        solution: r'''
+La formule est :
+
+    V = (1/3)πr²h
+
+Avec r = 3 et h = 8 :
+
+    V = (1/3) × π × 3² × 8
+      = (1/3) × π × 9 × 8
+      = 24π cm³
+
+Avec π ≈ 3,14159 :
+
+    V ≈ 75,4 cm³
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Fiche express — Pyramides et cônes',
+        ordre: 1,
+        contenu: r'''
+PYRAMIDE
+    V = (1/3) × aire de la base × hauteur
+
+CÔNE
+    V = (1/3)πr²h
+
+À RETENIR
+• hauteur = distance perpendiculaire à la base ;
+• rayon = centre du disque vers le cercle ;
+• génératrice ≠ hauteur ;
+• utiliser des unités cohérentes ;
+• conserver π dans une valeur exacte avant l'approximation.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Quiz — Pyramides et cônes',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'pc01',
+            type: TypeQuestion.qcm,
+            enonce: 'Quelle est la formule du volume d’une pyramide ?',
+            choix: ['B × h', '(1/2) × B × h', '(1/3) × B × h', '3 × B × h'],
+            bonnesReponses: [2],
+            explication: 'Le volume d’une pyramide vaut un tiers de l’aire de sa base multipliée par sa hauteur.',
+          ),
+          QuestionQuiz(
+            id: 'pc02',
+            type: TypeQuestion.qcm,
+            enonce: 'Le volume d’un cône de rayon r et de hauteur h est :',
+            choix: ['πrh', '(1/3)πr²h', '2πrh', 'πr²h'],
+            bonnesReponses: [1],
+            explication: 'La formule est V = (1/3)πr²h.',
+          ),
+          QuestionQuiz(
+            id: 'pc03',
+            type: TypeQuestion.qcm,
+            enonce: 'Dans un cône, la hauteur est :',
+            choix: ['toujours la génératrice', 'perpendiculaire à la base', 'le diamètre', 'le rayon'],
+            bonnesReponses: [1],
+            explication: 'La hauteur est la distance perpendiculaire du sommet au plan de la base.',
+          ),
+          QuestionQuiz(
+            id: 'pc04',
+            type: TypeQuestion.qcm,
+            enonce: 'Une base carrée de côté 4 cm a quelle aire ?',
+            choix: ['8 cm²', '12 cm²', '16 cm²', '20 cm²'],
+            bonnesReponses: [2],
+            explication: '4 × 4 = 16 cm².',
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch01': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Nombres entiers naturels — cours",
+        contenu: r'''Décomposer, comparer, ordonner et calculer avec les nombres entiers naturels. Dans une division euclidienne, dividende = diviseur × quotient + reste, avec un reste strictement inférieur au diviseur.
+
+À RETENIR
+Exemple : 248 = 12 × 20 + 8. Le quotient est 20 et le reste 8.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Nombres entiers naturels — comprendre facilement",
+        contenu: r'''Exemple : 248 = 12 × 20 + 8. Le quotient est 20 et le reste 8.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres entiers naturels — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''248 + 375''',
+        solution: r'''248 = 12 × 20 + 8''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres entiers naturels — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Nombres entiers naturels. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Nombres entiers naturels — fiche de révision",
+        contenu: r'''MOTS-CLÉS : entiers • comparaison • opérations • division euclidienne
+
+FORMULE / MÉTHODE : Exemple : 248 = 12 × 20 + 8. Le quotient est 20 et le reste 8.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Nombres entiers naturels — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e1q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Nombres entiers naturels ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e1q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Nombres entiers naturels permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e1q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch02': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Droites et points — cours",
+        contenu: r'''Reconnaître et utiliser point, droite, segment et demi-droite. Deux points distincts déterminent une unique droite. Trois points sont alignés lorsqu'ils appartiennent à une même droite.
+
+À RETENIR
+La notation (AB) désigne une droite ; [AB] un segment ; [AB) une demi-droite d'origine A passant par B.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Droites et points — comprendre facilement",
+        contenu: r'''La notation (AB) désigne une droite ; [AB] un segment ; [AB) une demi-droite d'origine A passant par B.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Droites et points — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Deux points A et B déterminent combien de droites ?''',
+        solution: r'''Une seule droite : (AB).''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Droites et points — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Droites et points. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Droites et points — fiche de révision",
+        contenu: r'''MOTS-CLÉS : point • droite • segment • demi-droite
+
+FORMULE / MÉTHODE : La notation (AB) désigne une droite ; [AB] un segment ; [AB) une demi-droite d'origine A passant par B.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Droites et points — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e2q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Droites et points ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e2q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Droites et points permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e2q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch03': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Nombres décimaux relatifs — cours",
+        contenu: r'''Repérer, comparer et calculer avec les nombres décimaux relatifs. La valeur absolue |a| est la distance de a à zéro. Pour soustraire, on ajoute l'opposé.
+
+À RETENIR
+Pour comparer des nombres négatifs, le plus proche de zéro est le plus grand. Exemple : −3 > −8.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Nombres décimaux relatifs — comprendre facilement",
+        contenu: r'''Pour comparer des nombres négatifs, le plus proche de zéro est le plus grand. Exemple : −3 > −8.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres décimaux relatifs — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''−7 + 12 − 5''',
+        solution: r'''0''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Nombres décimaux relatifs — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Nombres décimaux relatifs. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Nombres décimaux relatifs — fiche de révision",
+        contenu: r'''MOTS-CLÉS : relatifs • opposé • valeur absolue • droite graduée
+
+FORMULE / MÉTHODE : Pour comparer des nombres négatifs, le plus proche de zéro est le plus grand. Exemple : −3 > −8.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Nombres décimaux relatifs — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e3q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Nombres décimaux relatifs ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e3q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Nombres décimaux relatifs permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e3q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch04': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Segments — cours",
+        contenu: r'''Connaître la longueur d'un segment, son milieu et sa médiatrice. Le milieu M vérifie AM = MB. La médiatrice est perpendiculaire au segment en son milieu.
+
+À RETENIR
+Tout point de la médiatrice d'un segment est à égale distance des deux extrémités.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Segments — comprendre facilement",
+        contenu: r'''Tout point de la médiatrice d'un segment est à égale distance des deux extrémités.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Segments — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''AB = 10 cm, M milieu : AM = ?''',
+        solution: r'''5 cm''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Segments — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Segments. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Segments — fiche de révision",
+        contenu: r'''MOTS-CLÉS : segment • milieu • médiatrice • distance
+
+FORMULE / MÉTHODE : Tout point de la médiatrice d'un segment est à égale distance des deux extrémités.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Segments — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e4q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Segments ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e4q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Segments permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e4q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch05': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Pavés droits et cylindres droits — cours",
+        contenu: r'''Calculer le volume d'un pavé droit V = L×l×h et d'un cylindre V = πr²h. Pour un cylindre, le diamètre vaut 2r. Les unités doivent être cohérentes.
+
+À RETENIR
+Exemple : un pavé 8×5×3 a un volume de 120 cm³. Un cylindre de r=2 et h=10 a un volume de 40π cm³.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Pavés droits et cylindres droits — comprendre facilement",
+        contenu: r'''Exemple : un pavé 8×5×3 a un volume de 120 cm³. Un cylindre de r=2 et h=10 a un volume de 40π cm³.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Pavés droits et cylindres droits — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Volume d'un pavé 8×5×3''',
+        solution: r'''120 cm³''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Pavés droits et cylindres droits — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Pavés droits et cylindres droits. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Pavés droits et cylindres droits — fiche de révision",
+        contenu: r'''MOTS-CLÉS : pavé • cylindre • volume • rayon
+
+FORMULE / MÉTHODE : Exemple : un pavé 8×5×3 a un volume de 120 cm³. Un cylindre de r=2 et h=10 a un volume de 40π cm³.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Pavés droits et cylindres droits — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e5q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Pavés droits et cylindres droits ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e5q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Pavés droits et cylindres droits permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e5q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch06': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Fractions — cours",
+        contenu: r'''Lire, simplifier, comparer et additionner des fractions. Pour une addition, mettre au même dénominateur si nécessaire. Pour multiplier, multiplier numérateurs et dénominateurs.
+
+À RETENIR
+Exemple : 18/24 = 3/4. Pour 2/3 + 1/6, on obtient 4/6 + 1/6 = 5/6.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Fractions — comprendre facilement",
+        contenu: r'''Exemple : 18/24 = 3/4. Pour 2/3 + 1/6, on obtient 4/6 + 1/6 = 5/6.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Fractions — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Simplifie 18/24''',
+        solution: r'''3/4''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Fractions — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Fractions. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Fractions — fiche de révision",
+        contenu: r'''MOTS-CLÉS : numérateur • dénominateur • simplification • fractions équivalentes
+
+FORMULE / MÉTHODE : Exemple : 18/24 = 3/4. Pour 2/3 + 1/6, on obtient 4/6 + 1/6 = 5/6.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Fractions — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e6q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Fractions ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e6q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Fractions permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e6q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch07': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Cercles et disques — cours",
+        contenu: r'''Identifier centre, rayon, diamètre et disque. Le diamètre d=2r. La longueur du cercle vaut 2πr et l'aire du disque πr².
+
+À RETENIR
+Ne confonds pas périmètre et aire : la longueur du cercle est en unités de longueur, l'aire du disque en unités carrées.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Cercles et disques — comprendre facilement",
+        contenu: r'''Ne confonds pas périmètre et aire : la longueur du cercle est en unités de longueur, l'aire du disque en unités carrées.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Cercles et disques — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Rayon 5 cm : aire du disque ?''',
+        solution: r'''25π cm²''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Cercles et disques — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Cercles et disques. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Cercles et disques — fiche de révision",
+        contenu: r'''MOTS-CLÉS : centre • rayon • diamètre • aire • longueur
+
+FORMULE / MÉTHODE : Ne confonds pas périmètre et aire : la longueur du cercle est en unités de longueur, l'aire du disque en unités carrées.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Cercles et disques — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e7q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Cercles et disques ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e7q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Cercles et disques permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e7q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch08': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Angles — cours",
+        contenu: r'''Mesurer et construire des angles en degrés. Aigu <90°, droit =90°, obtus entre 90° et 180°, plat =180°. Deux angles complémentaires totalisent 90° et deux supplémentaires 180°.
+
+À RETENIR
+Avec un rapporteur, place son centre sur le sommet et une graduation zéro sur un côté de l'angle.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Angles — comprendre facilement",
+        contenu: r'''Avec un rapporteur, place son centre sur le sommet et une graduation zéro sur un côté de l'angle.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Angles — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Complément de 28° ?''',
+        solution: r'''62°''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Angles — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Angles. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Angles — fiche de révision",
+        contenu: r'''MOTS-CLÉS : aigu • droit • obtus • complémentaire • supplémentaire
+
+FORMULE / MÉTHODE : Avec un rapporteur, place son centre sur le sommet et une graduation zéro sur un côté de l'angle.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Angles — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e8q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Angles ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e8q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Angles permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e8q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch09': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Triangles — cours",
+        contenu: r'''Un triangle a trois angles dont la somme est 180°. Un équilatéral a trois côtés égaux, un isocèle au moins deux, un rectangle possède un angle droit.
+
+À RETENIR
+Dans un triangle, l'angle inconnu vaut 180° moins la somme des deux angles connus. Dans un isocèle, les angles à la base sont égaux.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Triangles — comprendre facilement",
+        contenu: r'''Dans un triangle, l'angle inconnu vaut 180° moins la somme des deux angles connus. Dans un isocèle, les angles à la base sont égaux.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Triangles — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''Angles 48° et 67° : troisième angle ?''',
+        solution: r'''65°''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Triangles — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Triangles. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Triangles — fiche de révision",
+        contenu: r'''MOTS-CLÉS : triangle • équilatéral • isocèle • rectangle
+
+FORMULE / MÉTHODE : Dans un triangle, l'angle inconnu vaut 180° moins la somme des deux angles connus. Dans un isocèle, les angles à la base sont égaux.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Triangles — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e9q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Triangles ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e9q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Triangles permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e9q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch10': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Proportionnalité — cours",
+        contenu: r'''Deux grandeurs sont proportionnelles si un même coefficient permet de passer de l'une à l'autre. On peut utiliser passage à l'unité, tableau ou produit en croix.
+
+À RETENIR
+Exemple : 4 kg coûtent 2 400 F ; 1 kg coûte 600 F et 7 kg coûtent 4 200 F.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Proportionnalité — comprendre facilement",
+        contenu: r'''Exemple : 4 kg coûtent 2 400 F ; 1 kg coûte 600 F et 7 kg coûtent 4 200 F.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Proportionnalité — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''4 kg = 2 400 F ; 7 kg = ?''',
+        solution: r'''4 200 F''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Proportionnalité — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Proportionnalité. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Proportionnalité — fiche de révision",
+        contenu: r'''MOTS-CLÉS : coefficient • tableau • pourcentage • produit en croix
+
+FORMULE / MÉTHODE : Exemple : 4 kg coûtent 2 400 F ; 1 kg coûte 600 F et 7 kg coûtent 4 200 F.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Proportionnalité — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e10q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Proportionnalité ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e10q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Proportionnalité permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e10q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch11': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Figures symétriques par rapport à un point — cours",
+        contenu: r'''Dans une symétrie centrale de centre O, A devient A' avec O milieu de [AA']. La transformation conserve longueurs, angles et parallélisme.
+
+À RETENIR
+Pour construire A', trace (AO) puis reporte OA de l'autre côté de O. Ainsi OA = OA'.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Figures symétriques par rapport à un point — comprendre facilement",
+        contenu: r'''Pour construire A', trace (AO) puis reporte OA de l'autre côté de O. Ainsi OA = OA'.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Figures symétriques par rapport à un point — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''OA = 4 cm : où placer A' ?''',
+        solution: r'''À 4 cm de O sur la droite (AO), de l'autre côté de O.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Figures symétriques par rapport à un point — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Figures symétriques par rapport à un point. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Figures symétriques par rapport à un point — fiche de révision",
+        contenu: r'''MOTS-CLÉS : symétrie centrale • centre • image • milieu
+
+FORMULE / MÉTHODE : Pour construire A', trace (AO) puis reporte OA de l'autre côté de O. Ainsi OA = OA'.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Figures symétriques par rapport à un point — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e11q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Figures symétriques par rapport à un point ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e11q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Figures symétriques par rapport à un point permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e11q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch12': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Statistique — cours",
+        contenu: r'''Une série statistique contient une population, un caractère et des effectifs. L'effectif total est la somme des effectifs. La fréquence est effectif ÷ effectif total.
+
+À RETENIR
+Exemple : 12 élèves sur 30 viennent à pied. Fréquence = 12/30 = 40 %.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Statistique — comprendre facilement",
+        contenu: r'''Exemple : 12 élèves sur 30 viennent à pied. Fréquence = 12/30 = 40 %.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Statistique — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''12 élèves sur 30 : fréquence ?''',
+        solution: r'''40 %''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Statistique — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Statistique. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Statistique — fiche de révision",
+        contenu: r'''MOTS-CLÉS : population • caractère • effectif • fréquence
+
+FORMULE / MÉTHODE : Exemple : 12 élèves sur 30 viennent à pied. Fréquence = 12/30 = 40 %.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Statistique — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e12q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Statistique ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e12q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Statistique permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e12q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch13': [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: "Parallélogramme — cours",
+        contenu: r'''Un parallélogramme est un quadrilatère dont les côtés opposés sont parallèles. Les côtés opposés ont même longueur et les diagonales se coupent en leur milieu.
+
+À RETENIR
+Deux angles consécutifs sont supplémentaires. Rectangle, losange et carré sont des parallélogrammes particuliers.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: "Parallélogramme — comprendre facilement",
+        contenu: r'''Deux angles consécutifs sont supplémentaires. Rectangle, losange et carré sont des parallélogrammes particuliers.
+
+Réflexe : lis les données, choisis la propriété adaptée, calcule proprement puis vérifie.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Parallélogramme — exercice guidé",
+        difficulte: Difficulte.facile,
+        enonce: r'''ABCD parallélogramme, AB=7 cm : CD = ?''',
+        solution: r'''7 cm''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: "Parallélogramme — exercice d'application",
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''Explique avec une propriété du chapitre comment résoudre cette situation de Parallélogramme. Donne les étapes de calcul et une conclusion.''',
+        solution: r'''On identifie les données, on choisit la propriété étudiée dans le cours, on effectue le calcul étape par étape puis on vérifie que le résultat est cohérent avec les données.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: "Parallélogramme — fiche de révision",
+        contenu: r'''MOTS-CLÉS : côtés opposés • diagonales • parallélisme • angles
+
+FORMULE / MÉTHODE : Deux angles consécutifs sont supplémentaires. Rectangle, losange et carré sont des parallélogrammes particuliers.
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: "Parallélogramme — quiz",
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e13q1',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle affirmation est correcte à propos de Parallélogramme ?",
+            choix: ["Elle respecte les propriétés étudiées","Elle n'a aucune propriété","Elle est toujours impossible","Elle ne se calcule jamais"],
+            bonnesReponses: [0],
+            explication: "La première proposition correspond aux propriétés essentielles du chapitre.",
+          ),
+          QuestionQuiz(
+            id: '6e13q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: "Les règles et propriétés de Parallélogramme permettent de justifier un calcul.",
+            choix: ["Vrai","Faux"],
+            bonnesReponses: [0],
+            explication: "Une réponse mathématique doit être justifiée par une propriété ou une méthode.",
+          ),
+          QuestionQuiz(
+            id: '6e13q3',
+            type: TypeQuestion.qcm,
+            enonce: "Quelle démarche faut-il privilégier ?",
+            choix: ["Identifier les données puis choisir la propriété adaptée","Répondre au hasard","Ignorer les unités","Ne jamais vérifier"],
+            bonnesReponses: [0],
+            explication: "On identifie les données, choisit une méthode puis vérifie le résultat.",
+          ),
+        ],
+      ),
+    ],
+
+
+    'Tle_A2_math_ch01': _mathTleA2Chapitre(
+      code:'ch01', titre:'Étude de fonctions polynômes et de fonctions rationnelles',
+      cours:r'''Une fonction polynôme est définie sur ℝ par une expression polynomiale. Une fonction rationnelle est un quotient de polynômes et son domaine exclut les zéros du dénominateur. L’étude porte notamment sur le domaine, les limites, le signe, les dérivées et les variations.''',
+      renforcement:r'''Pour une fonction rationnelle, commence par déterminer les valeurs interdites. Pour l’étude d’une fonction, organise les calculs : domaine → limites → dérivée → signe → variations → représentation graphique.''',
+      enonce1:r'''Détermine le domaine de f(x)=(2x+1)/(x−3).''', solution1:r'''D_f=ℝ\{3}, car le dénominateur ne doit pas être nul.''',
+      enonce2:r'''Dérive f(x)=x³−2x²+4x−1.''', solution2:r'''f'(x)=3x²−4x+4.''',
+      motsCles:'polynôme • rationnelle • domaine • limite • dérivée • signe • variation',
+      quiz1:'Que faut-il déterminer en priorité pour une fonction rationnelle ?', quizBonne:'Les valeurs qui annulent le dénominateur',
+    ),
+    'Tle_A2_math_ch02': _mathTleA2Chapitre(
+      code:'ch02', titre:'Probabilité',
+      cours:r'''Une expérience aléatoire possède des issues auxquelles sont associées des probabilités. La somme des probabilités de toutes les issues vaut 1. On utilise les événements, l’union, l’intersection et, selon les situations, les probabilités conditionnelles.''',
+      renforcement:r'''Commence par identifier l’univers et les événements. Vérifie que les probabilités sont comprises entre 0 et 1 et que la somme des probabilités des issues élémentaires vaut 1.''',
+      enonce1:r'''Une urne contient 3 boules rouges et 2 boules bleues. On tire une boule au hasard. Probabilité d’obtenir une rouge ?''', solution1:r'''P(R)=3/5.''',
+      enonce2:r'''Deux événements A et B sont incompatibles avec P(A)=0,4 et P(B)=0,3. Calcule P(A∪B).''', solution2:r'''Comme A et B sont incompatibles, P(A∪B)=P(A)+P(B)=0,7.''',
+      motsCles:'expérience aléatoire • issue • événement • probabilité • union • intersection',
+      quiz1:'Quelle valeur doit avoir la somme des probabilités de toutes les issues ?', quizBonne:'1',
+    ),
+    'Tle_A2_math_ch03': _mathTleA2Chapitre(
+      code:'ch03', titre:'Fonction logarithme népérien',
+      cours:r'''La fonction logarithme népérien, notée ln, est définie sur ]0;+∞[. Elle vérifie notamment ln(ab)=ln(a)+ln(b), ln(a/b)=ln(a)−ln(b) et ln(a^n)=n ln(a) pour a>0. Elle est strictement croissante.''',
+      renforcement:r'''Avant tout calcul avec ln, vérifie que chaque argument est strictement positif. Pour une équation logarithmique, utilise les propriétés de ln puis contrôle les conditions de définition.''',
+      enonce1:r'''Calcule ln(e³).''', solution1:r'''ln(e³)=3.''',
+      enonce2:r'''Résous ln(x)=2.''', solution2:r'''Par définition de l’exponentielle, x=e², avec x>0.''',
+      motsCles:'ln • logarithme népérien • domaine • propriétés • équation',
+      quiz1:'Sur quel ensemble la fonction ln est-elle définie ?', quizBonne:']0;+∞[',
+    ),
+    'Tle_A2_math_ch04': _mathTleA2Chapitre(
+      code:'ch04', titre:'Fonction exponentielle népérienne',
+      cours:r'''La fonction exponentielle, notée exp ou e^x, est définie sur ℝ, strictement positive et strictement croissante. Elle vérifie e^(a+b)=e^a e^b et est la fonction réciproque du logarithme népérien.''',
+      renforcement:r'''Utilise e^(a+b)=e^a e^b et e^(−a)=1/e^a. Pour résoudre une équation exponentielle, cherche à écrire les deux membres avec une même base ou applique ln lorsque les deux membres sont positifs.''',
+      enonce1:r'''Simplifie e²×e⁵.''', solution1:r'''e²×e⁵=e⁷.''',
+      enonce2:r'''Résous e^x=5.''', solution2:r'''x=ln(5).''',
+      motsCles:'exponentielle • e^x • croissance • ln • propriétés',
+      quiz1:'Quelle propriété est correcte ?', quizBonne:'e^(a+b)=e^a×e^b',
+    ),
+    'Tle_A2_math_ch05': _mathTleA2Chapitre(
+      code:'ch05', titre:'Statistique à deux variables',
+      cours:r'''Une série statistique à deux variables étudie deux caractères observés sur une même population. Le nuage de points permet de visualiser une relation. On peut utiliser la covariance, le coefficient de corrélation et une droite d’ajustement pour décrire une tendance.''',
+      renforcement:r'''Commence par organiser les couples de données. Observe le nuage de points puis interprète la tendance. Le coefficient de corrélation mesure la force d’une liaison linéaire, sans prouver à lui seul une causalité.''',
+      enonce1:r'''Une série comporte les couples (1,2), (2,4), (3,6). Quelle relation simple semble relier x et y ?''', solution1:r'''Les points sont alignés sur y=2x.''',
+      enonce2:r'''Que signifie un nuage de points fortement proche d’une droite croissante ?''', solution2:r'''Il indique une liaison linéaire positive forte entre les deux variables.''',
+      motsCles:'deux variables • nuage de points • corrélation • ajustement • droite',
+      quiz1:'Que représente un nuage de points en statistique à deux variables ?', quizBonne:'Les couples de valeurs observés',
+    ),
+    'Tle_A2_math_ch06': _mathTleA2Chapitre(
+      code:'ch06', titre:'Suites numériques',
+      cours:r'''Une suite numérique associe à chaque entier naturel un nombre réel. Une suite peut être définie explicitement ou par récurrence. On étudie notamment ses variations et sa convergence. Les suites arithmétiques et géométriques constituent des modèles fondamentaux.''',
+      renforcement:r'''Identifie d’abord le mode de définition. Pour une suite arithmétique, la différence entre deux termes consécutifs est constante. Pour une suite géométrique, le quotient de deux termes consécutifs est constant lorsque les termes concernés sont non nuls.''',
+      enonce1:r'''Soit u_n=3n+2. Calcule u_5.''', solution1:r'''u_5=3×5+2=17.''',
+      enonce2:r'''Une suite arithmétique vérifie u_1=4 et r=3. Calcule u_6.''', solution2:r'''u_6=u_1+5r=4+15=19.''',
+      motsCles:'suite • terme • récurrence • arithmétique • géométrique • convergence',
+      quiz1:'Dans une suite arithmétique, quelle grandeur reste constante ?', quizBonne:'La différence entre deux termes consécutifs',
+    ),
+    'Tle_A2_math_ch07': _mathTleA2Chapitre(
+      code:'ch07', titre:'Systèmes d’équations linéaires dans ℝ × ℝ',
+      cours:r'''Un système linéaire à deux inconnues cherche les couples (x,y) satisfaisant simultanément deux équations. On peut utiliser la substitution, la combinaison linéaire ou une interprétation graphique par deux droites.''',
+      renforcement:r'''Choisis la méthode qui réduit le plus simplement le système. Après résolution, remplace le couple obtenu dans les deux équations pour vérifier.''',
+      enonce1:r'''Résous x+y=7 et x−y=1.''', solution1:r'''En additionnant les deux équations, 2x=8 donc x=4 et y=3.''',
+      enonce2:r'''Résous 2x+y=8 et x−y=1.''', solution2:r'''De x−y=1, y=x−1. Donc 2x+x−1=8, soit x=3 et y=2.''',
+      motsCles:'système • équation linéaire • substitution • combinaison • solution',
+      quiz1:'Graphiquement, que représente la solution d’un système de deux droites sécantes ?', quizBonne:'Le point d’intersection',
+    ),
+
+
+    'Tle_C_math_ch01': _mathTleCChapitre(
+      code:'ch01', titre:'Barycentre et lignes de niveaux',
+      cours:r'''Le barycentre permet de définir un point associé à des points pondérés. Dans le plan, il généralise le milieu et permet d'étudier des relations vectorielles. Les lignes de niveaux sont des ensembles de points vérifiant une condition donnée, souvent exprimée à l'aide de distances ou de produits scalaires.''',
+      renforcement:r'''Traduis la condition géométrique sous forme vectorielle ou algébrique. Identifie les coefficients du barycentre, puis simplifie l'expression pour caractériser l'ensemble des points recherchés.''',
+      enonce1:r'''Soient A et B et des coefficients 2 et 1. Écris le vecteur position du barycentre G dans un repère.''', solution1:r'''Si les vecteurs sont définis par rapport à O, on a OG=(2OA+OB)/3.''',
+      enonce2:r'''Caractérise l'ensemble des points M tels que MA²−MB²=0.''', solution2:r'''MA=MB, donc M appartient à la médiatrice de [AB].''',
+      motsCles:'barycentre • coefficients • vecteurs • ligne de niveau • distances',
+      quiz1:'Quel point généralise le milieu de deux points pondérés ?', quizBonne:'Le barycentre',
+    ),
+    'Tle_C_math_ch02': _mathTleCChapitre(
+      code:'ch02', titre:'Limites et continuité',
+      cours:r'''La limite décrit le comportement d'une fonction lorsqu'une variable se rapproche d'un nombre ou tend vers l'infini. Une fonction est continue en a lorsque sa limite en a existe et vaut f(a). Les théorèmes de comparaison, les opérations sur les limites et les formes indéterminées permettent de conduire une étude rigoureuse.''',
+      renforcement:r'''Commence par identifier le domaine et le point étudié. En présence d'une forme indéterminée, transforme l'expression : factorisation, mise au même dénominateur ou utilisation d'une expression conjuguée selon le cas.''',
+      enonce1:r'''Calcule lim(x→2)(3x+1).''', solution1:r'''La fonction est continue, donc la limite vaut 7.''',
+      enonce2:r'''Calcule lim(x→+∞)(5x²−1)/x².''', solution2:r'''En divisant par x², la limite vaut 5.''',
+      motsCles:'limite • continuité • voisinage • infini • forme indéterminée',
+      quiz1:'Que signifie qu'une fonction f est continue en a ?', quizBonne:'La limite de f(x) quand x tend vers a est égale à f(a)',
+    ),
+    'Tle_C_math_ch03': _mathTleCChapitre(
+      code:'ch03', titre:'Divisibilité dans ℤ',
+      cours:r'''Dans l'ensemble des entiers relatifs, a divise b s'il existe un entier k tel que b=ak. La divisibilité permet d'étudier les multiples, diviseurs, nombres premiers et congruences. Les propriétés du PGCD et de l'algorithme d'Euclide sont fondamentales.''',
+      renforcement:r'''Pour montrer que a divise b, cherche à écrire b=ak avec k entier. Pour calculer un PGCD, applique l'algorithme d'Euclide en répétant les divisions euclidiennes.''',
+      enonce1:r'''Le nombre 7 divise-t-il 84 ?''', solution1:r'''Oui, car 84=7×12.''',
+      enonce2:r'''Calcule PGCD(84,30).''', solution2:r'''84=2×30+24 ; 30=1×24+6 ; 24=4×6, donc PGCD(84,30)=6.''',
+      motsCles:'divisibilité • diviseur • multiple • entier • PGCD • Euclide',
+      quiz1:'Que signifie a divise b dans ℤ ?', quizBonne:'Il existe un entier k tel que b=ak',
+    ),
+    'Tle_C_math_ch04': _mathTleCChapitre(
+      code:'ch04', titre:'Dérivabilité et étude de fonctions',
+      cours:r'''La dérivée mesure le taux de variation local d'une fonction. Elle permet d'étudier les variations, les extrema et les tangentes. Une étude complète associe domaine de définition, limites, dérivée, signe de la dérivée, tableau de variations et représentation graphique.''',
+      renforcement:r'''Détermine d'abord le domaine. Calcule ensuite la dérivée et étudie son signe. Complète avec les limites pour construire un tableau de variations cohérent.''',
+      enonce1:r'''Dérive f(x)=x³−3x+2.''', solution1:r'''f'(x)=3x²−3.''',
+      enonce2:r'''Étudie le signe de f'(x)=2x−4.''', solution2:r'''f'(x)<0 si x<2, f'(2)=0 et f'(x)>0 si x>2.''',
+      motsCles:'dérivée • taux de variation • tangente • extrema • variations',
+      quiz1:'Que permet principalement le signe de f\'(x) ?', quizBonne:'D'étudier les variations de f',
+    ),
+    'Tle_C_math_ch05': _mathTleCChapitre(
+      code:'ch05', titre:'Géométrie analytique de l’espace',
+      cours:r'''Dans l'espace, un repère permet de représenter les points par trois coordonnées. Les vecteurs sont décrits par leurs composantes. Les équations de droites et de plans s'obtiennent à partir de vecteurs directeurs, de vecteurs normaux et de systèmes de coordonnées.''',
+      renforcement:r'''Écris les coordonnées des vecteurs en soustrayant les coordonnées des points. Pour caractériser un plan, recherche une équation cartésienne ou une représentation paramétrique adaptée.''',
+      enonce1:r'''A(1,2,3) et B(4,0,5). Donne les coordonnées de AB.''', solution1:r'''AB=(3,−2,2).''',
+      enonce2:r'''Donne une équation cartésienne du plan x+2y−z=3 et indique un vecteur normal.''', solution2:r'''L'équation est déjà donnée ; un vecteur normal est n=(1,2,−1).''',
+      motsCles:'espace • coordonnées • vecteur • droite • plan • vecteur normal',
+      quiz1:'Combien de coordonnées faut-il pour repérer un point dans l’espace ?', quizBonne:'Trois',
+    ),
+    'Tle_C_math_ch06': _mathTleCChapitre(
+      code:'ch06', titre:'Primitives',
+      cours:r'''Une primitive F d'une fonction f sur un intervalle vérifie F'=f. Les primitives s'obtiennent à partir des formes usuelles et des règles de calcul. Elles sont utilisées pour calculer des intégrales et résoudre certaines équations différentielles.''',
+      renforcement:r'''Reconnais d'abord la forme de la fonction. Propose une primitive puis vérifie-la systématiquement en dérivant ton résultat.''',
+      enonce1:r'''Donne une primitive de f(x)=4x³.''', solution1:r'''F(x)=x⁴+C.''',
+      enonce2:r'''Donne une primitive de f(x)=1/x sur ]0;+∞[.''', solution2:r'''F(x)=ln(x)+C.''',
+      motsCles:'primitive • dérivée • constante • intégrale • fonction',
+      quiz1:'Quelle relation vérifie une primitive F de f ?', quizBonne:'F\'=f',
+    ),
+    'Tle_C_math_ch07': _mathTleCChapitre(
+      code:'ch07', titre:'Fonctions logarithmes',
+      cours:r'''La fonction logarithme népérien ln est définie sur ]0;+∞[, strictement croissante et dérivable. Elle transforme les produits en sommes et les puissances en multiples. Ses propriétés permettent de résoudre des équations et inéquations.''',
+      renforcement:r'''Vérifie toujours que les arguments des logarithmes sont positifs. Utilise ln(ab)=ln(a)+ln(b) et ln(a/b)=ln(a)−ln(b) pour simplifier les expressions.''',
+      enonce1:r'''Calcule ln(e⁴).''', solution1:r'''ln(e⁴)=4.''',
+      enonce2:r'''Résous ln(x)=3.''', solution2:r'''x=e³, avec x>0.''',
+      motsCles:'ln • logarithme • domaine • croissance • équation • inéquation',
+      quiz1:'Quel est le domaine de définition de ln ?', quizBonne:']0;+∞[',
+    ),
+    'Tle_C_math_ch08': _mathTleCChapitre(
+      code:'ch08', titre:'Coniques',
+      cours:r'''Les coniques regroupent notamment cercle, ellipse, parabole et hyperbole. Elles peuvent être étudiées par leurs équations cartésiennes, leurs foyers, directrices, axes et propriétés géométriques. Un changement de repère peut simplifier certaines équations.''',
+      renforcement:r'''Commence par identifier la forme de l'équation. Compare-la aux formes canoniques connues afin d'identifier la conique et ses paramètres.''',
+      enonce1:r'''Identifie la conique d'équation x²+y²=25.''', solution1:r'''C'est un cercle de centre O(0,0) et de rayon 5.''',
+      enonce2:r'''Identifie la conique d'équation y²=4x.''', solution2:r'''C'est une parabole de sommet O, d'axe (Ox).''',
+      motsCles:'conique • cercle • ellipse • parabole • hyperbole • équation',
+      quiz1:'Quelle conique possède une équation de type y²=2px dans un repère adapté ?', quizBonne:'La parabole',
+    ),
+    'Tle_C_math_ch09': _mathTleCChapitre(
+      code:'ch09', titre:'Fonctions exponentielles et fonctions puissances',
+      cours:r'''La fonction exponentielle est définie sur ℝ, positive, strictement croissante et vérifie e^(a+b)=e^a e^b. Les fonctions puissances prolongent l'étude de x^a sur les domaines où elles sont définies. Ces fonctions interviennent dans les phénomènes de croissance et de décroissance.''',
+      renforcement:r'''Utilise les propriétés de l'exponentielle pour transformer les produits et puissances. Pour une fonction puissance, commence par déterminer son domaine avant d'étudier ses variations.''',
+      enonce1:r'''Simplifie e²×e³.''', solution1:r'''e⁵.''',
+      enonce2:r'''Résous e^x=7.''', solution2:r'''x=ln(7).''',
+      motsCles:'exponentielle • puissance • croissance • ln • domaine',
+      quiz1:'Quelle relation est vraie pour l’exponentielle ?', quizBonne:'e^(a+b)=e^a×e^b',
+    ),
+    'Tle_C_math_ch10': _mathTleCChapitre(
+      code:'ch10', titre:'Nombres complexes',
+      cours:r'''Un nombre complexe s'écrit z=a+ib avec a,b réels et i²=−1. On distingue partie réelle, partie imaginaire, conjugué et module. Les opérations algébriques et la forme trigonométrique permettent de résoudre des problèmes de géométrie et d'équations.''',
+      renforcement:r'''Pour calculer avec les complexes, regroupe séparément les parties réelle et imaginaire. Utilise le conjugué pour simplifier certains quotients et le module pour les interprétations géométriques.''',
+      enonce1:r'''Calcule (2+3i)+(1−5i).''', solution1:r'''3−2i.''',
+      enonce2:r'''Calcule le module de z=3+4i.''', solution2:r'''|z|=√(3²+4²)=5.''',
+      motsCles:'complexe • partie réelle • partie imaginaire • conjugué • module',
+      quiz1:'Que vaut i² ?', quizBonne:'−1',
+    ),
+    'Tle_C_math_ch11': _mathTleCChapitre(
+      code:'ch11', titre:'PPCM et PGCD de deux entiers relatifs',
+      cours:r'''Le PGCD de deux entiers est leur plus grand diviseur commun. Le PPCM est leur plus petit multiple commun strictement positif. L'algorithme d'Euclide permet de calculer efficacement le PGCD et la relation |ab|=PGCD(a,b)×PPCM(a,b) permet d'obtenir le PPCM.''',
+      renforcement:r'''Calcule d'abord le PGCD avec l'algorithme d'Euclide. Si les deux entiers sont non nuls, utilise ensuite PPCM(a,b)=|ab|/PGCD(a,b).''',
+      enonce1:r'''Calcule PGCD(18,30).''', solution1:r'''PGCD(18,30)=6.''',
+      enonce2:r'''Déduis PPCM(18,30).''', solution2:r'''PPCM=18×30/6=90.''',
+      motsCles:'PGCD • PPCM • diviseur • multiple • Euclide',
+      quiz1:'Quelle relation relie PGCD et PPCM de deux entiers non nuls ?', quizBonne:'|ab|=PGCD(a,b)×PPCM(a,b)',
+    ),
+    'Tle_C_math_ch12': _mathTleCChapitre(
+      code:'ch12', titre:'Suites numériques',
+      cours:r'''Une suite est une fonction définie sur les entiers naturels. On étudie ses termes, ses variations et sa convergence. Les suites arithmétiques et géométriques offrent des modèles simples et leurs limites peuvent être déterminées à partir de leurs propriétés.''',
+      renforcement:r'''Identifie la relation entre deux termes consécutifs. Pour une suite arithmétique, étudie la raison ; pour une suite géométrique, étudie le quotient et sa valeur absolue.''',
+      enonce1:r'''Soit u_n=2n+1. Calcule u_5.''', solution1:r'''u_5=11.''',
+      enonce2:r'''Une suite géométrique vérifie u_0=3 et q=2. Calcule u_4.''', solution2:r'''u_4=3×2⁴=48.''',
+      motsCles:'suite • terme • arithmétique • géométrique • variation • convergence',
+      quiz1:'Dans une suite géométrique, quelle grandeur est constante ?', quizBonne:'Le quotient de deux termes consécutifs non nuls',
+    ),
+    'Tle_C_math_ch13': _mathTleCChapitre(
+      code:'ch13', titre:'Isométries du plan',
+      cours:r'''Une isométrie du plan conserve les distances. Les translations, rotations, symétries axiales et symétries centrales sont des isométries. Elles conservent également les angles et la forme des figures.''',
+      renforcement:r'''Identifie la transformation à partir de ses éléments caractéristiques : vecteur pour une translation, centre et angle pour une rotation, axe pour une symétrie axiale.''',
+      enonce1:r'''Quelle transformation envoie chaque point M sur M' avec MM' égal à un même vecteur ?''', solution1:r'''Une translation de vecteur constant.''',
+      enonce2:r'''Quel est le centre d'une symétrie centrale qui échange A et A' ?''', solution2:r'''Le milieu de [AA'].''',
+      motsCles:'isométrie • translation • rotation • symétrie • distance',
+      quiz1:'Quelle propriété fondamentale une isométrie conserve-t-elle ?', quizBonne:'Les distances',
+    ),
+    'Tle_C_math_ch14': _mathTleCChapitre(
+      code:'ch14', titre:'Calcul intégral',
+      cours:r'''L'intégrale définie de f sur [a,b] peut être calculée à l'aide d'une primitive F par ∫a^b f(x)dx=F(b)−F(a). Elle permet notamment de déterminer des aires algébriques et des quantités cumulées.''',
+      renforcement:r'''Cherche une primitive de la fonction puis applique la formule aux bornes. Pour une aire géométrique, vérifie le signe de la fonction sur l'intervalle avant d'interpréter l'intégrale comme une aire positive.''',
+      enonce1:r'''Calcule ∫₀² x dx.''', solution1:r'''Une primitive est x²/2, donc l'intégrale vaut 2.''',
+      enonce2:r'''Calcule ∫₁³ 2x dx.''', solution2:r'''Une primitive est x², donc 9−1=8.''',
+      motsCles:'intégrale • primitive • bornes • aire • fonction',
+      quiz1:'Quelle formule permet de calculer ∫a^b f(x)dx avec une primitive F ?', quizBonne:'F(b)−F(a)',
+    ),
+    'Tle_C_math_ch15': _mathTleCChapitre(
+      code:'ch15', titre:'Similitudes directes du plan',
+      cours:r'''Une similitude directe conserve les angles orientés et multiplie toutes les longueurs par un même rapport positif. Elle peut être décrite par une homothétie suivie d'une rotation et s'exprime efficacement avec les nombres complexes.''',
+      renforcement:r'''Identifie le rapport de similitude et l'angle de rotation. Dans le plan complexe, une transformation de la forme z'=az+b avec a complexe non nul représente une similitude directe.''',
+      enonce1:r'''Une similitude directe multiplie les longueurs par 3. Quel est son rapport ?''', solution1:r'''Le rapport de similitude est 3.''',
+      enonce2:r'''Dans z'=2z+1, quel est le coefficient complexe de la partie linéaire ?''', solution2:r'''Le coefficient est 2 ; le rapport est |2|=2 et l'angle est 0 modulo 2π.''',
+      motsCles:'similitude • rapport • angle • rotation • homothétie • complexe',
+      quiz1:'Que conserve une similitude directe ?', quizBonne:'Les angles orientés',
+    ),
+    'Tle_C_math_ch16': _mathTleCChapitre(
+      code:'ch16', titre:'Probabilité conditionnelle et variable aléatoire',
+      cours:r'''La probabilité conditionnelle de A sachant B est définie par P_B(A)=P(A∩B)/P(B) lorsque P(B) est non nulle. Une variable aléatoire associe une valeur numérique aux issues d'une expérience aléatoire et possède une loi de probabilité.''',
+      renforcement:r'''Identifie clairement l'événement conditionnant. Pour une variable aléatoire, construis la loi puis vérifie que la somme des probabilités vaut 1 avant de calculer espérance ou variance.''',
+      enonce1:r'''P(A∩B)=0,2 et P(B)=0,5. Calcule P_B(A).''', solution1:r'''P_B(A)=0,2/0,5=0,4.''',
+      enonce2:r'''Une variable X vaut 0 avec probabilité 0,3 et 2 avec probabilité 0,7. Calcule E(X).''', solution2:r'''E(X)=0×0,3+2×0,7=1,4.''',
+      motsCles:'conditionnelle • intersection • variable aléatoire • loi • espérance',
+      quiz1:'Quelle formule définit P_B(A) ?', quizBonne:'P(A∩B)/P(B)',
+    ),
+    'Tle_C_math_ch17': _mathTleCChapitre(
+      code:'ch17', titre:'Nombres complexes et géométrie du plan',
+      cours:r'''Les nombres complexes permettent de représenter les points et vecteurs du plan. Le module représente une distance et l'argument décrit une direction. Les formes algébrique, trigonométrique et exponentielle facilitent l'étude des transformations et configurations géométriques.''',
+      renforcement:r'''Associe à un point M d'affixe z son module |z| pour la distance à l'origine et son argument pour une direction. Utilise les quotients de complexes pour comparer des directions et des rapports de longueurs.''',
+      enonce1:r'''Pour z=3+4i, que représente |z| ?''', solution1:r'''|z|=5, c'est la distance du point d'affixe z à l'origine.''',
+      enonce2:r'''Quel nombre complexe représente le vecteur allant du point d'affixe 1+i au point d'affixe 4+3i ?''', solution2:r'''(4+3i)−(1+i)=3+2i.''',
+      motsCles:'affixe • module • argument • vecteur • distance • complexe',
+      quiz1:'Que représente géométriquement le module d'une affixe z ?', quizBonne:'La distance du point à l’origine',
+    ),
+    'Tle_C_math_ch18': _mathTleCChapitre(
+      code:'ch18', titre:'Statistique à deux variables',
+      cours:r'''Une statistique à deux variables étudie des couples de valeurs observés sur une population. Le nuage de points, la covariance, le coefficient de corrélation et les méthodes d'ajustement permettent de décrire une liaison entre les deux variables.''',
+      renforcement:r'''Organise les couples puis représente-les. Observe la tendance et utilise un ajustement linéaire lorsque le nuage s'y prête. Une corrélation décrit une association linéaire mais ne suffit pas à établir une causalité.''',
+      enonce1:r'''Les points (1,2), (2,4), (3,6) sont-ils alignés ?''', solution1:r'''Oui, ils vérifient tous y=2x.''',
+      enonce2:r'''Que suggère une corrélation linéaire proche de 1 ?''', solution2:r'''Une liaison linéaire positive forte entre les deux variables.''',
+      motsCles:'statistique • deux variables • nuage • corrélation • ajustement',
+      quiz1:'Que représente chaque point d'un nuage de points ?', quizBonne:'Un couple de valeurs observées',
+    ),
+    'Tle_C_math_ch19': _mathTleCChapitre(
+      code:'ch19', titre:'Équations différentielles',
+      cours:r'''Une équation différentielle relie une fonction inconnue à ses dérivées. Les équations différentielles linéaires du premier ordre et les équations du type y'=ay se résolvent à partir de formes générales, puis une condition initiale permet de déterminer la constante.''',
+      renforcement:r'''Identifie l'ordre et la forme de l'équation. Pour y'=ay, la solution générale est y=Ce^(ax). Utilise ensuite la condition initiale pour déterminer C.''',
+      enonce1:r'''Résous y'=2y.''', solution1:r'''La solution générale est y=Ce^(2x), où C est une constante réelle.''',
+      enonce2:r'''Résous y'=3y avec y(0)=5.''', solution2:r'''y=Ce^(3x). Comme y(0)=C=5, donc y=5e^(3x).''',
+      motsCles:'équation différentielle • dérivée • solution générale • condition initiale • exponentielle',
+      quiz1:'Quelle est la forme générale d’une solution de y'=ay ?', quizBonne:'y=Ce^(ax)',
+    ),
+
+  };
+}
+
 
 // ============================================================================
-//  CONTENU GENERE PAR L'AGENT
-//  Ce bloc est gere automatiquement. Il reste en brouillon dans Firestore.
+// CONTENU GENERE PAR L'AGENT — toujours en brouillon dans Firestore.
 // ============================================================================
 final Map<String, List<RessourceOfficielle>> _catalogueAgent = <String, List<RessourceOfficielle>>{
 };

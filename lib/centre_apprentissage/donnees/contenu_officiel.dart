@@ -9528,69 +9528,6 @@ Pour une addition :
       q3: r'''Le périmètre d'un parallélogramme de côtés 6 cm et 4 cm est 20 cm.''', choix3: ['Vrai', 'Faux'], bonne3: 0, exp3: r'''2 × (6 + 4) = 20 cm.''',
     ),
     
- CD=8 cm ; AD=5 cm ; P=2(8+5)=26 cm.
-''',
-        solution: r'''
-Correction : CD=8 cm ; AD=5 cm ; P=2(8+5)=26 cm.
-''',
-      ),
-      RessourceOfficielle(
-        type: TypeRessource.exercice,
-        titre: 'Parallélogramme — exercice d’application',
-        ordre: 2,
-        difficulte: Difficulte.moyen,
-        enonce: r'''
-Les diagonales [AC] et [BD] se coupent en O. On sait AO=6 cm et BO=4 cm. Calcule OC et OD.
-Réponses : OC=6 cm ; OD=4 cm, car les diagonales se coupent en leur milieu.
-''',
-        solution: r'''
-Réponses : OC=6 cm ; OD=4 cm, car les diagonales se coupent en leur milieu.
-''',
-      ),
-      RessourceOfficielle(
-        type: TypeRessource.fiche,
-        titre: 'Parallélogramme — fiche de révision',
-        ordre: 1,
-        contenu: r'''
-PARALLÉLOGRAMME : côtés opposés parallèles.
-PROPRIÉTÉS : côtés opposés égaux ; angles opposés égaux.
-DIAGONALES : elles se coupent en leur milieu.
-P = 2(a+b).
-''',
-      ),
-      RessourceOfficielle(
-        type: TypeRessource.quiz,
-        titre: 'Parallélogramme — quiz',
-        ordre: 1,
-        dureeMinutes: 5,
-        questions: [
-          QuestionQuiz(
-            id: '6e_math_ch13_q1',
-            type: TypeQuestion.qcm,
-            enonce: 'Dans un parallélogramme, les côtés opposés sont :',
-            choix: ['parallèles', 'Autre réponse', 'Je ne sais pas', 'Aucune de ces propositions'],
-            bonnesReponses: [1],
-            explication: 'C\'est la définition du parallélogramme.',
-          ),
-          QuestionQuiz(
-            id: '6e_math_ch13_q2',
-            type: TypeQuestion.qcm,
-            enonce: 'Si AB=7 cm dans ABCD parallélogramme, CD vaut :',
-            choix: ['7 cm', 'Autre réponse', 'Je ne sais pas', 'Aucune de ces propositions'],
-            bonnesReponses: [1],
-            explication: 'Les côtés opposés ont la même longueur.',
-          ),
-          QuestionQuiz(
-            id: '6e_math_ch13_q3',
-            type: TypeQuestion.qcm,
-            enonce: 'Vrai ou faux : les diagonales d\'un parallélogramme se coupent en leur milieu.',
-            choix: ['Vrai', 'Autre réponse', 'Je ne sais pas', 'Aucune de ces propositions'],
-            bonnesReponses: [0],
-            explication: 'C\'est une propriété fondamentale.',
-          ),
-        ],
-      ),
-    ],
 
 
     'Tle_A2_math_ch01': _mathTleA2Chapitre(

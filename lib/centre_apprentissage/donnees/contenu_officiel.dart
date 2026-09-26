@@ -533,7 +533,197 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _math2ndeCChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+'''),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une propriété sans vérifier les hypothèses.
+'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+        ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le domaine ou les conditions.
+'''),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(id: '2ndeC_${code}_q1', type: TypeQuestion.qcm, enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions du problème', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0], explication: 'La première proposition correspond à la notion essentielle du chapitre.'),
+          QuestionQuiz(id: '2ndeC_${code}_q2', type: TypeQuestion.vraiFaux,
+            enonce: 'Une résolution correcte doit présenter une démarche suffisamment claire pour être vérifiée.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Le raisonnement et la vérification permettent de contrôler le résultat.'),
+          QuestionQuiz(id: '2ndeC_${code}_q3', type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier ?',
+            choix: ['Identifier les données et les conditions avant de calculer', 'Répondre sans calcul', 'Ignorer les unités ou domaines', 'Copier uniquement le résultat'],
+            bonnesReponses: [0], explication: 'Les données et les conditions déterminent la méthode adaptée.'),
+        ]),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '2nde_C_math_ch01': _math2ndeCChapitre(
+      code: 'ch01', titre: 'Vecteurs et points du plan',
+      cours: r'''Un vecteur est caractérisé par une direction, un sens et une longueur. Dans un repère, si A(xA;yA) et B(xB;yB), alors AB=(xB−xA ; yB−yA). Deux vecteurs sont égaux lorsqu'ils ont les mêmes coordonnées. La relation de Chasles permet d'écrire AB+BC=AC.''',
+      renforcement: r'''Pour travailler avec des vecteurs, commence par identifier l'origine et l'extrémité. Calcule les coordonnées par différence. Pour une égalité de vecteurs, compare les deux composantes.''',
+      enonce1: r'''Dans un repère, A(2;−1) et B(7;3). Détermine les coordonnées de AB.''', solution1: r'''AB=(7−2 ; 3−(−1))=(5;4).''',
+      enonce2: r'''On donne A(−2;3), B(4;1) et C(5;6). Calcule AB puis AC et vérifie que AB+BC=AC.''', solution2: r'''AB=(6;−2), AC=(7;3), BC=(1;5), donc AB+BC=(7;3)=AC.''',
+      motsCles: 'vecteur • coordonnées • direction • sens • Chasles', quiz1: 'Si A(1;2) et B(5;7), quelles sont les coordonnées de AB ?', quizBonne: '(4;5)',
+    ),
+
+    '2nde_C_math_ch02': _math2ndeCChapitre(
+      code: 'ch02', titre: 'Ensemble des nombres réels',
+      cours: r'''ℝ contient les nombres rationnels et les nombres irrationnels. Les intervalles permettent de décrire des ensembles de réels. La valeur absolue |x| représente la distance de x à zéro. Les racines carrées réelles sont définies pour les nombres positifs ou nuls.''',
+      renforcement: r'''Pour comparer des réels, place-les sur une droite graduée. Pour une racine carrée, vérifie d'abord que le radicande est positif ou nul. Pour une valeur absolue, pense à une distance.''',
+      enonce1: r'''Classe −√2, −1, 0 et 3/2 dans l'ordre croissant.''', solution1: r'''−√2≈−1,414, donc −√2<−1<0<3/2.''',
+      enonce2: r'''Résous |x−2|≤3 et donne la réponse sous forme d'intervalle.''', solution2: r'''−3≤x−2≤3, donc −1≤x≤5. Solution : [−1;5].''',
+      motsCles: 'réel • rationnel • irrationnel • intervalle • valeur absolue • racine', quiz1: 'Lequel appartient à ℝ ?', quizBonne: '√2',
+    ),
+
+    '2nde_C_math_ch03': _math2ndeCChapitre(
+      code: 'ch03', titre: 'Utilisation des symétries et translations',
+      cours: r'''Une symétrie axiale conserve les distances et les angles et utilise un axe. Une symétrie centrale utilise un centre qui est le milieu de chaque segment reliant un point à son image. Une translation déplace tous les points d'un même vecteur.''',
+      renforcement: r'''Pour une symétrie centrale, cherche le milieu du point et de son image. Pour une translation, le vecteur de déplacement est identique pour tous les points. Ces transformations conservent la forme et les longueurs.''',
+      enonce1: r'''Une symétrie centrale de centre O envoie A sur A'. Que représente O pour [AA'] ?''', solution1: r'''O est le milieu de [AA'].''',
+      enonce2: r'''Une translation de vecteur u envoie A sur A' et B sur B'. Que peut-on dire de AA' et BB' ?''', solution2: r'''AA'=BB'=u : les deux segments ont même direction, même sens et même longueur.''',
+      motsCles: 'symétrie axiale • symétrie centrale • translation • image • vecteur', quiz1: 'Dans une symétrie centrale, le centre est quoi par rapport à un point et son image ?', quizBonne: 'Le milieu du segment',
+    ),
+
+    '2nde_C_math_ch04': _math2ndeCChapitre(
+      code: 'ch04', titre: 'Généralités sur les fonctions',
+      cours: r'''Une fonction associe à un nombre x de son domaine une unique image f(x). Un antécédent de y est un nombre x tel que f(x)=y. Une fonction peut être donnée par une expression, un tableau ou une courbe. Les variations indiquent où elle augmente ou diminue.''',
+      renforcement: r'''Dans f(3)=7, 3 est l'antécédent et 7 l'image. Pour résoudre f(x)=k graphiquement, cherche les abscisses des points de la courbe d'ordonnée k.''',
+      enonce1: r'''On donne f(x)=3x−2. Calcule f(4) et l'antécédent de 10.''', solution1: r'''f(4)=12−2=10. Pour f(x)=10 : 3x−2=10, donc x=4.''',
+      enonce2: r'''Une courbe passe par A(−2;5) et B(3;−1). Donne une image et un antécédent lisibles dans ces données.''', solution2: r'''5 est l'image de −2 et −2 est un antécédent de 5. −1 est l'image de 3 et 3 est un antécédent de −1.''',
+      motsCles: 'fonction • image • antécédent • domaine • courbe • variations', quiz1: 'Dans f(2)=9, quelle est l'image de 2 ?', quizBonne: '9',
+    ),
+
+    '2nde_C_math_ch05': _math2ndeCChapitre(
+      code: 'ch05', titre: 'Droites et plans de l’espace',
+      cours: r'''Dans l'espace, deux droites peuvent être sécantes, parallèles ou non coplanaires. Une droite et un plan peuvent être sécants, parallèles ou une droite peut être contenue dans le plan. Deux plans peuvent être sécants ou parallèles. Les positions relatives se démontrent à partir de propriétés géométriques.''',
+      renforcement: r'''Pour analyser une figure de l'espace, repère d'abord les éléments qui appartiennent au même plan. Deux droites non coplanaires ne peuvent ni être sécantes ni parallèles.''',
+      enonce1: r'''Deux droites distinctes d'un même plan ne se coupent pas. Quelle relation peut-on conclure ?''', solution1: r'''Elles sont parallèles.''',
+      enonce2: r'''Une droite d est contenue dans un plan P. Une droite e est parallèle à d mais n'est pas contenue dans P. Que peut-on dire de e et P ?''', solution2: r'''e est parallèle au plan P.''',
+      motsCles: 'espace • droite • plan • sécantes • parallèles • coplanaires', quiz1: 'Deux droites non coplanaires sont-elles nécessairement sécantes ?', quizBonne: 'Non',
+    ),
+
+    '2nde_C_math_ch06': _math2ndeCChapitre(
+      code: 'ch06', titre: 'Fonctions polynômes et fractions rationnelles',
+      cours: r'''Une fonction polynôme est une somme de puissances entières positives ou nulles de x. Une fonction fraction rationnelle est un quotient de deux polynômes, défini lorsque le dénominateur est non nul. On étudie notamment le domaine, les zéros et le signe.''',
+      renforcement: r'''Avant toute étude d'une fraction rationnelle, détermine les valeurs interdites. Pour factoriser un polynôme, cherche un facteur commun ou une identité remarquable. Le signe d'un quotient dépend des signes du numérateur et du dénominateur.''',
+      enonce1: r'''Détermine l'ensemble de définition de f(x)=(2x+1)/(x−3).''', solution1: r'''Le dénominateur ne doit pas être nul : x≠3. Donc Df=ℝ\\{3}.''',
+      enonce2: r'''Factorise x²−5x+6 puis détermine ses zéros.''', solution2: r'''x²−5x+6=(x−2)(x−3). Les zéros sont 2 et 3.''',
+      motsCles: 'polynôme • fraction rationnelle • domaine • valeur interdite • zéro • signe', quiz1: 'Quelle valeur est interdite pour 1/(x−4) ?', quizBonne: '4',
+    ),
+
+    '2nde_C_math_ch07': _math2ndeCChapitre(
+      code: 'ch07', titre: 'Angles inscrits',
+      cours: r'''Un angle inscrit a son sommet sur un cercle et intercepte un arc. La mesure d'un angle inscrit est la moitié de la mesure de l'angle au centre qui intercepte le même arc. Deux angles inscrits qui interceptent le même arc ont la même mesure.''',
+      renforcement: r'''Identifie toujours l'arc intercepté avant de calculer. Si un angle au centre mesure 100° sur le même arc, l'angle inscrit correspondant mesure 50°.''',
+      enonce1: r'''Dans un cercle, un angle au centre mesure 120°. Calcule l'angle inscrit qui intercepte le même arc.''', solution1: r'''L'angle inscrit mesure 120°/2=60°.''',
+      enonce2: r'''Deux angles inscrits interceptent le même arc. Le premier mesure 37°. Quelle est la mesure du second ?''', solution2: r'''37°, car deux angles inscrits interceptant le même arc sont égaux.''',
+      motsCles: 'cercle • angle inscrit • angle au centre • arc', quiz1: 'Un angle inscrit qui intercepte le même arc qu'un angle au centre de 80° mesure combien ?', quizBonne: '40°',
+    ),
+
+    '2nde_C_math_ch08': _math2ndeCChapitre(
+      code: 'ch08', titre: 'Angles orientés et trigonométrie',
+      cours: r'''Un angle orienté tient compte du sens de rotation. En trigonométrie, dans un triangle rectangle, cosinus = adjacent/hypoténuse, sinus = opposé/hypoténuse et tangente = opposé/adjacent. Les angles remarquables et le cercle trigonométrique permettent d'étendre ces notions.''',
+      renforcement: r'''Choisis le rapport trigonométrique correspondant aux côtés connus. Vérifie toujours quel côté est opposé, adjacent ou hypoténuse par rapport à l'angle étudié.''',
+      enonce1: r'''Dans un triangle rectangle, l'hypoténuse mesure 10 cm et le côté opposé à A mesure 6 cm. Calcule sin(A).''', solution1: r'''sin(A)=6/10=0,6.''',
+      enonce2: r'''Si cos(A)=√3/2 et A est aigu, donne la mesure de A.''', solution2: r'''A=30°.''',
+      motsCles: 'angle orienté • sinus • cosinus • tangente • cercle trigonométrique', quiz1: 'Dans un triangle rectangle, quel rapport vaut opposé/hypoténuse ?', quizBonne: 'Le sinus',
+    ),
+
+    '2nde_C_math_ch09': _math2ndeCChapitre(
+      code: 'ch09', titre: 'Statistique à une variable',
+      cours: r'''Une série statistique à une variable décrit un caractère étudié sur une population. On utilise effectifs, fréquences, moyenne, médiane, quartiles et étendue. La moyenne pondérée vaut somme(valeur×effectif)/effectif total.''',
+      renforcement: r'''Ordonne les données avant de chercher médiane et quartiles. Vérifie que la somme des fréquences vaut 1 ou 100 %. L'étendue est la différence entre la plus grande et la plus petite valeur.''',
+      enonce1: r'''Pour 4, 6, 7, 9, 14, calcule la moyenne et la médiane.''', solution1: r'''Moyenne=40/5=8. Médiane=7.''',
+      enonce2: r'''Pour 2, 4, 4, 5, 8, 10, 12, 15, calcule la médiane et l'étendue.''', solution2: r'''Médiane=(5+8)/2=6,5. Étendue=15−2=13.''',
+      motsCles: 'population • caractère • effectif • fréquence • moyenne • médiane • quartile • étendue', quiz1: 'Dans une série ordonnée de 7 valeurs, quelle position occupe la médiane ?', quizBonne: 'La 4e valeur',
+    ),
+
+    '2nde_C_math_ch10': _math2ndeCChapitre(
+      code: 'ch10', titre: 'Produit scalaire',
+      cours: r'''Le produit scalaire de deux vecteurs peut se définir par u·v=||u|| ||v|| cos(θ). Dans un repère orthonormé, si u=(x;y) et v=(x';y'), alors u·v=xx'+yy'. Deux vecteurs non nuls sont orthogonaux si leur produit scalaire est nul.''',
+      renforcement: r'''Choisis la formule selon les données disponibles. En repère, multiplie les coordonnées correspondantes puis additionne. Pour une orthogonalité, cherche immédiatement si le produit scalaire vaut zéro.''',
+      enonce1: r'''Calcule le produit scalaire de u=(2;−3) et v=(4;1).''', solution1: r'''u·v=2×4+(−3)×1=8−3=5.''',
+      enonce2: r'''Les vecteurs u=(2;1) et v=(−1;2) sont-ils orthogonaux ?''', solution2: r'''u·v=2×(−1)+1×2=0. Oui, ils sont orthogonaux.''',
+      motsCles: 'produit scalaire • orthogonalité • coordonnées • norme • angle', quiz1: 'Si u·v=0 pour deux vecteurs non nuls, que peut-on conclure ?', quizBonne: 'Ils sont orthogonaux',
+    ),
+
+    '2nde_C_math_ch11': _math2ndeCChapitre(
+      code: 'ch11', titre: 'Équations et inéquations dans ℝ',
+      cours: r'''Une équation cherche les valeurs qui rendent une égalité vraie. Une inéquation décrit un ensemble de réels vérifiant une relation d'ordre. Lorsqu'on multiplie ou divise une inéquation par un nombre négatif, le sens du signe s'inverse. Pour un produit nul, AB=0 équivaut à A=0 ou B=0.''',
+      renforcement: r'''Écris les étapes de façon réversible. Pour les inéquations, surveille le signe du coefficient de x. Pour un produit ou quotient, construis un tableau de signes si nécessaire.''',
+      enonce1: r'''Résous 5x−8=2x+7.''', solution1: r'''3x=15, donc x=5.''',
+      enonce2: r'''Résous (x−2)(x+4)≤0.''', solution2: r'''Les racines sont −4 et 2. Le produit est négatif ou nul entre les racines : x∈[−4;2].''',
+      motsCles: 'équation • inéquation • produit nul • tableau de signes • intervalle', quiz1: 'Que devient le signe d'une inéquation si on multiplie par −2 ?', quizBonne: 'Il s'inverse',
+    ),
+
+    '2nde_C_math_ch12': _math2ndeCChapitre(
+      code: 'ch12', titre: 'Homothéties',
+      cours: r'''Une homothétie de centre O et de rapport k transforme un point M en M' tel que OM'=k·OM. Elle conserve les alignements et transforme les longueurs dans le rapport |k|. Si k>0, M et M' sont du même côté de O ; si k<0, ils sont de côtés opposés.''',
+      renforcement: r'''Pour utiliser une homothétie, identifie le centre et le rapport. Les longueurs correspondantes sont multipliées par |k|. Les aires sont multipliées par k².''',
+      enonce1: r'''Une homothétie de rapport 3 transforme une longueur de 4 cm. Quelle est la longueur image ?''', solution1: r'''4×|3|=12 cm.''',
+      enonce2: r'''Une homothétie de centre O et de rapport −2 envoie A sur A'. Que peut-on dire de la position de A' par rapport à O et A ?''', solution2: r'''A' est sur la demi-droite opposée à OA et OA'=2×OA.''',
+      motsCles: 'homothétie • centre • rapport • image • longueur • aire', quiz1: 'Par une homothétie de rapport 2, une longueur est multipliée par combien ?', quizBonne: '2',
+    ),
+
+    '2nde_C_math_ch13': _math2ndeCChapitre(
+      code: 'ch13', titre: 'Étude de fonctions élémentaires',
+      cours: r'''Les fonctions usuelles de seconde C comprennent notamment les fonctions affine, carré, inverse et racine carrée. Pour chacune, on étudie domaine, signe, variations et représentation graphique. La fonction inverse est définie sur ℝ\\{0} et la fonction racine carrée sur [0;+∞[.''',
+      renforcement: r'''Pour étudier une fonction, commence par son domaine. Cherche ensuite zéros, signe et variations. Compare la forme de l'expression avec les fonctions usuelles pour choisir les propriétés adaptées.''',
+      enonce1: r'''Donne le domaine de définition de f(x)=√(x−2).''', solution1: r'''Il faut x−2≥0, donc Df=[2;+∞[.''',
+      enonce2: r'''Étudie le signe de g(x)=1/(x−3).''', solution2: r'''g(x)<0 pour x<3 et g(x)>0 pour x>3 ; x=3 est interdit.''',
+      motsCles: 'fonction affine • carré • inverse • racine • domaine • variations', quiz1: 'Quel est le domaine de définition de √x ?', quizBonne: '[0;+∞[',
+    ),
+
+    '2nde_C_math_ch14': _math2ndeCChapitre(
+      code: 'ch14', titre: 'Rotations',
+      cours: r'''Une rotation de centre O et d'angle θ conserve les distances, les angles et les aires. Elle fait tourner chaque point autour de O du même angle orienté et dans le même sens. Une rotation de 180° correspond à une symétrie centrale.''',
+      renforcement: r'''Pour construire une image par rotation, conserve la distance au centre puis reporte l'angle orienté. Identifie le centre, l'angle et le sens avant de commencer.''',
+      enonce1: r'''Une rotation de centre O et d'angle 90° envoie A sur A'. Quelle relation entre OA et OA' ?''', solution1: r'''OA=OA' et l'angle orienté (OA,OA') mesure 90°.''',
+      enonce2: r'''Quelle transformation obtient-on avec une rotation de centre O et d'angle 180° ?''', solution2: r'''Une symétrie centrale de centre O.''',
+      motsCles: 'rotation • centre • angle orienté • conservation • symétrie centrale', quiz1: 'Quelle grandeur est conservée par une rotation ?', quizBonne: 'La distance',
+    ),
+
+    '2nde_C_math_ch15': _math2ndeCChapitre(
+      code: 'ch15', titre: 'Inéquations dans ℝ × ℝ',
+      cours: r'''Une inéquation linéaire à deux inconnues décrit un demi-plan du plan. Une expression ax+by+c=0 représente une droite frontière. L'inéquation indique le demi-plan situé d'un côté de cette droite ; la frontière est incluse pour ≤ ou ≥.''',
+      renforcement: r'''Pour résoudre graphiquement, trace d'abord la droite frontière. Choisis ensuite un point test qui n'est pas sur la droite pour déterminer le bon demi-plan. Avec ≤ ou ≥, la frontière appartient à l'ensemble solution.''',
+      enonce1: r'''Décris graphiquement l'ensemble solution de x+y≤4.''', solution1: r'''C'est le demi-plan situé sous la droite x+y=4, frontière comprise.''',
+      enonce2: r'''Le point A(1;2) appartient-il à l'ensemble x−2y≥−3 ?''', solution2: r'''1−4=−3, donc oui, A appartient à l'ensemble solution.''',
+      motsCles: 'inéquation • deux inconnues • droite frontière • demi-plan • point test', quiz1: 'Pour une inéquation ≤, la droite frontière est-elle incluse ?', quizBonne: 'Oui',
+    ),
+
 
     '2nde_A_math_ch01': _math2ndeAChapitre(
       code: 'ch01', titre: 'Calcul numérique',

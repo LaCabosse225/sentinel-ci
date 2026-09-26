@@ -805,7 +805,129 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _mathTleA1Chapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+'''),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
+'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+        ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
+'''),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(id: 'TleA1_${code}_q1', type: TypeQuestion.qcm, enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0], explication: 'La première proposition correspond à la notion essentielle du chapitre.'),
+          QuestionQuiz(id: 'TleA1_${code}_q2', type: TypeQuestion.vraiFaux,
+            enonce: 'Une résolution correcte doit respecter les conditions des propriétés utilisées.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Les hypothèses d’une propriété doivent être vérifiées avant son application.'),
+          QuestionQuiz(id: 'TleA1_${code}_q3', type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier ?',
+            choix: ['Identifier les données, les conditions et la méthode', 'Répondre sans justification', 'Ignorer le domaine', 'Utiliser une formule sans vérifier'],
+            bonnesReponses: [0], explication: 'La rigueur commence par l’identification des données et des conditions.'
+          ),
+        ]),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    'Tle_A1_math_ch01': _mathTleA1Chapitre(
+      code:'ch01', titre:'Étude de fonctions polynômes et de fonctions rationnelles',
+      cours:r'''Les fonctions polynômes et rationnelles se définissent sur des domaines déterminés par leurs expressions. Leur étude utilise limites, dérivée, signe, variations, zéros et asymptotes. Une représentation graphique rassemble ces informations pour décrire le comportement de la fonction.''',
+      renforcement:r'''Commence par déterminer le domaine de définition. Étudie ensuite les limites et la dérivée, puis le signe et les variations. Pour une fonction rationnelle, recherche les valeurs interdites et les éventuelles asymptotes.''',
+      enonce1:r'''Dérive f(x)=x³−3x²+2x.''', solution1:r'''f'(x)=3x²−6x+2.''',
+      enonce2:r'''Détermine le domaine de f(x)=(x+1)/(x−2).''', solution2:r'''Le dénominateur ne doit pas être nul : Df=ℝ\{2}.''',
+      motsCles:'polynôme • rationnelle • domaine • dérivée • limite • asymptote • variation', quiz1:'Pour une fonction rationnelle, que faut-il vérifier avant toute étude ?', quizBonne:'Les valeurs qui annulent le dénominateur',
+    ),
+    'Tle_A1_math_ch02': _mathTleA1Chapitre(
+      code:'ch02', titre:'Probabilité et variable aléatoire',
+      cours:r'''Une variable aléatoire associe un nombre réel à chaque issue d’une expérience aléatoire. Sa loi donne les probabilités de ses valeurs. L’espérance représente une valeur moyenne théorique et la variance mesure la dispersion autour de cette moyenne.''',
+      renforcement:r'''Construis d’abord la loi de probabilité en vérifiant que la somme des probabilités vaut 1. Calcule ensuite espérance et variance à partir des valeurs et de leurs probabilités.''',
+      enonce1:r'''Une variable X vaut 0 avec probabilité 0,4 et 1 avec probabilité 0,6. Calcule E(X).''', solution1:r'''E(X)=0×0,4+1×0,6=0,6.''',
+      enonce2:r'''Une variable X prend 1 et 3 avec probabilités 0,5 chacune. Calcule E(X).''', solution2:r'''E(X)=1×0,5+3×0,5=2.''',
+      motsCles:'variable aléatoire • loi • probabilité • espérance • variance', quiz1:'Que représente l’espérance d’une variable aléatoire ?', quizBonne:'Sa valeur moyenne théorique',
+    ),
+    'Tle_A1_math_ch03': _mathTleA1Chapitre(
+      code:'ch03', titre:'Primitives et calcul intégral',
+      cours:r'''Une primitive F d’une fonction f sur un intervalle vérifie F’=f. L’intégrale d’une fonction sur un intervalle peut être calculée à partir d’une primitive. Elle permet notamment de déterminer des aires algébriques et des quantités cumulées.''',
+      renforcement:r'''Pour trouver une primitive, reconnais les formes usuelles puis vérifie en dérivant le résultat. Pour une intégrale définie, applique F(b)−F(a).''',
+      enonce1:r'''Donne une primitive de f(x)=3x².''', solution1:r'''F(x)=x³+C.''',
+      enonce2:r'''Calcule ∫₀² x dx.''', solution2:r'''Une primitive est x²/2, donc l’intégrale vaut 2.''',
+      motsCles:'primitive • intégrale • aire • dérivée • borne', quiz1:'Quelle relation doit vérifier une primitive F de f ?', quizBonne:'F’=f',
+    ),
+    'Tle_A1_math_ch04': _mathTleA1Chapitre(
+      code:'ch04', titre:'Fonction logarithme népérien',
+      cours:r'''La fonction logarithme népérien, notée ln, est définie sur ]0;+∞[ et vérifie ln(ab)=ln(a)+ln(b). Elle est strictement croissante et constitue la fonction réciproque de l’exponentielle. Les propriétés du logarithme permettent de résoudre des équations et inéquations.''',
+      renforcement:r'''Vérifie toujours que les arguments des logarithmes sont strictement positifs. Utilise ln(ab)=ln(a)+ln(b), ln(a/b)=ln(a)−ln(b) et ln(a^r)=r ln(a).''',
+      enonce1:r'''Calcule ln(1).''', solution1:r'''ln(1)=0.''',
+      enonce2:r'''Résous ln(x)=2.''', solution2:r'''En appliquant l’exponentielle, x=e².''',
+      motsCles:'ln • logarithme • domaine • exponentielle • propriétés', quiz1:'Sur quel ensemble la fonction ln est-elle définie ?', quizBonne:']0;+∞[',
+    ),
+    'Tle_A1_math_ch05': _mathTleA1Chapitre(
+      code:'ch05', titre:'Fonction exponentielle népérienne',
+      cours:r'''La fonction exponentielle, notée exp ou e^x, est définie sur ℝ. Elle vérifie exp(a+b)=exp(a)exp(b), exp(0)=1 et exp(x)>0. Sa dérivée est elle-même. Elle est strictement croissante et réciproque du logarithme népérien.''',
+      renforcement:r'''Utilise les propriétés de produit et de quotient pour transformer les expressions. Pour résoudre exp(x)=k avec k>0, applique ln des deux côtés.''',
+      enonce1:r'''Calcule e^0.''', solution1:r'''e^0=1.''',
+      enonce2:r'''Résous e^x=5.''', solution2:r'''x=ln(5).''',
+      motsCles:'exponentielle • exp • e^x • logarithme • croissance', quiz1:'Quelle est la dérivée de la fonction exponentielle ?', quizBonne:'Elle est égale à elle-même',
+    ),
+    'Tle_A1_math_ch06': _mathTleA1Chapitre(
+      code:'ch06', titre:'Statistique à deux variables',
+      cours:r'''Une série statistique à deux variables étudie deux caractères observés simultanément. Le nuage de points permet de visualiser leur relation. La covariance et le coefficient de corrélation renseignent sur le sens et l’intensité d’une liaison linéaire, tandis qu’une droite d’ajustement peut servir à estimer des valeurs.''',
+      renforcement:r'''Commence par représenter les couples (x,y). Observe la tendance générale puis utilise un ajustement linéaire lorsque le modèle est pertinent. Une corrélation proche de 1 ou −1 indique une liaison linéaire forte.''',
+      enonce1:r'''Un nuage de points suit approximativement une droite croissante. Que peut-on dire du coefficient de corrélation ?''', solution1:r'''Il est positif et, si la liaison est forte, proche de 1.''',
+      enonce2:r'''Une droite d’ajustement est y=2x+3. Estime y pour x=5.''', solution2:r'''y=2×5+3=13.''',
+      motsCles:'statistique • deux variables • nuage • corrélation • ajustement', quiz1:'Que représente un coefficient de corrélation proche de 1 ?', quizBonne:'Une forte liaison linéaire positive',
+    ),
+    'Tle_A1_math_ch07': _mathTleA1Chapitre(
+      code:'ch07', titre:'Suites numériques',
+      cours:r'''Une suite numérique peut être définie explicitement ou par récurrence. Les suites arithmétiques et géométriques possèdent des formules particulières. L’étude d’une suite peut porter sur son sens de variation, ses bornes et sa convergence.''',
+      renforcement:r'''Pour étudier une suite, calcule quelques termes puis cherche une propriété générale. Pour une suite arithmétique, utilise la raison additive ; pour une suite géométrique, la raison multiplicative.''',
+      enonce1:r'''Une suite arithmétique vérifie u₀=3 et r=4. Calcule u₇.''', solution1:r'''u₇=3+7×4=31.''',
+      enonce2:r'''Une suite géométrique vérifie u₀=2 et q=1/2. Calcule u₃.''', solution2:r'''u₃=2×(1/2)³=1/4.''',
+      motsCles:'suite • récurrence • arithmétique • géométrique • convergence', quiz1:'Dans une suite géométrique de raison q, quelle relation relie deux termes consécutifs ?', quizBonne:'uₙ₊₁=q uₙ',
+    ),
+    'Tle_A1_math_ch08': _mathTleA1Chapitre(
+      code:'ch08', titre:'Systèmes d’équations linéaires dans ℝ × ℝ',
+      cours:r'''Un système linéaire à deux inconnues recherche les couples qui satisfont simultanément deux équations. Il peut être résolu par substitution, combinaison linéaire ou interprétation graphique. Deux droites peuvent être sécantes, parallèles distinctes ou confondues, correspondant respectivement à une, aucune ou une infinité de solutions.''',
+      renforcement:r'''Choisis la méthode qui simplifie le plus le système. Après avoir trouvé un couple, remplace-le dans les deux équations pour vérifier.''',
+      enonce1:r'''Résous x+y=8 et x−y=2.''', solution1:r'''En additionnant : 2x=10, donc x=5 et y=3.''',
+      enonce2:r'''Résous 2x+y=7 et x−y=2.''', solution2:r'''y=x−2. Donc 3x−2=7, x=3 et y=1.''',
+      motsCles:'système • équation linéaire • substitution • combinaison • droites', quiz1:'Graphiquement, que représente la solution d’un système de deux droites sécantes ?', quizBonne:'Leur point d’intersection',
+    ),
+
+
 
     '1ere_D_math_ch01': _math1ereDChapitre(
       code:'ch01', titre:'Équations et inéquations du second degré dans ℝ',

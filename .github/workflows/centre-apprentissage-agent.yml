@@ -25,10 +25,13 @@ jobs:
       - name: Audit catalogue
         run: python3 tool/centre_apprentissage_agent.py
 
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.2
+
       - name: Validate catalogue
-        run: |
-          dart --version
-          dart run tool/validate_centre_apprentissage.dart
+        run: dart run tool/validate_centre_apprentissage.dart
 
   generate:
     if: github.event_name == 'workflow_dispatch' && inputs.generate == true

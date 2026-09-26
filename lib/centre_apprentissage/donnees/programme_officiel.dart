@@ -68,41 +68,37 @@ class ProgrammeOfficiel {
   // ==========================================================================
 
   static const Map<String, List<ChapitreOfficiel>> _programmes = {
-    // ════════════════════════════════════════════════════════════════════
-    //  MATHEMATIQUES — 3e  (13 lecons, 4 h/semaine, 128 h/an)
-    //  Ordre choisi pour respecter la dependance signalee par le guide
-    //  d'execution : « Triangle rectangle » vient apres « Racines carrees ».
-    // ════════════════════════════════════════════════════════════════════
     '3e_math': [
-      ChapitreOfficiel(1, 'Calcul litteral',
-          'Polynomes, fractions rationnelles, puissances d exposant entier relatif, developpement, reduction, factorisation.'),
-      ChapitreOfficiel(2, 'Racines carrees',
-          'Nombres reels, valeur absolue, expression conjuguee, operations avec les radicaux.'),
-      ChapitreOfficiel(3, 'Calcul numerique',
-          'Intervalles, encadrements, comparaison de nombres, arrondis d ordre 1, 2 ou 3.'),
-      ChapitreOfficiel(4, 'Equations et inequations du premier degre dans R',
-          'Resolution des equations et inequations, systemes de deux inequations, problemes du premier degre.'),
-      ChapitreOfficiel(5, 'Equations et inequations du premier degre dans R x R',
-          'Systemes de deux equations : substitution, combinaison, resolution graphique.'),
-      ChapitreOfficiel(6, 'Applications affines',
-          'Applications affines et lineaires, representation graphique, sens de variation, proportionnalite.'),
-      ChapitreOfficiel(7, 'Statistique',
-          'Effectifs et frequences cumules croissants, mediane, classe modale, diagramme circulaire.'),
-      ChapitreOfficiel(8, 'Triangle rectangle',
-          'Propriete de Pythagore et sa reciproque, sinus, cosinus et tangente d un angle aigu.'),
-      ChapitreOfficiel(9, 'Proprietes de Thales dans un triangle',
-          'Propriete de Thales, sa reciproque, sa consequence, partage d un segment.'),
-      ChapitreOfficiel(10, 'Angles inscrits',
-          'Angle inscrit, arc intercepte, angle au centre associe, egalite de mesures.'),
-      ChapitreOfficiel(11, 'Vecteurs',
-          'Somme, difference, produit d un vecteur par un reel, colinearite, orthogonalite.'),
-      ChapitreOfficiel(12, 'Coordonnees d un vecteur',
-          'Reperes du plan, coordonnees, milieu d un segment, distance de deux points.'),
-      ChapitreOfficiel(13, 'Equations de droites',
-          'Equation d une droite, coefficient directeur, droites paralleles et perpendiculaires.'),
+      ChapitreOfficiel(1, 'Calcul littéral',
+          'Développement, réduction, factorisation, identités remarquables et calcul avec des expressions littérales.'),
+      ChapitreOfficiel(2, 'Propriétés de Thalès dans un triangle',
+          'Propriété de Thalès, réciproque, conséquence et partage d’un segment.'),
+      ChapitreOfficiel(3, 'Racines carrées',
+          'Racine carrée, produits et quotients de radicaux, simplification et comparaison.'),
+      ChapitreOfficiel(4, 'Triangle rectangle',
+          'Théorème de Pythagore et sa réciproque, sinus, cosinus et tangente d’un angle aigu.'),
+      ChapitreOfficiel(5, 'Calcul numérique',
+          'Nombres réels, intervalles, encadrements, valeurs approchées et calculs numériques.'),
+      ChapitreOfficiel(6, 'Angles inscrits',
+          'Angles inscrits, angles au centre et relations entre leurs mesures.'),
+      ChapitreOfficiel(7, 'Vecteurs',
+          'Égalité, somme, différence, multiplication par un réel et colinéarité des vecteurs.'),
+      ChapitreOfficiel(8, 'Équations et inéquations dans ℝ',
+          'Résolution d’équations et d’inéquations du premier degré dans ℝ et résolution de problèmes.'),
+      ChapitreOfficiel(9, 'Pyramides et cônes',
+          'Patrons, volumes et aires de pyramides et de cônes.'),
+      ChapitreOfficiel(10, 'Statistique',
+          'Effectifs, fréquences, effectifs cumulés, médiane et représentation de données.'),
+      ChapitreOfficiel(11, 'Coordonnées de vecteurs',
+          'Coordonnées dans un repère, opérations sur les vecteurs, milieu et distance.'),
+      ChapitreOfficiel(12, 'Équations de droites',
+          'Coefficient directeur, équation d’une droite, parallélisme et perpendicularité.'),
+      ChapitreOfficiel(13, 'Applications affines',
+          'Applications affines et linéaires, représentations graphiques et variations.'),
+      ChapitreOfficiel(14, 'Équations et inéquations dans ℝ × ℝ',
+          'Systèmes de deux équations et d’inéquations à deux inconnues, méthodes algébriques et graphiques.'),
     ],
   };
-
   // ==========================================================================
   //  CLES ET ACCES
   // ==========================================================================

@@ -750,7 +750,185 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _math1ereDChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+'''),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
+'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+        ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
+'''),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(id: '1ereD_${code}_q1', type: TypeQuestion.qcm, enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0], explication: 'La première proposition correspond à la notion essentielle du chapitre.'),
+          QuestionQuiz(id: '1ereD_${code}_q2', type: TypeQuestion.vraiFaux,
+            enonce: 'Une résolution mathématique correcte doit respecter les conditions des propriétés utilisées.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Les hypothèses d’une propriété doivent être vérifiées avant son application.'),
+          QuestionQuiz(id: '1ereD_${code}_q3', type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier ?',
+            choix: ['Identifier les données, les conditions et la méthode', 'Répondre sans justification', 'Ignorer le domaine', 'Utiliser une formule sans vérifier'],
+            bonnesReponses: [0], explication: 'La rigueur commence par l’identification des données et des conditions.'
+          ),
+        ]),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '1ere_D_math_ch01': _math1ereDChapitre(
+      code:'ch01', titre:'Équations et inéquations du second degré dans ℝ',
+      cours:r'''Une équation du second degré s’écrit ax²+bx+c=0 avec a≠0. Le discriminant Δ=b²−4ac permet de déterminer le nombre de solutions réelles. Les inéquations du second degré se résolvent à l’aide du signe du trinôme et de ses racines.''',
+      renforcement:r'''Calcule d’abord Δ. Si Δ>0, le trinôme possède deux racines réelles ; si Δ=0, une racine double ; si Δ<0, aucune racine réelle. Pour une inéquation, construis ensuite le tableau de signes.''',
+      enonce1:r'''Résous x²−5x+6=0.''', solution1:r'''(x−2)(x−3)=0, donc x=2 ou x=3.''',
+      enonce2:r'''Résous x²−4x+3≤0.''', solution2:r'''Les racines sont 1 et 3 et le coefficient de x² est positif : solution [1;3].''',
+      motsCles:'trinôme • second degré • discriminant • racines • signe', quiz1:'Que permet de déterminer le discriminant d’un trinôme ?', quizBonne:'Le nombre de solutions réelles et la nature des racines',
+    ),
+    '1ere_D_math_ch02': _math1ereDChapitre(
+      code:'ch02', titre:'Angles orientés et trigonométrie',
+      cours:r'''Les angles orientés décrivent un sens de rotation et sont définis modulo 2π. Le cercle trigonométrique permet de lire sinus et cosinus. Les identités fondamentales et les formules trigonométriques servent à transformer et résoudre des expressions.''',
+      renforcement:r'''Travaille dans un repère trigonométrique et respecte le sens des angles. Utilise notamment sin²x+cos²x=1 et les relations de périodicité.''',
+      enonce1:r'''Donne sin(π/2) et cos(π/2).''', solution1:r'''sin(π/2)=1 et cos(π/2)=0.''',
+      enonce2:r'''Simplifie cos²x+sin²x.''', solution2:r'''L’expression vaut 1 pour tout réel x.''',
+      motsCles:'angle orienté • cercle trigonométrique • sinus • cosinus • périodicité', quiz1:'Quelle relation fondamentale relie sinus et cosinus ?', quizBonne:'sin²x+cos²x=1',
+    ),
+    '1ere_D_math_ch03': _math1ereDChapitre(
+      code:'ch03', titre:'Généralités sur les fonctions',
+      cours:r'''Une fonction associe une image unique à chaque élément de son domaine. Son étude comprend domaine de définition, images, antécédents, zéros, signe, variations et représentation graphique. Les fonctions usuelles servent de modèles pour l’interprétation de situations.''',
+      renforcement:r'''Dans f(a)=b, a est un antécédent de b et b est l’image de a. Pour déterminer les zéros, résous f(x)=0 et respecte le domaine de définition.''',
+      enonce1:r'''Soit f(x)=4x−1. Calcule f(2).''', solution1:r'''f(2)=7.''',
+      enonce2:r'''Pour f(x)=x²−16, trouve les zéros.''', solution2:r'''x²−16=(x−4)(x+4), donc x=−4 ou x=4.''',
+      motsCles:'fonction • domaine • image • antécédent • zéro • variation', quiz1:'Dans f(3)=10, quelle est l’image de 3 ?', quizBonne:'10',
+    ),
+    '1ere_D_math_ch04': _math1ereDChapitre(
+      code:'ch04', titre:'Limites et continuité',
+      cours:r'''La limite décrit le comportement d’une fonction au voisinage d’un point ou lorsque la variable tend vers l’infini. La continuité en a signifie que la limite en a est égale à f(a). Les limites permettent d’étudier asymptotes et comportements aux bornes du domaine.''',
+      renforcement:r'''Commence par identifier le point étudié et le domaine. Si une forme indéterminée apparaît, transforme l’expression par factorisation ou simplification avant de calculer la limite.''',
+      enonce1:r'''Calcule lim(x→1)(2x+3).''', solution1:r'''La limite vaut 5.''',
+      enonce2:r'''Calcule lim(x→+∞)(3x+2)/x.''', solution2:r'''La limite vaut 3.''',
+      motsCles:'limite • continuité • voisinage • infini • asymptote', quiz1:'Une fonction continue en a vérifie quelle relation ?', quizBonne:'lim f(x) quand x tend vers a = f(a)',
+    ),
+    '1ere_D_math_ch05': _math1ereDChapitre(
+      code:'ch05', titre:'Dénombrement',
+      cours:r'''Le dénombrement permet de compter des possibilités sans les énumérer une à une. Les principes additif et multiplicatif, les arrangements, permutations et combinaisons répondent à des situations différentes selon que l’ordre compte ou non.''',
+      renforcement:r'''Analyse d’abord le type de choix. Pour des étapes successives, multiplie les possibilités ; pour des cas exclusifs, additionne. Vérifie si l’ordre intervient.''',
+      enonce1:r'''Un menu propose 3 entrées et 5 plats. Combien de menus entrée+plat ?''', solution1:r'''3×5=15 menus.''',
+      enonce2:r'''Combien de façons de choisir 2 délégués parmi 8 sans ordre ?''', solution2:r'''C(8,2)=28.''',
+      motsCles:'dénombrement • choix • arrangement • combinaison • permutation', quiz1:'Dans une combinaison, l’ordre du choix est-il pris en compte ?', quizBonne:'Non',
+    ),
+    '1ere_D_math_ch06': _math1ereDChapitre(
+      code:'ch06', titre:'Dérivation',
+      cours:r'''La dérivée d’une fonction donne son taux de variation instantané et le coefficient directeur de la tangente. Les règles de dérivation permettent d’étudier rapidement les variations d’une fonction.''',
+      renforcement:r'''Reconnais la forme de la fonction, applique la règle de dérivation puis simplifie. Le signe de la dérivée permet ensuite de construire les variations.''',
+      enonce1:r'''Dérive f(x)=x³+2x²−x.''', solution1:r'''f'(x)=3x²+4x−1.''',
+      enonce2:r'''Détermine la dérivée de f(x)=5x²−3x+4.''', solution2:r'''f'(x)=10x−3.''',
+      motsCles:'dérivée • taux de variation • tangente • pente • variation', quiz1:'Que représente f’(a) graphiquement ?', quizBonne:'Le coefficient directeur de la tangente à la courbe en a',
+    ),
+    '1ere_D_math_ch07': _math1ereDChapitre(
+      code:'ch07', titre:'Extension de la notion de limite',
+      cours:r'''L’étude des limites s’étend aux comportements à l’infini et aux limites infinies. Elle permet d’identifier des asymptotes et de traiter des expressions dont la forme initiale peut être indéterminée.''',
+      renforcement:r'''Compare les termes dominants à l’infini. Pour une fraction rationnelle, divise par la plus grande puissance de x afin de faire apparaître la limite.''',
+      enonce1:r'''Calcule lim(x→+∞)(2x²+1)/x².''', solution1:r'''La limite vaut 2.''',
+      enonce2:r'''Calcule lim(x→+∞)(x+2)/(x²+1).''', solution2:r'''La limite vaut 0.''',
+      motsCles:'limite à l’infini • limite infinie • asymptote • terme dominant', quiz1:'À l’infini, quelle idée permet souvent de simplifier une fraction rationnelle ?', quizBonne:'Comparer ou diviser par les termes de plus haut degré',
+    ),
+    '1ere_D_math_ch08': _math1ereDChapitre(
+      code:'ch08', titre:'Barycentre',
+      cours:r'''Le barycentre de points pondérés permet de représenter un centre associé à des coefficients. Il est défini lorsque la somme des coefficients n’est pas nulle. Les relations vectorielles du barycentre permettent d’étudier positions, alignements et milieux pondérés.''',
+      renforcement:r'''Écris la relation vectorielle avec les coefficients. Vérifie leur somme avant d’utiliser la formule et simplifie les vecteurs avec soin.''',
+      enonce1:r'''G est barycentre de (A,2) et (B,1). Quelle relation vérifie-t-il ?''', solution1:r'''2\vec{GA}+\vec{GB}=\vec{0}.''',
+      enonce2:r'''Si G est barycentre de (A,1) et (B,3), exprime \vec{OG}.''', solution2:r'''\vec{OG}=(\vec{OA}+3\vec{OB})/4.''',
+      motsCles:'barycentre • coefficients • points pondérés • vecteurs • position', quiz1:'Que doit vérifier la somme des coefficients d’un barycentre ?', quizBonne:'Elle doit être non nulle',
+    ),
+    '1ere_D_math_ch09': _math1ereDChapitre(
+      code:'ch09', titre:'Étude et représentation graphique d’une fonction',
+      cours:r'''L’étude d’une fonction organise les informations nécessaires à sa représentation : domaine, limites, dérivée, signe, variations et valeurs remarquables. Le tableau de variations sert de guide pour construire une courbe cohérente.''',
+      renforcement:r'''Respecte l’ordre d’étude et place les points remarquables. Contrôle ensuite la cohérence de la courbe avec les variations et les limites.''',
+      enonce1:r'''Pour f(x)=x²−2x, calcule f'(x).''', solution1:r'''f'(x)=2x−2.''',
+      enonce2:r'''Détermine le minimum de f(x)=x²−2x−3.''', solution2:r'''Le sommet est en x=1 et f(1)=−4. Le minimum est −4.''',
+      motsCles:'étude de fonction • dérivée • variations • tableau • courbe', quiz1:'Quelle information permet directement de construire le tableau de variations ?', quizBonne:'Le signe de la dérivée',
+    ),
+    '1ere_D_math_ch10': _math1ereDChapitre(
+      code:'ch10', titre:'Probabilité',
+      cours:r'''Une expérience aléatoire possède un ensemble d’issues. Une probabilité mesure la chance qu’un événement se réalise. Dans un univers fini équiprobable, elle se calcule comme le rapport des cas favorables aux cas possibles. Les événements contraires et incompatibles permettent de simplifier les calculs.''',
+      renforcement:r'''Définis l’univers avant de compter. Vérifie que la probabilité obtenue appartient à [0;1] et utilise P(Ā)=1−P(A) pour un événement contraire.''',
+      enonce1:r'''Un dé équilibré est lancé. Quelle est la probabilité d’obtenir 5 ?''', solution1:r'''P=1/6.''',
+      enonce2:r'''Si P(A)=0,25, calcule P(Ā).''', solution2:r'''P(Ā)=1−0,25=0,75.''',
+      motsCles:'probabilité • événement • univers • équiprobabilité • contraire', quiz1:'Quelle formule donne la probabilité de l’événement contraire ?', quizBonne:'P(Ā)=1−P(A)',
+    ),
+    '1ere_D_math_ch11': _math1ereDChapitre(
+      code:'ch11', titre:'Suites numériques',
+      cours:r'''Une suite associe des nombres aux entiers naturels. Elle peut être définie par une formule explicite ou une relation de récurrence. Les suites arithmétiques ont une raison additive constante et les suites géométriques une raison multiplicative constante.''',
+      renforcement:r'''Compare deux termes consécutifs. Une différence constante indique une suite arithmétique ; un quotient constant indique une suite géométrique.''',
+      enonce1:r'''Une suite arithmétique vérifie u_0=6 et r=3. Calcule u_5.''', solution1:r'''u_5=6+5×3=21.''',
+      enonce2:r'''Une suite géométrique vérifie u_0=4 et q=2. Calcule u_4.''', solution2:r'''u_4=4×2^4=64.''',
+      motsCles:'suite • terme • récurrence • arithmétique • géométrique • raison', quiz1:'Comment obtient-on le terme suivant d’une suite arithmétique ?', quizBonne:'En ajoutant la raison',
+    ),
+    '1ere_D_math_ch12': _math1ereDChapitre(
+      code:'ch12', titre:'Composées de transformations du plan',
+      cours:r'''Une transformation du plan associe des points à leurs images. Une composition applique plusieurs transformations successivement. Les translations, rotations, symétries et homothéties conservent certaines propriétés et permettent de construire ou démontrer des configurations.''',
+      renforcement:r'''Respecte l’ordre de composition et suis les images de points caractéristiques. Pour une translation, additionne les vecteurs ; pour une rotation, conserve le centre et additionne les angles lorsqu’elle est composée avec elle-même.''',
+      enonce1:r'''Deux translations de vecteurs u puis v donnent quelle translation ?''', solution1:r'''La translation de vecteur u+v.''',
+      enonce2:r'''Deux rotations de même centre et d’angles 40° puis 50° donnent quelle rotation ?''', solution2:r'''Une rotation de même centre et d’angle 90°.''',
+      motsCles:'transformation • composition • translation • rotation • symétrie', quiz1:'Dans une composition, l’ordre des transformations doit-il être respecté ?', quizBonne:'Oui',
+    ),
+    '1ere_D_math_ch13': _math1ereDChapitre(
+      code:'ch13', titre:'Statistique à une variable',
+      cours:r'''Une série statistique à une variable décrit les valeurs d’un caractère observé. Effectifs, fréquences, moyenne, médiane, quartiles et étendue permettent de résumer la série et d’en comparer les distributions.''',
+      renforcement:r'''Ordonne les valeurs avant de déterminer médiane et quartiles. Avec des effectifs, utilise une moyenne pondérée et vérifie l’effectif total.''',
+      enonce1:r'''Calcule la moyenne de 5, 7, 9, 11 et 13.''', solution1:r'''La moyenne est 9.''',
+      enonce2:r'''Pour 2,4,6,8,10,12,14, donne la médiane et l’étendue.''', solution2:r'''La médiane est 8 et l’étendue est 12.''',
+      motsCles:'statistique • effectif • fréquence • moyenne • médiane • quartile • étendue', quiz1:'Comment calcule-t-on l’étendue ?', quizBonne:'Maximum − minimum',
+    ),
+    '1ere_D_math_ch14': _math1ereDChapitre(
+      code:'ch14', titre:'Systèmes d’équations linéaires dans ℝ² et ℝ³',
+      cours:r'''Un système linéaire rassemble plusieurs équations portant sur plusieurs inconnues. La résolution cherche les valeurs qui satisfont simultanément toutes les équations. On utilise substitution ou combinaisons linéaires et on vérifie la solution dans le système.''',
+      renforcement:r'''Choisis une inconnue facile à isoler ou éliminer. Pour trois inconnues, réduis progressivement le système à deux puis une inconnue avant de remonter aux autres.''',
+      enonce1:r'''Résous x+y=9 et x−y=3.''', solution1:r'''En additionnant, 2x=12 donc x=6 et y=3.''',
+      enonce2:r'''Résous x+y+z=6, x−y=2 et z=1.''', solution2:r'''x+y=5 et x−y=2, donc x=3,5 et y=1,5 ; z=1.''',
+      motsCles:'système • équation linéaire • substitution • combinaison • inconnues', quiz1:'Une solution d’un système doit-elle vérifier toutes les équations ?', quizBonne:'Oui',
+    ),
+    '1ere_D_math_ch15': _math1ereDChapitre(
+      code:'ch15', titre:'Orthogonalité dans l’espace',
+      cours:r'''L’orthogonalité dans l’espace peut être étudiée avec les vecteurs et le produit scalaire. Deux vecteurs sont orthogonaux lorsque leur produit scalaire est nul. Une droite perpendiculaire à un plan est orthogonale à deux directions non colinéaires de ce plan.''',
+      renforcement:r'''Pour démontrer une orthogonalité, choisis des vecteurs directeurs adaptés et calcule leur produit scalaire. Pour une droite et un plan, utilise deux directions indépendantes du plan.''',
+      enonce1:r'''Les vecteurs u=(1,1,0) et v=(1,−1,0) sont-ils orthogonaux ?''', solution1:r'''u·v=1−1=0, donc ils sont orthogonaux.''',
+      enonce2:r'''Un vecteur directeur d=(2,0,0) est-il orthogonal au vecteur n=(0,1,0) ?''', solution2:r'''Oui, d·n=0.''',
+      motsCles:'orthogonalité • espace • produit scalaire • vecteur • plan', quiz1:'Quelle condition caractérise deux vecteurs orthogonaux ?', quizBonne:'Leur produit scalaire est nul',
+    ),
+
+
 
     '1ere_C_math_ch01': _math1ereCChapitre(
       code:'ch01', titre:'Équations et inéquations dans ℝ',

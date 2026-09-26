@@ -22,7 +22,7 @@ jobs:
           sdk: 3.12.2
 
       - name: Validate catalogue
-        run: dart run tool/validate_centre_apprentissage.dart
+        run: dart tool/validate_centre_apprentissage.dart
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2

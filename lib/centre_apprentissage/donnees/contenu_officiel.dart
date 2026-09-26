@@ -339,7 +339,7 @@ PIÈGE À ÉVITER : appliquer une formule sans vérifier les unités et les cond
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: '$titre — exercice d'application',
+        titre: '$titre — exercice d\'application',
         ordre: 2,
         difficulte: Difficulte.moyen,
         enonce: '''$enonce2''',
@@ -428,7 +428,7 @@ PIÈGE À ÉVITER : oublier les signes, les conditions ou les unités.
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: '$titre — exercice d'application',
+        titre: '$titre — exercice d\'application',
         ordre: 2,
         difficulte: Difficulte.moyen,
         enonce: '''$enonce2''',
@@ -506,7 +506,7 @@ PIÈGE À ÉVITER : appliquer une règle sans vérifier ses conditions.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -560,7 +560,7 @@ PIÈGE À ÉVITER : appliquer une propriété sans vérifier les hypothèses.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -614,7 +614,7 @@ PIÈGE À ÉVITER : appliquer une formule sans vérifier les conditions.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -668,7 +668,7 @@ PIÈGE À ÉVITER : appliquer une règle sans vérifier les conditions.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -722,7 +722,7 @@ PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -777,7 +777,7 @@ PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -832,7 +832,7 @@ PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
 '''),
       RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d\'application',
         ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
       RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
         contenu: '''MOTS-CLÉS : $motsCles
@@ -900,7 +900,7 @@ PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: '$titre — exercice d'application',
+        titre: '$titre — exercice d\'application',
         ordre: 2,
         difficulte: Difficulte.moyen,
         enonce: '''$enonce2''',
@@ -991,7 +991,7 @@ PIÈGE À ÉVITER : utiliser une propriété sans vérifier ses hypothèses et s
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: '$titre — exercice d'application',
+        titre: '$titre — exercice d\'application',
         ordre: 2,
         difficulte: Difficulte.moyen,
         enonce: '''$enonce2''',
@@ -1082,7 +1082,7 @@ PIÈGE À ÉVITER : utiliser une propriété sans vérifier ses hypothèses et s
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: '$titre — exercice d'application',
+        titre: '$titre — exercice d\'application',
         ordre: 2,
         difficulte: Difficulte.moyen,
         enonce: '''$enonce2''',

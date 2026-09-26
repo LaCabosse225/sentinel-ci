@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Audit catalogue
         run: python3 tool/centre_apprentissage_agent.py
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -50,7 +50,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CENTRE_AGENT_MODEL: ${{ vars.CENTRE_AGENT_MODEL }}
           CENTRE_AGENT_BATCH_SIZE: 3
-        run: python3 tool/centre_apprentissage_agent.py --generate
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY est absent. Configure le secret GitHub avant une génération." >&2
+            exit 2
+          fi
+          python3 tool/centre_apprentissage_agent.py --generate
 
       - name: Format generated Dart
         run: dart format lib/centre_apprentissage/donnees/contenu_officiel.dart tool/validate_centre_apprentissage.dart

@@ -24,10 +24,9 @@ jobs:
       - name: Validate catalogue
         run: dart run tool/validate_centre_apprentissage.dart
 
-      - name: Flutter analyze
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.38.3
           channel: stable
 
       - name: Install dependencies

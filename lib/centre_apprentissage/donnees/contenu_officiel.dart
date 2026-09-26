@@ -479,7 +479,135 @@ RÉFLEXE : identifier les données → choisir la propriété → calculer → v
     ];
   }
 
+
+  static List<RessourceOfficielle> _math2ndeAChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : lire les données → choisir la propriété → calculer → vérifier.
+'''),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une règle sans vérifier ses conditions.
+'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+        ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
+'''),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(id: '2ndeA_${code}_q1', type: TypeQuestion.qcm, enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions du problème', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0], explication: 'La première proposition correspond à la notion essentielle du chapitre.'),
+          QuestionQuiz(id: '2ndeA_${code}_q2', type: TypeQuestion.vraiFaux,
+            enonce: 'Une résolution correcte doit présenter une démarche suffisamment claire pour être vérifiée.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Le raisonnement et la vérification permettent de contrôler le résultat.'),
+          QuestionQuiz(id: '2ndeA_${code}_q3', type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier ?',
+            choix: ['Identifier les données et les conditions avant de calculer', 'Répondre sans calcul', 'Ignorer les unités ou domaines', 'Copier uniquement le résultat'],
+            bonnesReponses: [0], explication: 'Les données et les conditions déterminent la méthode adaptée.'),
+        ]),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '2nde_A_math_ch01': _math2ndeAChapitre(
+      code: 'ch01', titre: 'Calcul numérique',
+      cours: r'''En seconde, on consolide les ensembles de nombres et les techniques de calcul. Les priorités opératoires sont : parenthèses, puissances, multiplications et divisions, puis additions et soustractions. Les fractions se simplifient en divisant numérateur et dénominateur par un même nombre non nul. Pour les puissances, a^m × a^n = a^(m+n) et (a^m)^n = a^(mn).''',
+      renforcement: r'''Pour calculer proprement, repère d'abord les parenthèses et les puissances. Garde une écriture exacte avec les fractions aussi longtemps que possible. Dans un quotient, vérifie que le dénominateur n'est pas nul. Une racine carrée réelle n'est définie que pour un nombre positif ou nul.''',
+      enonce1: r'''Calcule A = 3 - 2(5 - 8) + 4².''', solution1: r'''5 - 8 = -3 ; 2(-3) = -6 ; 4² = 16. Donc A = 3 - (-6) + 16 = 25.''',
+      enonce2: r'''Simplifie B = 3/4 + 5/6 sous forme irréductible.''', solution2: r'''PPCM(4,6)=12. B = 9/12 + 10/12 = 19/12. La fraction est irréductible.''',
+      motsCles: 'ensembles de nombres • priorités • puissances • fractions • racines',
+      quiz1: 'Quelle règle respecte les priorités opératoires ?', quizBonne: 'Effectuer les puissances avant les multiplications et les additions',
+    ),
+    '2nde_A_math_ch02': _math2ndeAChapitre(
+      code: 'ch02', titre: 'Dénombrement',
+      cours: r'''Le dénombrement consiste à compter des possibilités sans les énumérer une à une. Lorsque deux choix successifs offrent respectivement m et n possibilités, le principe multiplicatif donne m×n possibilités. Un arbre ou un tableau aide à organiser les choix et à éviter les oublis.''',
+      renforcement: r'''Demande-toi combien de choix sont disponibles à chaque étape. Pour des choix successifs, multiplie les nombres de possibilités. Fais attention à savoir si les répétitions sont autorisées ou non : cela change le calcul.''',
+      enonce1: r'''Une tenue comprend 4 chemises et 3 pantalons. Combien de tenues différentes peut-on former ?''', solution1: r'''4×3 = 12 tenues.''',
+      enonce2: r'''Un code est formé de 2 lettres parmi A, B, C puis de 2 chiffres parmi 1, 2, 3. Les répétitions sont autorisées. Combien de codes ?''', solution2: r'''3×3×3×3 = 81 codes.''',
+      motsCles: 'dénombrement • choix • arbre • tableau • principe multiplicatif',
+      quiz1: 'Une première étape offre 5 choix et une seconde 4 choix pour chacun. Combien de possibilités ?', quizBonne: '20 possibilités',
+    ),
+    '2nde_A_math_ch03': _math2ndeAChapitre(
+      code: 'ch03', titre: 'Calcul littéral',
+      cours: r'''Le calcul littéral utilise des lettres pour représenter des nombres. On développe avec la distributivité : a(b+c)=ab+ac. On factorise en mettant un facteur commun en évidence. Les identités remarquables sont (a+b)²=a²+2ab+b², (a-b)²=a²-2ab+b² et (a-b)(a+b)=a²-b². Réduire une expression consiste à regrouper les termes de même nature.''',
+      renforcement: r'''Après un développement, regroupe les termes semblables. Pour factoriser, cherche d'abord un facteur commun, puis une identité remarquable. Une vérification numérique avec une valeur simple de x permet souvent de détecter une erreur de signe.''',
+      enonce1: r'''Développe et réduis E = 3(2x - 5) + 4x.''', solution1: r'''E = 6x - 15 + 4x = 10x - 15.''',
+      enonce2: r'''Factorise F = x² - 10x + 25.''', solution2: r'''F = x² - 2×5×x + 5² = (x - 5)².''',
+      motsCles: 'expression • développer • réduire • factoriser • identité remarquable',
+      quiz1: 'Quelle identité correspond à (a-b)² ?', quizBonne: 'a² - 2ab + b²',
+    ),
+    '2nde_A_math_ch04': _math2ndeAChapitre(
+      code: 'ch04', titre: 'Équations et inéquations dans ℝ',
+      cours: r'''Une équation est une égalité contenant une inconnue. Résoudre une équation revient à trouver les valeurs qui rendent l'égalité vraie. Pour une inéquation, l'addition ou la soustraction conserve le sens ; une multiplication ou division par un nombre négatif inverse le sens. Pour AB=0, on utilise la propriété du produit nul : A=0 ou B=0.''',
+      renforcement: r'''Effectue la même opération aux deux membres d'une équation. Pour une inéquation, surveille le signe du diviseur. Dans une équation-produit, utilise directement le produit nul. Termine par une vérification et écris clairement l'ensemble solution.''',
+      enonce1: r'''Résous 4x - 7 = 2x + 9.''', solution1: r'''2x = 16, donc x = 8.''',
+      enonce2: r'''Résous (x - 3)(2x + 5) = 0 puis -3x + 6 > 0.''', solution2: r'''x=3 ou x=-5/2. Puis -3x>-6, donc x<2. Solution de la seconde inéquation : ]-∞;2[.''',
+      motsCles: 'équation • inéquation • produit nul • ensemble solution • signe',
+      quiz1: 'Que se passe-t-il lorsqu’on divise une inéquation par un nombre négatif ?', quizBonne: 'Le sens de l’inégalité s’inverse',
+    ),
+    '2nde_A_math_ch05': _math2ndeAChapitre(
+      code: 'ch05', titre: 'Généralités sur les fonctions',
+      cours: r'''Une fonction associe à chaque nombre x de son ensemble de définition au plus un nombre f(x). x est un antécédent et f(x) est son image. Une fonction peut être représentée par une formule, un tableau de valeurs ou une courbe. Résoudre f(x)=k revient à chercher les antécédents de k. Les variations indiquent les intervalles où la fonction augmente ou diminue.''',
+      renforcement: r'''Dans f(3)=7, 3 est l'antécédent et 7 est l'image. Sur une courbe, une image se lit avec une verticale et un antécédent avec une horizontale. Pour résoudre f(x)=0, cherche les abscisses des points où la courbe rencontre l'axe des abscisses.''',
+      enonce1: r'''On donne f(x)=2x-1. Calcule f(4) et détermine l'antécédent de 9.''', solution1: r'''f(4)=7. Pour l'antécédent de 9 : 2x-1=9, donc x=5.''',
+      enonce2: r'''Une fonction vérifie f(-2)=5 et f(3)=-1. Que représentent -2 et 5 ? Que représente 3 par rapport à -1 ?''', solution2: r'''-2 est un antécédent de 5 et 5 est l'image de -2. 3 est un antécédent de -1.''',
+      motsCles: 'fonction • image • antécédent • courbe • variation • domaine',
+      quiz1: 'Dans f(2)=7, quelle est l’image de 2 ?', quizBonne: '7',
+    ),
+    '2nde_A_math_ch06': _math2ndeAChapitre(
+      code: 'ch06', titre: 'Étude de fonctions élémentaires',
+      cours: r'''La fonction affine s'écrit f(x)=ax+b et sa représentation est une droite. La fonction linéaire est f(x)=ax. La fonction carré est f(x)=x² ; elle est décroissante sur ]-∞;0] et croissante sur [0;+∞[. La fonction inverse f(x)=1/x est définie pour x≠0 et sa courbe est une hyperbole.''',
+      renforcement: r'''Pour reconnaître une affine, cherche la forme ax+b. Pour la fonction carré, retiens x²≥0 et ses variations. Pour l'inverse, 0 est interdit et le signe de 1/x dépend du signe de x. Les tableaux de valeurs permettent de construire et contrôler une représentation.''',
+      enonce1: r'''Soit f(x)=-2x+6. Donne son coefficient directeur, son ordonnée à l'origine et calcule f(4).''', solution1: r'''a=-2, b=6 et f(4)=-8+6=-2.''',
+      enonce2: r'''Étudie le signe de g(x)=x²-9 et résous g(x)≥0.''', solution2: r'''g(x)=(x-3)(x+3). Donc g(x)≥0 pour x≤-3 ou x≥3.''',
+      motsCles: 'affine • linéaire • carré • inverse • coefficient directeur • variations',
+      quiz1: 'Quelle est la forme d’une fonction affine ?', quizBonne: 'f(x)=ax+b',
+    ),
+    '2nde_A_math_ch07': _math2ndeAChapitre(
+      code: 'ch07', titre: 'Statistique',
+      cours: r'''Une série statistique décrit un caractère observé sur une population. L'effectif est le nombre d'observations et la fréquence est l'effectif divisé par l'effectif total. La moyenne pondérée est la somme des produits valeur×effectif divisée par l'effectif total. La médiane partage la série ordonnée en deux groupes de même effectif. Les quartiles décrivent la dispersion de la série.''',
+      renforcement: r'''Ordonne les valeurs avant de déterminer médiane et quartiles. Vérifie la somme des effectifs. Une moyenne peut être influencée par des valeurs extrêmes, alors que la médiane est basée sur la position centrale.''',
+      enonce1: r'''Les notes 8, 10, 10, 12 et 15 sont obtenues par cinq élèves. Calcule la moyenne et la médiane.''', solution1: r'''Moyenne = 55/5 = 11. La médiane est la troisième valeur : 10.''',
+      enonce2: r'''Pour la série 5, 7, 7, 8, 9, 12, 15, 15, détermine la médiane et l'étendue.''', solution2: r'''Il y a 8 valeurs : médiane=(8+9)/2=8,5. Étendue=15-5=10.''',
+      motsCles: 'population • caractère • effectif • fréquence • moyenne • médiane • quartiles',
+      quiz1: 'Que représente la médiane d’une série ordonnée ?', quizBonne: 'Une valeur qui partage la série en deux groupes de même effectif',
+    ),
+    '2nde_A_math_ch08': _math2ndeAChapitre(
+      code: 'ch08', titre: 'Systèmes d’équations linéaires dans ℝ × ℝ',
+      cours: r'''Un système de deux équations linéaires à deux inconnues s'écrit ax+by=c et a'x+b'y=c'. Sa solution est un couple (x;y) qui vérifie simultanément les deux équations. On peut utiliser la substitution, la combinaison linéaire ou la résolution graphique. Graphiquement, les équations représentent des droites et une solution unique correspond à leur point d'intersection.''',
+      renforcement: r'''Avec la substitution, isole une inconnue puis remplace dans l'autre équation. Avec la combinaison, fais disparaître une inconnue en additionnant ou soustrayant des équations convenablement multipliées. Vérifie toujours le couple obtenu dans les deux équations.''',
+      enonce1: r'''Résous le système x+y=7 et 2x-y=5.''', solution1: r'''En additionnant : 3x=12, donc x=4. Puis y=3. Solution : (4;3).''',
+      enonce2: r'''Un cahier coûte x francs et un stylo y francs. 3 cahiers et 2 stylos coûtent 2 100 F ; 2 cahiers et 3 stylos coûtent 1 900 F. Détermine x et y.''', solution2: r'''3x+2y=2100 et 2x+3y=1900. Par combinaison, 5x=2500, donc x=500. Puis y=300. Le cahier coûte 500 F et le stylo 300 F.''',
+      motsCles: 'système • inconnues • substitution • combinaison • droite • intersection',
+      quiz1: 'Que représente graphiquement la solution d’un système de deux droites sécantes ?', quizBonne: 'Le point d’intersection des deux droites',
+    ),
+
 
     '4e_math_ch01': _math4eChapitre(
       code: 'ch01',

@@ -14,6 +14,7 @@ import '../../main.dart';
 import '../modeles/contenu.dart';
 import '../services/contenu_service.dart';
 import '../donnees/programme_officiel.dart';
+import '../donnees/contenu_officiel.dart';
 import 'ressources.dart';
 
 // ============================================================================
@@ -316,12 +317,26 @@ class ChapitresPage extends StatelessWidget {
 
     try {
       final r = await ProgrammeOfficiel.installer(niveau, matiere.id);
+
+      // Une fois les chapitres synchronises, installe aussi les ressources
+      // officielles manquantes en brouillon. Le contenu deja present est
+      // conserve et n'est jamais publie automatiquement.
+      final chapitresExistants =
+          await ContenuService.chapitres(niveau, matiere.id);
+      int ressourcesAjoutees = 0;
+      for (final chapitre in chapitresExistants) {
+        ressourcesAjoutees +=
+            await ContenuOfficiel.installer(chapitre, user.uid);
+      }
+
       if (!context.mounted) return;
       showSnack(
         context,
         r.crees == 0
-            ? 'Programme deja complet : ${r.ignores} chapitre(s) conserve(s).'
-            : '${r.crees} chapitre(s) ajoute(s), ${r.ignores} deja present(s).',
+            ? 'Programme deja complet : ${r.ignores} chapitre(s). '
+              '$ressourcesAjoutees ressource(s) ajoutee(s) en brouillon.'
+            : '${r.crees} chapitre(s) ajoute(s), ${r.ignores} deja presents. '
+              '$ressourcesAjoutees ressource(s) ajoutee(s) en brouillon.',
       );
     } catch (e) {
       if (context.mounted) {

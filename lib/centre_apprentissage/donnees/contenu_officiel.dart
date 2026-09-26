@@ -302,41 +302,41 @@ class ContenuOfficiel {
 
 
   static List<RessourceOfficielle> _math6eChapitre({
-    required String code, required String titre, required String cours,
-    required String renforcement, required String enonce1, required String solution1,
-    required String enonce2, required String solution2, required String motsCles,
-    required String q1, required List<String> choix1, required int bonne1, required String exp1,
-    required String q2, required List<String> choix2, required int bonne2, required String exp2,
-    required String q3, required List<String> choix3, required int bonne3, required String exp3,
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String q1,
+    required List<String> choix1,
+    required int bonne1,
+    required String exp1,
+    required String q2,
+    required List<String> choix2,
+    required int bonne2,
+    required String exp2,
+    required String q3,
+    required List<String> choix3,
+    required int bonne3,
+    required String exp3,
   }) {
     return [
-      RessourceOfficielle(type: TypeRessource.cours, titre: '\${titre} — cours', ordre: 1, contenu: r'''\${cours}'''),
-      RessourceOfficielle(type: TypeRessource.renforcement, titre: '\${titre} — comprendre et retenir', ordre: 1,
-        contenu: r'''\${renforcement}
-
-MÉTHODE : lire l'énoncé → repérer les données → choisir la règle → calculer → vérifier.
-'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '\${titre} — exercice guidé', ordre: 1,
-        difficulte: Difficulte.facile, enonce: r'''\${enonce1}''', solution: r'''\${solution1}'''),
-      RessourceOfficielle(type: TypeRessource.exercice, titre: '\${titre} — exercice d'application', ordre: 2,
-        difficulte: Difficulte.moyen, enonce: r'''\${enonce2}''', solution: r'''\${solution2}'''),
-      RessourceOfficielle(type: TypeRessource.fiche, titre: '\${titre} — fiche de révision', ordre: 1,
-        contenu: r'''MOTS-CLÉS : \${motsCles}
-
-À RETENIR
-\${cours}
-
-RÉFLEXE : toujours vérifier que le résultat répond bien à la question.
-'''),
-      RessourceOfficielle(type: TypeRessource.quiz, titre: '\${titre} — quiz', ordre: 1, dureeMinutes: 5,
-        questions: [
-          QuestionQuiz(id: '6e_math_\${code}_q1', type: TypeQuestion.qcm, enonce: r'''\${q1}''', choix: choix1, bonnesReponses: [bonne1], explication: r'''\${exp1}'''),
-          QuestionQuiz(id: '6e_math_\${code}_q2', type: TypeQuestion.qcm, enonce: r'''\${q2}''', choix: choix2, bonnesReponses: [bonne2], explication: r'''\${exp2}'''),
-          QuestionQuiz(id: '6e_math_\${code}_q3', type: TypeQuestion.vraiFaux, enonce: r'''\${q3}''', choix: choix3, bonnesReponses: [bonne3], explication: r'''\${exp3}'''),
-        ]),
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours', ordre: 1, contenu: cours),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre et retenir', ordre: 1, contenu: '$renforcement\n\nMÉTHODE : lire l’énoncé → repérer les données → choisir la règle → calculer → vérifier.'),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé', ordre: 1, difficulte: Difficulte.facile, enonce: enonce1, solution: solution1),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d’application', ordre: 2, difficulte: Difficulte.moyen, enonce: enonce2, solution: solution2),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision', ordre: 1, contenu: 'MOTS-CLÉS : $motsCles\n\nÀ RETENIR\n$cours\n\nRÉFLEXE : toujours vérifier que le résultat répond bien à la question.'),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', ordre: 1, dureeMinutes: 5, questions: [
+        QuestionQuiz(id: '6e_math_${code}_q1', type: TypeQuestion.qcm, enonce: q1, choix: choix1, bonnesReponses: [bonne1], explication: exp1),
+        QuestionQuiz(id: '6e_math_${code}_q2', type: TypeQuestion.qcm, enonce: q2, choix: choix2, bonnesReponses: [bonne2], explication: exp2),
+        QuestionQuiz(id: '6e_math_${code}_q3', type: TypeQuestion.vraiFaux, enonce: q3, choix: choix3, bonnesReponses: [bonne3], explication: exp3),
+      ]),
     ];
   }
-
   static List<RessourceOfficielle> _math5eChapitre({
     required String code,
     required String titre,
@@ -9332,7 +9332,94 @@ Une école reçoit 2 475 cahiers. Elle distribue 1 386 cahiers aux élèves.
     2 475 - 1 386 = 1 089.
 
 2) Division euclidienne :
-     '6e_math_ch02': _math6eChapitre(
+    1 089 = 7 × 155 + 4.
+
+Le quotient est 155 et le reste est 4.
+
+3) Chaque classe reçoit 155 cahiers.
+
+4) Vérification :
+    7 × 155 + 4 = 1 089.
+
+La division est correcte.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: 'Nombres entiers naturels — fiche de révision',
+        ordre: 1,
+        contenu: r'''
+À RETENIR
+
+ℕ = {0, 1, 2, 3, ...}
+
+VALEURS DE POSITION
+unités → dizaines → centaines → milliers → dizaines de milliers...
+
+
+COMPARER
+- Plus de chiffres : nombre plus grand.
+- Même nombre de chiffres : comparer de gauche à droite.
+
+
+ORDRE
+Croissant : du plus petit au plus grand.
+Décroissant : du plus grand au plus petit.
+
+
+DIVISION EUCLIDIENNE
+    dividende = diviseur × quotient + reste
+    reste < diviseur
+
+
+PRIORITÉS DE CALCUL
+1. Parenthèses
+2. Multiplications et divisions
+3. Additions et soustractions
+
+
+RÉFLEXE DE VÉRIFICATION
+Pour une division :
+    diviseur × quotient + reste = dividende.
+
+Pour une addition :
+    somme - un terme = l'autre terme.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: 'Nombres entiers naturels — quiz',
+        ordre: 1,
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '6e_math_ch01_q1',
+            type: TypeQuestion.qcm,
+            enonce: 'Lequel de ces nombres est un entier naturel ?',
+            choix: ['-5', '3,5', '27', '1/2'],
+            bonnesReponses: [2],
+            explication: '27 appartient à ℕ. Les autres propositions ne sont pas des entiers naturels.',
+          ),
+          QuestionQuiz(
+            id: '6e_math_ch01_q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: 'Dans une division euclidienne, le reste est toujours strictement inférieur au diviseur.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication: 'C’est une propriété fondamentale de la division euclidienne.',
+          ),
+          QuestionQuiz(
+            id: '6e_math_ch01_q3',
+            type: TypeQuestion.qcm,
+            enonce: 'Que vaut 8 + 3 × 4 ?',
+            choix: ['44', '20', '32', '15'],
+            bonnesReponses: [1],
+            explication: 'La multiplication est prioritaire : 3 × 4 = 12, puis 8 + 12 = 20.',
+          ),
+        ],
+      ),
+    ],
+    '6e_math_ch02': _math6eChapitre(
       code: 'ch02', titre: 'Droites et points',
       cours: r'''Un point se note A, B, C. Une droite se note (AB) et est illimitée. Par deux points distincts passe une seule droite. Une demi-droite [AB) a une origine A. Un segment [AB] a deux extrémités A et B. Deux droites sécantes ont un point commun ; deux droites parallèles distinctes n'en ont pas.''', renforcement: r'''Utilise deux points pour définir une droite. Pour distinguer les objets, regarde leurs extrémités : droite aucune, demi-droite une, segment deux. Pour l'appartenance, vérifie si le point est placé sur la ligne.''',
       enonce1: r'''A et B sont deux points distincts. Place C sur (AB) mais entre A et B, puis D sur (AB) en dehors de [AB]. Écris les appartenances.''', solution1: r'''C ∈ (AB), D ∈ (AB) et C ∈ [AB]. D n'appartient pas à [AB].''',

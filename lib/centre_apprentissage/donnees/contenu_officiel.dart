@@ -641,7 +641,126 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _math1ereA2Chapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+'''),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une règle sans vérifier les conditions.
+'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+        ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
+'''),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(id: '1ereA2_${code}_q1', type: TypeQuestion.qcm, enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0], explication: 'La première proposition correspond à la notion essentielle du chapitre.'),
+          QuestionQuiz(id: '1ereA2_${code}_q2', type: TypeQuestion.vraiFaux,
+            enonce: 'Une résolution correcte doit présenter une démarche claire et vérifiable.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Une démarche explicite permet de contrôler le raisonnement et le résultat.'),
+          QuestionQuiz(id: '1ereA2_${code}_q3', type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier ?',
+            choix: ['Identifier les données et les conditions avant de calculer', 'Répondre sans calcul', 'Ignorer le domaine', 'Copier uniquement le résultat'],
+            bonnesReponses: [0], explication: 'Les données et les conditions déterminent la méthode adaptée.'),
+        ]),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '1ere_A2_math_ch01': _math1ereA2Chapitre(
+      code: 'ch01', titre: 'Équations et inéquations dans ℝ',
+      cours: r'''Dans ℝ, une équation cherche les réels qui rendent une égalité vraie. Une inéquation décrit un ensemble de solutions. On utilise les propriétés de l'ordre, les produits nuls, les factorisations et les tableaux de signes pour résoudre des expressions plus complexes.''',
+      renforcement: r'''Commence par simplifier puis ramène l'expression à une forme connue. Pour une inéquation, conserve le sens du signe lors d'une multiplication ou division par un nombre positif et inverse-le pour un nombre négatif.''',
+      enonce1: r'''Résous 2x−5=9.''', solution1: r'''2x=14, donc x=7.''',
+      enonce2: r'''Résous (x−3)(x+2)≤0.''', solution2: r'''Le produit est négatif ou nul entre les deux racines : x∈[−2;3].''',
+      motsCles: 'équation • inéquation • ordre • factorisation • tableau de signes', quiz1: 'Que faut-il faire lorsqu’on divise une inéquation par un nombre négatif ?', quizBonne: 'Inverser le sens de l’inégalité',
+    ),
+
+    '1ere_A2_math_ch02': _math1ereA2Chapitre(
+      code: 'ch02', titre: 'Dénombrement',
+      cours: r'''Le dénombrement permet de déterminer le nombre de résultats possibles dans une expérience. Le principe additif s’utilise pour des cas séparés et le principe multiplicatif pour des choix successifs. Les arrangements, permutations et combinaisons permettent de compter des sélections selon que l’ordre compte ou non.''',
+      renforcement: r'''Avant de compter, précise si l’ordre intervient et si les répétitions sont autorisées. Organise les cas avec un arbre ou une formule adaptée.''',
+      enonce1: r'''Une tenue est composée d’une chemise parmi 4 et d’un pantalon parmi 3. Combien de tenues ?''', solution1: r'''4×3=12 tenues.''',
+      enonce2: r'''Combien de façons de choisir 2 élèves parmi 5, sans tenir compte de l’ordre ?''', solution2: r'''Il y en a C(5,2)=5×4/2=10.''',
+      motsCles: 'dénombrement • principe additif • principe multiplicatif • arrangement • combinaison', quiz1: 'Si deux choix successifs offrent 5 puis 4 possibilités, combien de résultats ?', quizBonne: '20',
+    ),
+
+    '1ere_A2_math_ch03': _math1ereA2Chapitre(
+      code: 'ch03', titre: 'Généralités sur les fonctions',
+      cours: r'''Une fonction f associe à chaque élément de son domaine une unique image. On étudie notamment son domaine de définition, ses images et antécédents, ses zéros, son signe et ses variations. Une fonction peut être représentée par une expression, un tableau ou une courbe.''',
+      renforcement: r'''Dans f(a)=b, a est un antécédent de b et b est l’image de a. Pour résoudre f(x)=k, recherche les antécédents de k. Vérifie toujours que les valeurs utilisées appartiennent au domaine.''',
+      enonce1: r'''Soit f(x)=3x−2. Calcule f(4).''', solution1: r'''f(4)=3×4−2=10.''',
+      enonce2: r'''Soit f(x)=x²−4. Détermine ses zéros.''', solution2: r'''x²−4=0, donc (x−2)(x+2)=0 et x=−2 ou x=2.''',
+      motsCles: 'fonction • domaine • image • antécédent • zéro • variations', quiz1: 'Dans f(5)=12, quelle est l’image de 5 ?', quizBonne: '12',
+    ),
+
+    '1ere_A2_math_ch04': _math1ereA2Chapitre(
+      code: 'ch04', titre: 'Dérivabilité et étude de fonctions',
+      cours: r'''La dérivée f' mesure la variation locale d’une fonction dérivable. Son signe permet d’établir les variations : f'>0 correspond à une croissance et f'<0 à une décroissance. L’étude complète associe domaine, limites éventuelles, dérivée, signe et tableau de variations.''',
+      renforcement: r'''Détermine d’abord le domaine, puis calcule f'. Résous f'(x)=0, étudie le signe de f' et déduis les variations. Vérifie les valeurs aux points remarquables.''',
+      enonce1: r'''Calcule la dérivée de f(x)=x²+3x−1.''', solution1: r'''f'(x)=2x+3.''',
+      enonce2: r'''Pour f(x)=x²−6x+2, indique le sens de variation de f.''', solution2: r'''f'(x)=2x−6. Donc f est décroissante sur ]−∞;3] puis croissante sur [3;+∞[.''',
+      motsCles: 'dérivée • dérivabilité • signe • variations • extremum', quiz1: 'Si f'(x)<0 sur un intervalle, que peut-on conclure ?', quizBonne: 'f est décroissante sur cet intervalle',
+    ),
+
+    '1ere_A2_math_ch05': _math1ereA2Chapitre(
+      code: 'ch05', titre: 'Suites numériques',
+      cours: r'''Une suite numérique est une fonction définie sur une partie de ℕ. Elle peut être donnée explicitement ou par récurrence. Les suites arithmétiques ont une différence constante et les suites géométriques un quotient constant. On peut calculer leurs termes et étudier leur évolution.''',
+      renforcement: r'''Identifie la relation entre deux termes consécutifs. Pour une suite arithmétique, u_{n+1}=u_n+r. Pour une suite géométrique, u_{n+1}=q u_n.''',
+      enonce1: r'''Une suite arithmétique vérifie u_0=7 et r=4. Calcule u_5.''', solution1: r'''u_5=7+5×4=27.''',
+      enonce2: r'''Une suite géométrique vérifie u_0=3 et q=2. Calcule u_4.''', solution2: r'''u_4=3×2^4=48.''',
+      motsCles: 'suite • terme • récurrence • arithmétique • géométrique • raison', quiz1: 'Dans une suite géométrique de raison q, comment obtient-on u_{n+1} ?', quizBonne: 'En multipliant u_n par q',
+    ),
+
+    '1ere_A2_math_ch06': _math1ereA2Chapitre(
+      code: 'ch06', titre: 'Statistique',
+      cours: r'''La statistique décrit une population à partir d’un caractère étudié. On utilise effectifs, fréquences, moyenne, médiane, quartiles et étendue pour résumer une série. Les représentations graphiques facilitent la lecture et la comparaison des données.''',
+      renforcement: r'''Trie les données avant de chercher médiane et quartiles. Pour une moyenne avec effectifs, utilise la somme des produits valeur×effectif divisée par l’effectif total. L’étendue vaut maximum−minimum.''',
+      enonce1: r'''Calcule la moyenne de 8, 10, 12, 14 et 16.''', solution1: r'''La moyenne est (8+10+12+14+16)/5=12.''',
+      enonce2: r'''Pour la série 3, 5, 7, 9, 11, 15, détermine la médiane et l’étendue.''', solution2: r'''La médiane est (7+9)/2=8 et l’étendue est 15−3=12.''',
+      motsCles: 'statistique • effectif • fréquence • moyenne • médiane • quartile • étendue', quiz1: 'Comment calcule-t-on l’étendue d’une série ?', quizBonne: 'Maximum − minimum',
+    ),
+
+    '1ere_A2_math_ch07': _math1ereA2Chapitre(
+      code: 'ch07', titre: 'Systèmes d’équations linéaires dans ℝ × ℝ',
+      cours: r'''Un système linéaire à deux inconnues recherche les couples (x,y) qui vérifient simultanément deux équations. On peut utiliser la substitution, la combinaison linéaire ou une lecture graphique. Une solution correspond à l’intersection des deux droites lorsqu’elle existe.''',
+      renforcement: r'''Choisis une inconnue facile à isoler ou cherche une combinaison qui élimine une inconnue. Vérifie toujours le couple obtenu dans les deux équations.''',
+      enonce1: r'''Résous le système x+y=10 et x−y=2.''', solution1: r'''En additionnant, 2x=12 donc x=6 puis y=4. Solution : (6;4).''',
+      enonce2: r'''Résous le système 2x+y=7 et x−y=2.''', solution2: r'''De x−y=2, y=x−2. Donc 2x+x−2=7, soit x=3 et y=1. Solution : (3;1).''',
+      motsCles: 'système • équation linéaire • substitution • combinaison • couple solution', quiz1: 'Que représente graphiquement la solution d’un système de deux droites sécantes ?', quizBonne: 'Le point d’intersection des deux droites',
+    ),
+
+
 
     '1ere_A1_math_ch01': _math1ereA1Chapitre(
       code: 'ch01', titre: 'Équations et inéquations',

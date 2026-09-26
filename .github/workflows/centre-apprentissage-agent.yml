@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - refonte/centre-apprentissage-2026-2027
+      - test/agent-premier-batch
   workflow_dispatch:
     inputs:
       generate:

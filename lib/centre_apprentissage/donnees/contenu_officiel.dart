@@ -317,7 +317,7 @@ class ContenuOfficiel {
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: '$titre — cours',
-        contenu: r'''$cours
+        contenu: '''$cours
 
 MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
 ''',
@@ -325,7 +325,7 @@ MÉTHODE : identifier les données → choisir la propriété → calculer → v
       RessourceOfficielle(
         type: TypeRessource.renforcement,
         titre: '$titre — comprendre facilement',
-        contenu: r'''$renforcement
+        contenu: '''$renforcement
 
 PIÈGE À ÉVITER : appliquer une formule sans vérifier les unités et les conditions.
 ''',
@@ -334,21 +334,21 @@ PIÈGE À ÉVITER : appliquer une formule sans vérifier les unités et les cond
         type: TypeRessource.exercice,
         titre: '$titre — exercice guidé',
         difficulte: Difficulte.facile,
-        enonce: r'''$enonce1''',
-        solution: r'''$solution1''',
+        enonce: '''$enonce1''',
+        solution: '''$solution1''',
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
         titre: '$titre — exercice d'application',
         ordre: 2,
         difficulte: Difficulte.moyen,
-        enonce: r'''$enonce2''',
-        solution: r'''$solution2''',
+        enonce: '''$enonce2''',
+        solution: '''$solution2''',
       ),
       RessourceOfficielle(
         type: TypeRessource.fiche,
         titre: '$titre — fiche de révision',
-        contenu: r'''MOTS-CLÉS : $motsCles
+        contenu: '''MOTS-CLÉS : $motsCles
 
 À RETENIR :
 $cours
@@ -364,8 +364,8 @@ RÉFLEXE : identifier les données → choisir la propriété → calculer → v
           QuestionQuiz(
             id: '5e${code}q1',
             type: TypeQuestion.qcm,
-            enonce: r'''$quiz1''',
-            choix: [r'''$quiz1Bonne''', 'Une réponse sans justification', 'Une méthode qui ignore les données', 'Aucune de ces réponses'],
+            enonce: '''$quiz1''',
+            choix: ['''$quiz1Bonne''', 'Une réponse sans justification', 'Une méthode qui ignore les données', 'Aucune de ces réponses'],
             bonnesReponses: [0],
             explication: 'La première proposition correspond à la règle ou propriété essentielle du chapitre.',
           ),

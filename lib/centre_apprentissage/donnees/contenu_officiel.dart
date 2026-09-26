@@ -1042,7 +1042,195 @@ RÉFLEXE : écrire les étapes du raisonnement et contrôler les résultats.
     ];
   }
 
+
+  static List<RessourceOfficielle> _mathTleDChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → développer le raisonnement → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : utiliser une propriété sans vérifier ses hypothèses et son domaine d'application.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile,
+        enonce: '''$enonce1''',
+        solution: '''$solution1''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice d'application',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: '''$enonce2''',
+        solution: '''$solution2''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et contrôler les résultats.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: '$titre — quiz',
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'TleD_' + code + '_q1',
+            type: TypeQuestion.qcm,
+            enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les hypothèses', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0],
+            explication: 'La première proposition correspond à la notion essentielle du chapitre.',
+          ),
+          QuestionQuiz(
+            id: 'TleD_' + code + '_q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: 'Une démarche correcte doit respecter les hypothèses des théorèmes et propriétés utilisés.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication: 'Les conditions d’application doivent être vérifiées avant d’utiliser un résultat.',
+          ),
+          QuestionQuiz(
+            id: 'TleD_' + code + '_q3',
+            type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier en Terminale D ?',
+            choix: ['Justifier les étapes et vérifier le résultat', 'Répondre sans raisonnement', 'Ignorer le domaine', 'Utiliser une formule sans vérifier'],
+            bonnesReponses: [0],
+            explication: 'La rigueur du raisonnement est essentielle dans les exercices de niveau Terminale D.',
+          ),
+        ],
+      ),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    'Tle_D_math_ch01': _mathTleDChapitre(
+      code:'ch01', titre:'Limites et continuité',
+      cours:r'''Une limite décrit le comportement d’une fonction lorsque la variable se rapproche d’une valeur ou tend vers l’infini. La continuité en a signifie que la limite de f(x) quand x tend vers a est égale à f(a).''',
+      renforcement:r'''Pour lever une forme indéterminée, transforme l’expression par factorisation, mise au même dénominateur ou expression conjuguée selon le cas. Vérifie aussi le domaine de définition.''',
+      enonce1:r'''Calcule lim(x→2)(3x+1).''', solution1:r'''La fonction affine est continue, donc la limite vaut 7.''',
+      enonce2:r'''Calcule lim(x→+∞)(5x²−1)/x².''', solution2:r'''En divisant par x², on obtient 5−1/x², donc la limite vaut 5.''',
+      motsCles:'limite • continuité • voisinage • infini • forme indéterminée', quiz1:r'''Que signifie qu’une fonction f est continue en a ?''', quizBonne:r'''La limite de f(x) quand x tend vers a est égale à f(a)''',
+    ),
+    'Tle_D_math_ch02': _mathTleDChapitre(
+      code:'ch02', titre:'Probabilité conditionnelle et variable aléatoire',
+      cours:r'''La probabilité conditionnelle de A sachant B est P_B(A)=P(A∩B)/P(B), lorsque P(B)>0. Une variable aléatoire associe une valeur numérique aux issues d’une expérience aléatoire et possède une loi de probabilité.''',
+      renforcement:r'''Identifie clairement l’événement conditionnant. Pour une variable aléatoire, construis la loi puis vérifie que la somme des probabilités vaut 1 avant de calculer l’espérance.''',
+      enonce1:r'''P(A∩B)=0,2 et P(B)=0,5. Calcule P_B(A).''', solution1:r'''P_B(A)=0,2/0,5=0,4.''',
+      enonce2:r'''Une variable X vaut 0 avec probabilité 0,3 et 2 avec probabilité 0,7. Calcule E(X).''', solution2:r'''E(X)=0×0,3+2×0,7=1,4.''',
+      motsCles:'probabilité conditionnelle • variable aléatoire • loi • espérance • événement', quiz1:r'''Quelle formule définit P_B(A) ?''', quizBonne:r'''P(A∩B)/P(B)''',
+    ),
+    'Tle_D_math_ch03': _mathTleDChapitre(
+      code:'ch03', titre:'Dérivabilité et étude de fonctions',
+      cours:r'''La dérivée mesure le taux de variation local d’une fonction. Elle permet d’étudier les variations, les extrema et les tangentes. Une étude de fonction associe domaine, limites, dérivée, signe de la dérivée et tableau de variations.''',
+      renforcement:r'''Détermine d’abord le domaine, calcule la dérivée puis étudie son signe. Complète l’étude avec les limites et les valeurs remarquables.''',
+      enonce1:r'''Dérive f(x)=x³−3x+2.''', solution1:r'''f'(x)=3x²−3.''',
+      enonce2:r'''Étudie le signe de f'(x)=2x−4.''', solution2:r'''f'(x)<0 pour x<2, f'(2)=0 et f'(x)>0 pour x>2.''',
+      motsCles:'dérivée • taux de variation • tangente • extrema • variations', quiz1:r'''Que permet principalement le signe de f'(x) ?''', quizBonne:r'''D’étudier les variations de f''',
+    ),
+    'Tle_D_math_ch04': _mathTleDChapitre(
+      code:'ch04', titre:'Primitives',
+      cours:r'''Une primitive F d’une fonction f sur un intervalle vérifie F'=f. Toute autre primitive de f sur cet intervalle diffère de F par une constante.''',
+      renforcement:r'''Reconnais les formes usuelles, propose une primitive puis vérifie-la systématiquement en dérivant le résultat.''',
+      enonce1:r'''Donne une primitive de f(x)=4x³.''', solution1:r'''F(x)=x⁴+C.''',
+      enonce2:r'''Donne une primitive de f(x)=1/x sur ]0;+∞[.''', solution2:r'''F(x)=ln(x)+C.''',
+      motsCles:'primitive • dérivée • constante • intégrale • fonction', quiz1:r'''Quelle relation vérifie une primitive F de f ?''', quizBonne:r'''F'=f''',
+    ),
+    'Tle_D_math_ch05': _mathTleDChapitre(
+      code:'ch05', titre:'Fonctions logarithmes',
+      cours:r'''La fonction logarithme népérien ln est définie sur ]0;+∞[, strictement croissante et dérivable. Elle transforme les produits en sommes et permet de résoudre des équations et inéquations.''',
+      renforcement:r'''Vérifie toujours que les arguments des logarithmes sont positifs. Utilise ln(ab)=ln(a)+ln(b) et ln(a/b)=ln(a)−ln(b).''',
+      enonce1:r'''Calcule ln(e⁴).''', solution1:r'''ln(e⁴)=4.''',
+      enonce2:r'''Résous ln(x)=3.''', solution2:r'''x=e³, avec x>0.''',
+      motsCles:'ln • logarithme • domaine • croissance • équation • inéquation', quiz1:r'''Quel est le domaine de définition de ln ?''', quizBonne:r''']0;+∞[''',
+    ),
+    'Tle_D_math_ch06': _mathTleDChapitre(
+      code:'ch06', titre:'Fonctions exponentielles et puissances',
+      cours:r'''La fonction exponentielle est définie sur ℝ, positive et strictement croissante, avec e^(a+b)=e^a e^b. Les fonctions puissances sont étudiées sur leurs domaines de définition et permettent de modéliser des variations.''',
+      renforcement:r'''Utilise les propriétés de l’exponentielle pour simplifier les produits et puissances. Pour une fonction puissance, commence par déterminer son domaine.''',
+      enonce1:r'''Simplifie e²×e³.''', solution1:r'''e⁵.''',
+      enonce2:r'''Résous e^x=7.''', solution2:r'''x=ln(7).''',
+      motsCles:'exponentielle • puissance • croissance • ln • domaine', quiz1:r'''Quelle relation est vraie pour l’exponentielle ?''', quizBonne:r'''e^(a+b)=e^a×e^b''',
+    ),
+    'Tle_D_math_ch07': _mathTleDChapitre(
+      code:'ch07', titre:'Suites numériques',
+      cours:r'''Une suite est une fonction définie sur les entiers naturels. On étudie ses termes, ses variations et sa convergence. Les suites arithmétiques et géométriques constituent des modèles fondamentaux.''',
+      renforcement:r'''Identifie la relation entre deux termes consécutifs. Pour une suite arithmétique, étudie la raison ; pour une suite géométrique, étudie le quotient et sa valeur absolue.''',
+      enonce1:r'''Soit u_n=2n+1. Calcule u_5.''', solution1:r'''u_5=11.''',
+      enonce2:r'''Une suite géométrique vérifie u_0=3 et q=2. Calcule u_4.''', solution2:r'''u_4=3×2⁴=48.''',
+      motsCles:'suite • terme • arithmétique • géométrique • variation • convergence', quiz1:r'''Dans une suite géométrique, quelle grandeur est constante ?''', quizBonne:r'''Le quotient de deux termes consécutifs non nuls''',
+    ),
+    'Tle_D_math_ch08': _mathTleDChapitre(
+      code:'ch08', titre:'Nombres complexes',
+      cours:r'''Un nombre complexe s’écrit z=a+ib avec a,b réels et i²=−1. On distingue partie réelle, partie imaginaire, conjugué et module. Les formes algébrique et trigonométrique permettent de résoudre des problèmes.''',
+      renforcement:r'''Regroupe séparément les parties réelle et imaginaire. Utilise le conjugué pour simplifier certains quotients et le module pour les interprétations géométriques.''',
+      enonce1:r'''Calcule (2+3i)+(1−5i).''', solution1:r'''3−2i.''',
+      enonce2:r'''Calcule le module de z=3+4i.''', solution2:r'''|z|=√(3²+4²)=5.''',
+      motsCles:'complexe • partie réelle • partie imaginaire • conjugué • module', quiz1:r'''Que vaut i² ?''', quizBonne:r'''−1''',
+    ),
+    'Tle_D_math_ch09': _mathTleDChapitre(
+      code:'ch09', titre:'Calcul intégral',
+      cours:r'''L’intégrale définie d’une fonction f sur [a,b] peut être calculée à l’aide d’une primitive F par ∫a^b f(x)dx=F(b)−F(a). Elle intervient notamment dans le calcul d’aires algébriques.''',
+      renforcement:r'''Cherche une primitive puis applique la formule aux bornes. Pour interpréter une intégrale comme une aire, vérifie le signe de la fonction sur l’intervalle.''',
+      enonce1:r'''Calcule ∫₀² x dx.''', solution1:r'''Une primitive est x²/2, donc l’intégrale vaut 2.''',
+      enonce2:r'''Calcule ∫₁³ 2x dx.''', solution2:r'''Une primitive est x², donc 9−1=8.''',
+      motsCles:'intégrale • primitive • bornes • aire • fonction', quiz1:r'''Quelle formule permet de calculer ∫a^b f(x)dx avec une primitive F ?''', quizBonne:r'''F(b)−F(a)''',
+    ),
+    'Tle_D_math_ch10': _mathTleDChapitre(
+      code:'ch10', titre:'Nombres complexes et géométrie du plan',
+      cours:r'''Les nombres complexes permettent de représenter les points et vecteurs du plan. Le module représente une distance et l’argument décrit une direction. Les quotients de complexes permettent aussi d’étudier des rapports et angles.''',
+      renforcement:r'''Associe à une affixe z son module pour la distance à l’origine et son argument pour une direction. Utilise les opérations complexes pour traduire les relations géométriques.''',
+      enonce1:r'''Pour z=3+4i, que représente |z| ?''', solution1:r'''|z|=5 : c’est la distance du point d’affixe z à l’origine.''',
+      enonce2:r'''Quel complexe représente le vecteur allant du point d’affixe 1+i au point d’affixe 4+3i ?''', solution2:r'''(4+3i)−(1+i)=3+2i.''',
+      motsCles:'affixe • module • argument • vecteur • distance • complexe', quiz1:r'''Que représente géométriquement le module d’une affixe z ?''', quizBonne:r'''La distance du point à l’origine''',
+    ),
+    'Tle_D_math_ch11': _mathTleDChapitre(
+      code:'ch11', titre:'Statistiques à deux variables',
+      cours:r'''Une statistique à deux variables étudie des couples de valeurs observées. Le nuage de points, la covariance, le coefficient de corrélation et l’ajustement permettent de décrire une liaison entre les variables.''',
+      renforcement:r'''Organise les couples puis représente-les. Observe la tendance et utilise un ajustement linéaire lorsque le nuage s’y prête. Une corrélation décrit une association linéaire.''',
+      enonce1:r'''Les points (1,2), (2,4), (3,6) sont-ils alignés ?''', solution1:r'''Oui, ils vérifient tous y=2x.''',
+      enonce2:r'''Que suggère une corrélation linéaire proche de 1 ?''', solution2:r'''Une liaison linéaire positive forte entre les deux variables.''',
+      motsCles:'statistique • deux variables • nuage • corrélation • ajustement', quiz1:r'''Que représente chaque point d’un nuage de points ?''', quizBonne:r'''Un couple de valeurs observées''',
+    ),
+    'Tle_D_math_ch12': _mathTleDChapitre(
+      code:'ch12', titre:'Équations différentielles',
+      cours:r'''Une équation différentielle relie une fonction inconnue à ses dérivées. Pour une équation du type y'=ay, la solution générale est y=Ce^(ax). Une condition initiale permet de déterminer la constante.''',
+      renforcement:r'''Identifie l’ordre et la forme de l’équation. Pour y'=ay, utilise y=Ce^(ax), puis applique la condition initiale.''',
+      enonce1:r'''Résous y'=2y.''', solution1:r'''La solution générale est y=Ce^(2x), où C est une constante réelle.''',
+      enonce2:r'''Résous y'=3y avec y(0)=5.''', solution2:r'''y=Ce^(3x). Comme y(0)=C=5, y=5e^(3x).''',
+      motsCles:'équation différentielle • dérivée • solution générale • condition initiale • exponentielle', quiz1:r'''Quelle est la forme générale d’une solution de y'=ay ?''', quizBonne:r'''y=Ce^(ax)''',
+    ),
 
     'Tle_A1_math_ch01': _mathTleA1Chapitre(
       code:'ch01', titre:'Étude de fonctions polynômes et de fonctions rationnelles',

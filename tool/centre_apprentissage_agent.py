@@ -14,6 +14,7 @@ PROGRAMME = Path("lib/centre_apprentissage/donnees/programme_officiel.dart")
 CONTENU = Path("lib/centre_apprentissage/donnees/contenu_officiel.dart")
 REPORT = Path("tool/centre_apprentissage_agent_report.json")
 MODEL = os.getenv("CENTRE_AGENT_MODEL", "gpt-5.6-luna")
+OPENAI_URL = "https://api.openai.com/v1/responses"
 BATCH_SIZE = int(os.getenv("CENTRE_AGENT_BATCH_SIZE", "3"))
 REQUEST_GENERATE = "--generate" in sys.argv
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -109,7 +110,7 @@ Chapitres :
         }
     }
     req = urllib.request.Request(
-        "https://api.openai.com/v1/responses",
+        OPENAI_URL,
         data=json.dumps(body, ensure_ascii=False).encode(),
         headers={
             "Authorization": "Bearer " + os.environ["OPENAI_API_KEY"],
@@ -117,8 +118,15 @@ Chapitres :
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=180) as response:
-        data = json.load(response)
+    try:
+        with urllib.request.urlopen(req, timeout=180) as response:
+            data = json.load(response)
+    except urllib.error.HTTPError as exc:
+        details = exc.read().decode("utf-8", errors="replace").strip()
+        raise RuntimeError(
+            f"OpenAI HTTP {exc.code} (modele={MODEL}, endpoint={OPENAI_URL}): "
+            f"{details or exc.reason}"
+        ) from exc
     raw = extract_output_text(data)
     if not raw:
         raise RuntimeError("Réponse IA vide.")

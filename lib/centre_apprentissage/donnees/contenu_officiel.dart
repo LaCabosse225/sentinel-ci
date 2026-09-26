@@ -299,7 +299,231 @@ class ContenuOfficiel {
   //  CATALOGUE
   // ==========================================================================
 
+
+  static List<RessourceOfficielle> _math5eChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quiz1Bonne,
+  }) {
+    return [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: '$titre — cours',
+        contenu: r'''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: '$titre — comprendre facilement',
+        contenu: r'''$renforcement
+
+PIÈGE À ÉVITER : appliquer une formule sans vérifier les unités et les conditions.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile,
+        enonce: r'''$enonce1''',
+        solution: r'''$solution1''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice d'application',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: r'''$enonce2''',
+        solution: r'''$solution2''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: '$titre — fiche de révision',
+        contenu: r'''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: '$titre — quiz',
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '5e${code}q1',
+            type: TypeQuestion.qcm,
+            enonce: r'''$quiz1''',
+            choix: [r'''$quiz1Bonne''', 'Une réponse sans justification', 'Une méthode qui ignore les données', 'Aucune de ces réponses'],
+            bonnesReponses: [0],
+            explication: 'La première proposition correspond à la règle ou propriété essentielle du chapitre.',
+          ),
+          QuestionQuiz(
+            id: '5e${code}q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: 'Une démarche correcte consiste à identifier les données, choisir une propriété adaptée et vérifier le résultat.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication: 'Une résolution mathématique doit être organisée et vérifiable.',
+          ),
+          QuestionQuiz(
+            id: '5e${code}q3',
+            type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe est le plus utile dans ce chapitre ?',
+            choix: ['Écrire les étapes du raisonnement', 'Répondre sans calculer', 'Ignorer les unités', 'Ne jamais vérifier'],
+            bonnesReponses: [0],
+            explication: 'Écrire les étapes permet de justifier la réponse et de repérer une éventuelle erreur.',
+          ),
+        ],
+      ),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '5e_math_ch01': _math5eChapitre(
+      code: 'ch01',
+      titre: 'Nombres premiers',
+      cours: r'''Un nombre premier est un entier naturel supérieur à 1 qui possède exactement deux diviseurs positifs : 1 et lui-même. Pour reconnaître un nombre premier, on teste les diviseurs premiers jusqu'à la racine carrée du nombre. La décomposition en facteurs premiers permet ensuite de déterminer PGCD, PPCM et de simplifier certains calculs.''',
+      renforcement: r'''Un nombre composé possède au moins un diviseur autre que 1 et lui-même. Pour 84 : 84 = 2 × 42 = 2² × 21 = 2² × 3 × 7. La décomposition doit être complète et chaque facteur doit être premier.''',
+      enonce1: r'''91 est-il premier ?''', solution1: r'''Non, car 91 = 7 × 13.''',
+      enonce2: r'''Décompose 180 en facteurs premiers.''', solution2: r'''180 = 2² × 3² × 5.''',
+      motsCles: 'diviseur • nombre premier • composé • décomposition',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch02': _math5eChapitre(
+      code: 'ch02',
+      titre: 'Segments',
+      cours: r'''Un segment [AB] est la portion de droite comprise entre A et B. Sa longueur se note AB. Le milieu M de [AB] vérifie AM = MB et AB = AM + MB. Pour calculer une longueur manquante, on utilise ces relations et on respecte les unités.''',
+      renforcement: r'''Sur une droite graduée, la distance entre deux points correspond à la valeur absolue de la différence de leurs abscisses. Pour construire le milieu d'un segment, on peut utiliser la règle et le compas ou calculer sa position sur une droite graduée.''',
+      enonce1: r'''AB = 12 cm et M est le milieu de [AB]. Calcule AM.''', solution1: r'''AM = 6 cm.''',
+      enonce2: r'''Sur une droite graduée, A a pour abscisse -3 et B a pour abscisse 5. Calcule AB.''', solution2: r'''AB = |5 - (-3)| = 8 unités.''',
+      motsCles: 'segment • longueur • milieu • distance',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch03': _math5eChapitre(
+      code: 'ch03',
+      titre: 'Angles',
+      cours: r'''Un angle est formé par deux demi-droites de même origine. On distingue notamment l'angle aigu, droit, obtus, plat et rentrant. Deux angles complémentaires ont une somme de 90° et deux angles supplémentaires une somme de 180°. Le rapporteur sert à mesurer et construire un angle.''',
+      renforcement: r'''Pour raisonner, commence par identifier la nature de l'angle et les relations données. Dans un triangle, la somme des angles vaut 180°. Deux angles adjacents peuvent aussi être complémentaires ou supplémentaires selon la situation.''',
+      enonce1: r'''Un angle mesure 37°. Quelle est la mesure de son complémentaire ?''', solution1: r'''90° - 37° = 53°.''',
+      enonce2: r'''Deux angles supplémentaires mesurent 68° et x. Détermine x.''', solution2: r'''x = 180° - 68° = 112°.''',
+      motsCles: 'sommet • côtés • aigu • droit • obtus • complémentaire',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch04': _math5eChapitre(
+      code: 'ch04',
+      titre: 'Nombres décimaux relatifs',
+      cours: r'''Les nombres décimaux relatifs peuvent être positifs, négatifs ou nuls. Sur une droite graduée, le nombre le plus à droite est le plus grand. Pour additionner des relatifs, on tient compte des signes ; pour soustraire un nombre, on ajoute son opposé.''',
+      renforcement: r'''Pour additionner deux nombres de même signe, on additionne leurs distances à zéro et on garde le signe. Pour des signes différents, on soustrait les distances à zéro et on garde le signe du nombre de plus grande distance à zéro. La soustraction se transforme en addition de l'opposé.''',
+      enonce1: r'''Calcule A = -7,5 + 3,2.''', solution1: r'''A = -4,3.''',
+      enonce2: r'''Calcule B = 4,8 - (-2,7).''', solution2: r'''B = 4,8 + 2,7 = 7,5.''',
+      motsCles: 'relatif • opposé • valeur absolue • comparaison',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch05': _math5eChapitre(
+      code: 'ch05',
+      titre: 'Figures symétriques par rapport à une droite',
+      cours: r'''La symétrie axiale par rapport à une droite d est une transformation qui associe à un point A un point A' tel que d soit la médiatrice de [AA']. La distance à l'axe est conservée et [AA'] est perpendiculaire à d.''',
+      renforcement: r'''Pour construire l'image d'un point, on trace la perpendiculaire à l'axe passant par le point, puis on reporte la même distance de l'autre côté. Une figure et son image ont la même forme et les mêmes longueurs.''',
+      enonce1: r'''A est à 3 cm de l'axe d. Quelle est la distance de A' à d ?''', solution1: r'''A' est aussi à 3 cm de d.''',
+      enonce2: r'''Que représente l'axe de symétrie pour le segment [AA'] ?''', solution2: r'''L'axe est la médiatrice de [AA'] : il est perpendiculaire au segment et passe par son milieu.''',
+      motsCles: 'symétrie axiale • axe • médiatrice • image',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch06': _math5eChapitre(
+      code: 'ch06',
+      titre: 'Fractions',
+      cours: r'''Une fraction représente un quotient et peut exprimer une partie d'un tout. Pour additionner ou soustraire des fractions, on utilise un dénominateur commun. Pour multiplier, on multiplie numérateurs entre eux et dénominateurs entre eux. Pour diviser par une fraction non nulle, on multiplie par son inverse.''',
+      renforcement: r'''Pour simplifier une fraction, on divise le numérateur et le dénominateur par un même diviseur non nul. Avant une addition, ne jamais additionner directement les dénominateurs. Exemple : 2/3 + 1/6 = 4/6 + 1/6 = 5/6.''',
+      enonce1: r'''Calcule 3/4 + 1/8.''', solution1: r'''3/4 = 6/8, donc 3/4 + 1/8 = 7/8.''',
+      enonce2: r'''Calcule 5/6 ÷ 10/9.''', solution2: r'''5/6 × 9/10 = 45/60 = 3/4.''',
+      motsCles: 'numérateur • dénominateur • simplifier • inverse',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch07': _math5eChapitre(
+      code: 'ch07',
+      titre: 'Prismes droits',
+      cours: r'''Un prisme droit possède deux bases polygonales parallèles et superposables ; ses faces latérales sont des rectangles. Le volume d'un prisme droit se calcule par V = aire de la base × hauteur.''',
+      renforcement: r'''Pour un prisme droit, commence par identifier la base. Pour un pavé droit, V = longueur × largeur × hauteur. Les unités de volume sont cubiques : cm³, dm³, m³.''',
+      enonce1: r'''Un prisme a une aire de base de 12 cm² et une hauteur de 8 cm. Calcule son volume.''', solution1: r'''V = 12 × 8 = 96 cm³.''',
+      enonce2: r'''Un pavé mesure 5 cm × 4 cm × 3 cm. Calcule son volume.''', solution2: r'''V = 5 × 4 × 3 = 60 cm³.''',
+      motsCles: 'prisme droit • base • hauteur • volume',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch08': _math5eChapitre(
+      code: 'ch08',
+      titre: 'Triangles',
+      cours: r'''Un triangle possède trois côtés et trois angles. La somme de ses angles est 180°. Dans un triangle isocèle, les angles à la base sont égaux ; dans un triangle équilatéral, les trois angles mesurent 60°. La construction d'un triangle dépend des longueurs ou angles connus.''',
+      renforcement: r'''Pour déterminer un angle inconnu, utilise la somme 180°. Pour reconnaître un triangle isocèle, cherche deux côtés de même longueur ou deux angles de même mesure. Dans un triangle rectangle, un angle mesure 90°.''',
+      enonce1: r'''Deux angles d'un triangle mesurent 48° et 67°. Calcule le troisième.''', solution1: r'''180° - 48° - 67° = 65°.''',
+      enonce2: r'''Dans un triangle isocèle, l'angle au sommet mesure 40°. Calcule chacun des angles à la base.''', solution2: r'''Les deux angles à la base sont égaux : (180° - 40°)/2 = 70° chacun.''',
+      motsCles: 'triangle • isocèle • équilatéral • rectangle • somme des angles',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch09': _math5eChapitre(
+      code: 'ch09',
+      titre: 'Proportionnalité',
+      cours: r'''Deux grandeurs sont proportionnelles lorsqu'on peut passer de l'une à l'autre en multipliant toujours par un même nombre, appelé coefficient de proportionnalité. On peut utiliser un tableau de proportionnalité, le passage à l'unité ou le produit en croix.''',
+      renforcement: r'''Pour vérifier une proportionnalité, les rapports correspondants doivent être égaux. Dans un tableau, on peut multiplier ou diviser une ligne par un même nombre. Le pourcentage est une situation fréquente de proportionnalité.''',
+      enonce1: r'''4 kg de cacao coûtent 2 400 F. Combien coûtent 7 kg au même tarif ?''', solution1: r'''1 kg coûte 600 F, donc 7 kg coûtent 4 200 F.''',
+      enonce2: r'''Un article à 8 000 F augmente de 15 %. Quel est le nouveau prix ?''', solution2: r'''Augmentation = 8 000 × 15/100 = 1 200 F. Nouveau prix = 9 200 F.''',
+      motsCles: 'coefficient • tableau • produit en croix • pourcentage',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch10': _math5eChapitre(
+      code: 'ch10',
+      titre: 'Cercles',
+      cours: r'''Un cercle de centre O et de rayon r est l'ensemble des points situés à la distance r de O. Le diamètre d vaut 2r. La longueur du cercle est L = 2πr et son aire est A = πr². On utilise souvent π ≈ 3,14.''',
+      renforcement: r'''Pour résoudre un problème, repère le rayon ou le diamètre puis choisis la bonne formule. Si le diamètre est donné, commence par calculer r = d/2. Pense à l'unité : longueur en cm, aire en cm².''',
+      enonce1: r'''Un cercle a un rayon de 5 cm. Calcule son diamètre.''', solution1: r'''d = 2 × 5 = 10 cm.''',
+      enonce2: r'''Avec r = 5 cm et π ≈ 3,14, calcule l'aire du disque.''', solution2: r'''A = πr² ≈ 3,14 × 25 = 78,5 cm².''',
+      motsCles: 'centre • rayon • diamètre • disque • périmètre • aire',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch11': _math5eChapitre(
+      code: 'ch11',
+      titre: 'Statistique',
+      cours: r'''Une série statistique décrit une population à partir d'un caractère. L'effectif est le nombre d'observations d'une valeur et l'effectif total est la somme des effectifs. La fréquence est effectif ÷ effectif total, souvent exprimée en pourcentage.''',
+      renforcement: r'''Un tableau d'effectifs permet de lire et organiser les données. La fréquence d'une modalité peut être convertie en pourcentage en multipliant par 100. La somme des fréquences vaut 1, ou 100 %.''',
+      enonce1: r'''Dans une classe de 30 élèves, 12 viennent à pied. Quelle est la fréquence en pourcentage ?''', solution1: r'''12/30 = 0,4, soit 40 %.''',
+      enonce2: r'''Une série a les effectifs 5, 8, 7 et 10. Calcule l'effectif total puis la fréquence de la deuxième valeur.''', solution2: r'''Effectif total = 30. Fréquence = 8/30 ≈ 26,7 %.''',
+      motsCles: 'population • caractère • effectif • fréquence • tableau',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
+    '5e_math_ch12': _math5eChapitre(
+      code: 'ch12',
+      titre: 'Parallélogrammes particuliers',
+      cours: r'''Le rectangle, le losange et le carré sont des parallélogrammes particuliers. Un rectangle possède quatre angles droits ; un losange possède quatre côtés de même longueur ; un carré possède quatre côtés égaux et quatre angles droits.''',
+      renforcement: r'''Les diagonales permettent aussi de reconnaître certaines propriétés : celles d'un rectangle sont de même longueur ; celles d'un losange sont perpendiculaires et se coupent en leur milieu ; celles d'un carré cumulent ces propriétés.''',
+      enonce1: r'''Un rectangle a une longueur de 8 cm et une largeur de 5 cm. Calcule son périmètre.''', solution1: r'''P = 2(8 + 5) = 26 cm.''',
+      enonce2: r'''Un losange a un côté de 6 cm. Calcule son périmètre.''', solution2: r'''P = 4 × 6 = 24 cm.''',
+      motsCles: 'rectangle • losange • carré • diagonales • angles droits',
+      quiz1: r'''undefined''', quiz1Bonne: r'''undefined''',
+    ),
+
 
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 1 : CALCUL LITTERAL

@@ -290,6 +290,10 @@ class _NbChapitres extends StatelessWidget {
 // ============================================================================
 
 class ChapitresPage extends StatelessWidget {
+  // Bootstrap automatique du catalogue national Maths 6e.
+  // Une seule fois par session, uniquement pour un administrateur.
+  static final Set<String> _autoSyncFait = <String>{};
+
   final AppUser user;
   final String niveau;
   final Matiere matiere;
@@ -377,6 +381,36 @@ class ChapitresPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const cleBootstrap = '6e_math';
+
+    if (user.role == UserRole.admin &&
+        niveau == '6e' &&
+        matiere.id == 'math' &&
+        !_autoSyncFait.contains(cleBootstrap)) {
+      _autoSyncFait.add(cleBootstrap);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          final officiel =
+              ProgrammeOfficiel.chapitres('6e', 'math');
+          final existants =
+              await ContenuService.chapitres('6e', 'math');
+
+          if (existants.length < officiel.length) {
+            await ProgrammeOfficiel.installer('6e', 'math');
+          }
+
+          final chapitres =
+              await ContenuService.chapitres('6e', 'math');
+          for (final chapitre in chapitres) {
+            await ContenuOfficiel.installer(chapitre, user.uid);
+          }
+        } catch (_) {
+          // Le bouton de synchronisation manuelle reste disponible en cas
+          // de problème réseau ou de droits Firestore.
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(matiere.nom),

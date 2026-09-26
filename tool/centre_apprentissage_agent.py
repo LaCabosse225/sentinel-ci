@@ -13,7 +13,7 @@ from pathlib import Path
 PROGRAMME = Path("lib/centre_apprentissage/donnees/programme_officiel.dart")
 CONTENU = Path("lib/centre_apprentissage/donnees/contenu_officiel.dart")
 REPORT = Path("tool/centre_apprentissage_agent_report.json")
-MODEL = os.getenv("CENTRE_AGENT_MODEL", "gpt-5.6-luna")
+MODEL = os.getenv("CENTRE_AGENT_MODEL") or "gpt-5.6-luna"
 OPENAI_URL = "https://api.openai.com/v1/responses"
 BATCH_SIZE = int(os.getenv("CENTRE_AGENT_BATCH_SIZE", "3"))
 REQUEST_GENERATE = "--generate" in sys.argv

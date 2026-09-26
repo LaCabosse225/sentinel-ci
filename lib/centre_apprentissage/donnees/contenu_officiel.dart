@@ -695,7 +695,201 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _math1ereCChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(type: TypeRessource.cours, titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+'''),
+      RessourceOfficielle(type: TypeRessource.renforcement, titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
+'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile, enonce: '''$enonce1''', solution: '''$solution1'''),
+      RessourceOfficielle(type: TypeRessource.exercice, titre: '$titre — exercice d'application',
+        ordre: 2, difficulte: Difficulte.moyen, enonce: '''$enonce2''', solution: '''$solution2'''),
+      RessourceOfficielle(type: TypeRessource.fiche, titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
+'''),
+      RessourceOfficielle(type: TypeRessource.quiz, titre: '$titre — quiz', dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(id: '1ereC_${code}_q1', type: TypeQuestion.qcm, enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0], explication: 'La première proposition correspond à la notion essentielle du chapitre.'),
+          QuestionQuiz(id: '1ereC_${code}_q2', type: TypeQuestion.vraiFaux,
+            enonce: 'Une démonstration mathématique doit utiliser des propriétés applicables aux objets étudiés.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Une propriété n’est utilisable que lorsque ses hypothèses sont satisfaites.'),
+          QuestionQuiz(id: '1ereC_${code}_q3', type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier dans un problème ?',
+            choix: ['Identifier les données, les conditions et la méthode', 'Répondre sans justification', 'Ignorer le domaine de définition', 'Utiliser une formule sans vérifier'],
+            bonnesReponses: [0], explication: 'Une résolution rigoureuse commence par l’identification des données et des conditions.'
+          ),
+        ]),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '1ere_C_math_ch01': _math1ereCChapitre(
+      code:'ch01', titre:'Équations et inéquations dans ℝ',
+      cours:r'''Une équation cherche les réels qui rendent une égalité vraie. Les inéquations décrivent des ensembles de solutions. La factorisation, le produit nul et les tableaux de signes permettent de traiter des expressions algébriques plus complexes.''',
+      renforcement:r'''Simplifie avant de résoudre. Pour une inéquation, surveille le signe lors d’une multiplication ou division. Pour un produit, repère les valeurs qui annulent chaque facteur puis construis le tableau de signes.''',
+      enonce1:r'''Résous 3x−8=13.''', solution1:r'''3x=21, donc x=7.''',
+      enonce2:r'''Résous (x−2)(x+4)>0.''', solution2:r'''Le produit est positif pour x<−4 ou x>2.''',
+      motsCles:'équation • inéquation • produit nul • factorisation • signe', quiz1:'Lorsqu’on divise une inéquation par un nombre négatif, que fait-on ?', quizBonne:'On inverse le sens de l’inégalité',
+    ),
+    '1ere_C_math_ch02': _math1ereCChapitre(
+      code:'ch02', titre:'Angles orientés et trigonométrie',
+      cours:r'''Les angles orientés permettent de tenir compte du sens de rotation. En trigonométrie, le cercle trigonométrique relie les angles aux valeurs de sinus, cosinus et tangente. Les identités fondamentales et les formules d’addition permettent de transformer et résoudre des expressions trigonométriques.''',
+      renforcement:r'''Repère d’abord l’angle sur le cercle trigonométrique et respecte les unités. Utilise cos²x+sin²x=1 et les relations de périodicité pour simplifier les expressions.''',
+      enonce1:r'''Donne cos(0) et sin(0).''', solution1:r'''cos(0)=1 et sin(0)=0.''',
+      enonce2:r'''Simplifie sin²x+cos²x.''', solution2:r'''L’expression vaut 1 pour tout réel x.''',
+      motsCles:'angle orienté • cercle trigonométrique • sinus • cosinus • tangente', quiz1:'Quelle identité est toujours vraie ?', quizBonne:'sin²x+cos²x=1',
+    ),
+    '1ere_C_math_ch03': _math1ereCChapitre(
+      code:'ch03', titre:'Généralités sur les fonctions',
+      cours:r'''Une fonction associe à chaque élément de son domaine une unique image. Son étude porte sur le domaine, les images, les antécédents, les zéros, le signe, les variations et les représentations graphiques. Les fonctions peuvent être étudiées algébriquement ou graphiquement.''',
+      renforcement:r'''Dans f(a)=b, a est un antécédent de b. Pour trouver les zéros, résous f(x)=0. Pour une lecture graphique, utilise les coordonnées et les intersections avec les axes.''',
+      enonce1:r'''Soit f(x)=2x+1. Calcule f(3).''', solution1:r'''f(3)=7.''',
+      enonce2:r'''Pour f(x)=x²−9, détermine les zéros.''', solution2:r'''x²−9=(x−3)(x+3), donc les zéros sont −3 et 3.''',
+      motsCles:'fonction • domaine • image • antécédent • zéro • variation', quiz1:'Dans f(2)=−5, quel est l’antécédent de −5 ?', quizBonne:'2',
+    ),
+    '1ere_C_math_ch04': _math1ereCChapitre(
+      code:'ch04', titre:'Barycentre',
+      cours:r'''Le barycentre généralise la notion de centre de gravité d’un système de points pondérés. Pour deux points A et B affectés de coefficients non opposés, le barycentre G vérifie une relation vectorielle entre GA et GB. La notion permet de démontrer des alignements et de déterminer des lieux géométriques.''',
+      renforcement:r'''Écris la relation vectorielle du barycentre avec les coefficients donnés. Vérifie que leur somme n’est pas nulle avant d’utiliser la formule.''',
+      enonce1:r'''Pour deux points A et B de coefficients 2 et 1, quelle relation vérifie leur barycentre G ?''', solution1:r'''2\vec{GA}+\vec{GB}=\vec{0}.''',
+      enonce2:r'''Si G est le barycentre de (A,2) et (B,1), exprime \vec{OG}.''', solution2:r'''\vec{OG}=(2\vec{OA}+\vec{OB})/3.''',
+      motsCles:'barycentre • points pondérés • coefficients • vecteurs • centre de gravité', quiz1:'Quelle condition faut-il pour définir le barycentre de points pondérés ?', quizBonne:'La somme des coefficients doit être non nulle',
+    ),
+    '1ere_C_math_ch05': _math1ereCChapitre(
+      code:'ch05', titre:'Limites et continuité',
+      cours:r'''La limite décrit le comportement d’une fonction lorsque la variable se rapproche d’une valeur ou devient très grande. Une fonction est continue en a lorsque sa limite en a existe et vaut f(a). Les limites permettent notamment d’étudier les comportements aux bornes du domaine.''',
+      renforcement:r'''Identifie le point ou l’infini étudié. Cherche d’abord une forme simple ; en cas d’indétermination, factorise ou utilise une transformation adaptée.''',
+      enonce1:r'''Calcule lim(x→2) (x+3).''', solution1:r'''La limite vaut 5.''',
+      enonce2:r'''Calcule lim(x→+∞) (2x+1)/x.''', solution2:r'''En divisant par x, on obtient 2+1/x, donc la limite est 2.''',
+      motsCles:'limite • continuité • voisinage • infini • indétermination', quiz1:'Que signifie qu’une fonction est continue en a ?', quizBonne:'Sa limite en a existe et vaut f(a)',
+    ),
+    '1ere_C_math_ch06': _math1ereCChapitre(
+      code:'ch06', titre:'Dénombrement',
+      cours:r'''Le dénombrement compte des configurations finies. Selon le problème, on utilise les principes additif et multiplicatif, les arrangements, les permutations ou les combinaisons. La distinction entre ordre important et ordre non important est essentielle.''',
+      renforcement:r'''Décris précisément l’expérience avant de choisir une formule. Un arbre aide à visualiser les choix successifs et les répétitions.''',
+      enonce1:r'''Combien de codes à deux chiffres peut-on former avec 0 à 9 si les répétitions sont autorisées ?''', solution1:r'''10×10=100 codes.''',
+      enonce2:r'''Combien de groupes de 3 élèves peut-on choisir parmi 6 ?''', solution2:r'''C(6,3)=20.''',
+      motsCles:'dénombrement • permutation • arrangement • combinaison • choix', quiz1:'Dans une combinaison, l’ordre des éléments choisis compte-t-il ?', quizBonne:'Non',
+    ),
+    '1ere_C_math_ch07': _math1ereCChapitre(
+      code:'ch07', titre:'Extension de la notion de limite',
+      cours:r'''Les limites peuvent être étudiées lorsqu’une variable tend vers un réel, vers +∞ ou vers −∞. L’extension permet d’analyser les asymptotes et des expressions présentant des formes indéterminées. Les transformations algébriques facilitent le calcul des limites.''',
+      renforcement:r'''Repère la forme obtenue avant de conclure. Pour une fraction rationnelle à l’infini, compare les degrés ou divise par la plus grande puissance de x.''',
+      enonce1:r'''Calcule lim(x→+∞) (3x²+1)/x².''', solution1:r'''En divisant par x², la limite vaut 3.''',
+      enonce2:r'''Calcule lim(x→+∞) (x+1)/(x²+2).''', solution2:r'''En divisant par x², on obtient (1/x+1/x²)/(1+2/x²), donc la limite est 0.''',
+      motsCles:'limite à l’infini • forme indéterminée • asymptote • degré • comportement', quiz1:'Pour une fraction rationnelle à l’infini, quel élément compare-t-on souvent en premier ?', quizBonne:'Les degrés du numérateur et du dénominateur',
+    ),
+    '1ere_C_math_ch08': _math1ereCChapitre(
+      code:'ch08', titre:'Composées de transformations du plan',
+      cours:r'''Les transformations du plan, comme les translations, rotations, symétries et homothéties, peuvent être composées. Une composition consiste à appliquer successivement plusieurs transformations. L’étude des images de points et des propriétés conservées permet d’identifier la transformation résultante.''',
+      renforcement:r'''Respecte l’ordre des transformations : appliquer T puis S signifie S∘T. Suis quelques points caractéristiques pour comprendre la transformation obtenue.''',
+      enonce1:r'''Une translation de vecteur u suivie d’une translation de vecteur v équivaut à quelle translation ?''', solution1:r'''À la translation de vecteur u+v.''',
+      enonce2:r'''Une rotation de centre O et d’angle 90° est appliquée deux fois. Quelle rotation obtient-on ?''', solution2:r'''Une rotation de centre O et d’angle 180°.''',
+      motsCles:'transformation • composition • translation • rotation • symétrie', quiz1:'Dans une composition T puis S, quelle transformation est appliquée en premier ?', quizBonne:'T',
+    ),
+    '1ere_C_math_ch09': _math1ereCChapitre(
+      code:'ch09', titre:'Dérivation',
+      cours:r'''La dérivée donne le taux de variation instantané d’une fonction. Elle permet de calculer la pente de la tangente et d’étudier les variations. Les règles de dérivation s’appliquent aux fonctions usuelles et à leurs sommes, produits ou compositions selon le niveau étudié.''',
+      renforcement:r'''Commence par reconnaître la forme de la fonction. Applique la règle de dérivation puis simplifie. Le signe de la dérivée donne les variations.''',
+      enonce1:r'''Dérive f(x)=x³−2x.''', solution1:r'''f'(x)=3x²−2.''',
+      enonce2:r'''Détermine la dérivée de f(x)=5x²+4x−7.''', solution2:r'''f'(x)=10x+4.''',
+      motsCles:'dérivée • taux de variation • tangente • pente • variation', quiz1:'Que représente graphiquement f’(a) ?', quizBonne:'Le coefficient directeur de la tangente à la courbe en a',
+    ),
+    '1ere_C_math_ch10': _math1ereCChapitre(
+      code:'ch10', titre:'Orthogonalité de l’espace',
+      cours:r'''Dans l’espace, l’orthogonalité concerne les droites, plans et vecteurs. Deux vecteurs sont orthogonaux lorsque leur produit scalaire est nul. Une droite est perpendiculaire à un plan lorsqu’elle est orthogonale à toutes les directions du plan.''',
+      renforcement:r'''Utilise les vecteurs directeurs et le produit scalaire. Pour montrer qu’une droite est perpendiculaire à un plan, vérifie son orthogonalité avec deux directions non colinéaires du plan.''',
+      enonce1:r'''Calcule le produit scalaire de u=(1,2,−1) et v=(2,0,2).''', solution1:r'''u·v=1×2+2×0+(−1)×2=0. Les vecteurs sont orthogonaux.''',
+      enonce2:r'''Que peut-on conclure si un vecteur normal n d’un plan est colinéaire au vecteur directeur d’une droite d ?''', solution2:r'''La droite d est perpendiculaire au plan.''',
+      motsCles:'espace • orthogonalité • produit scalaire • plan • vecteur normal', quiz1:'Quand deux vecteurs sont-ils orthogonaux ?', quizBonne:'Lorsque leur produit scalaire est nul',
+    ),
+    '1ere_C_math_ch11': _math1ereCChapitre(
+      code:'ch11', titre:'Étude et représentation graphique d’une fonction',
+      cours:r'''L’étude d’une fonction rassemble domaine, limites éventuelles, dérivée, signe, variations et valeurs remarquables. Le tableau de variations organise les résultats et permet ensuite de construire une représentation graphique cohérente.''',
+      renforcement:r'''Travaille dans l’ordre : domaine → limites → dérivée → signe de la dérivée → variations → points remarquables. Vérifie la cohérence graphique avec les résultats obtenus.''',
+      enonce1:r'''Pour f(x)=x²−4x, calcule f'(x).''', solution1:r'''f'(x)=2x−4.''',
+      enonce2:r'''Détermine le minimum de f(x)=x²−4x+3.''', solution2:r'''Le sommet est en x=2 et f(2)=−1. Le minimum vaut −1.''',
+      motsCles:'étude de fonction • dérivée • variation • tableau • courbe', quiz1:'Quelle information fournit le signe de la dérivée ?', quizBonne:'Le sens de variation de la fonction',
+    ),
+    '1ere_C_math_ch12': _math1ereCChapitre(
+      code:'ch12', titre:'Probabilité',
+      cours:r'''Une expérience aléatoire possède plusieurs issues possibles. Une probabilité associe à chaque événement un nombre entre 0 et 1. Dans un univers fini équiprobable, P(A)=nombre de cas favorables/nombre de cas possibles. On utilise aussi les événements contraires et les réunions.''',
+      renforcement:r'''Définis clairement l’univers et l’événement. Vérifie que les probabilités sont comprises entre 0 et 1 et que les événements incompatibles sont traités correctement.''',
+      enonce1:r'''On lance un dé équilibré. Quelle est la probabilité d’obtenir un nombre pair ?''', solution1:r'''Les issues favorables sont 2,4,6 : P=3/6=1/2.''',
+      enonce2:r'''Si P(A)=0,3, quelle est P(Ā) ?''', solution2:r'''P(Ā)=1−0,3=0,7.''',
+      motsCles:'probabilité • événement • univers • équiprobabilité • contraire', quiz1:'Quelle est la probabilité de l’événement contraire de A ?', quizBonne:'1−P(A)',
+    ),
+    '1ere_C_math_ch13': _math1ereCChapitre(
+      code:'ch13', titre:'Système d’équations linéaires dans ℝ² et ℝ³',
+      cours:r'''Un système linéaire à deux ou trois inconnues cherche les valeurs qui vérifient simultanément plusieurs équations. On peut utiliser substitution, combinaison linéaire ou une méthode matricielle selon le niveau. Une solution doit satisfaire toutes les équations du système.''',
+      renforcement:r'''Élimine progressivement les inconnues ou isole une variable. Après résolution, remplace les valeurs trouvées dans chaque équation pour vérifier.''',
+      enonce1:r'''Résous x+y=7 et x−y=1.''', solution1:r'''En additionnant, 2x=8 donc x=4 et y=3.''',
+      enonce2:r'''Résous x+y+z=6, x−y=0 et z=2.''', solution2:r'''z=2 et x=y. Donc 2x+2=6, x=y=2. Solution (2,2,2).''',
+      motsCles:'système linéaire • inconnue • substitution • combinaison • solution', quiz1:'Combien d’équations faut-il au minimum pour déterminer trois inconnues dans un système linéaire indépendant ?', quizBonne:'Trois',
+    ),
+    '1ere_C_math_ch14': _math1ereCChapitre(
+      code:'ch14', titre:'Géométrie analytique du plan',
+      cours:r'''La géométrie analytique décrit les objets du plan avec des coordonnées et des équations. Les vecteurs permettent de calculer directions et colinéarité. Une droite peut être décrite par une équation cartésienne ou paramétrique, et les coordonnées permettent d’étudier intersections et distances.''',
+      renforcement:r'''Choisis un repère adapté. Pour une droite, identifie un point et une direction ou un vecteur normal. Vérifie les coordonnées en les remplaçant dans l’équation.''',
+      enonce1:r'''Donne un vecteur directeur de la droite 2x−y+3=0.''', solution1:r'''Un vecteur directeur est (1,2), car 2×1−2=0.''',
+      enonce2:r'''Le point A(2,1) appartient-il à la droite x+2y−4=0 ?''', solution2:r'''2+2×1−4=0, donc oui.''',
+      motsCles:'repère • coordonnées • vecteur • droite • équation cartésienne', quiz1:'Comment vérifier qu’un point appartient à une droite donnée par une équation ?', quizBonne:'En remplaçant ses coordonnées dans l’équation',
+    ),
+    '1ere_C_math_ch15': _math1ereCChapitre(
+      code:'ch15', titre:'Suites numériques',
+      cours:r'''Une suite numérique associe un réel à chaque entier naturel de son domaine. Elle peut être définie explicitement ou par récurrence. Les suites arithmétiques et géométriques constituent deux familles fondamentales, avec des formules permettant de calculer leurs termes.''',
+      renforcement:r'''Observe la relation entre deux termes consécutifs. Une différence constante indique une suite arithmétique ; un quotient constant non nul indique une suite géométrique.''',
+      enonce1:r'''Une suite arithmétique vérifie u_0=4 et r=5. Calcule u_6.''', solution1:r'''u_6=4+6×5=34.''',
+      enonce2:r'''Une suite géométrique vérifie u_0=2 et q=3. Calcule u_3.''', solution2:r'''u_3=2×3³=54.''',
+      motsCles:'suite • terme • récurrence • arithmétique • géométrique • raison', quiz1:'Quel est le point commun caractéristique d’une suite arithmétique ?', quizBonne:'La différence entre deux termes consécutifs est constante',
+    ),
+    '1ere_C_math_ch16': _math1ereCChapitre(
+      code:'ch16', titre:'Vecteurs de l’espace',
+      cours:r'''Dans l’espace, un vecteur est caractérisé par ses coordonnées dans un repère. On peut additionner des vecteurs, les multiplier par un réel et étudier leur colinéarité. Les vecteurs servent à décrire directions, parallélisme et positions de points.''',
+      renforcement:r'''Pour calculer AB, fais coordonnées de B moins coordonnées de A. Deux vecteurs sont colinéaires lorsqu’il existe un réel k tel que v=ku.''',
+      enonce1:r'''Détermine \vec{AB} pour A(1,2,−1) et B(4,0,2).''', solution1:r'''\vec{AB}=(3,−2,3).''',
+      enonce2:r'''Les vecteurs u=(1,−2,3) et v=(2,−4,6) sont-ils colinéaires ?''', solution2:r'''Oui, v=2u.''',
+      motsCles:'vecteur • espace • coordonnées • colinéarité • repère', quiz1:'Comment obtient-on les coordonnées de \vec{AB} ?', quizBonne:'Coordonnées de B moins coordonnées de A',
+    ),
+    '1ere_C_math_ch17': _math1ereCChapitre(
+      code:'ch17', titre:'Statistique à une variable',
+      cours:r'''Une série statistique à une variable étudie un caractère sur une population. Les effectifs, fréquences, moyenne, médiane, quartiles et étendue permettent de résumer les données. Les représentations graphiques aident à interpréter la distribution.''',
+      renforcement:r'''Ordonne les données avant de déterminer médiane et quartiles. Pour une série avec effectifs, calcule la moyenne à partir des produits valeur×effectif et vérifie l’effectif total.''',
+      enonce1:r'''Calcule la moyenne de 4, 6, 8, 10 et 12.''', solution1:r'''La moyenne est 8.''',
+      enonce2:r'''Pour 2,4,5,7,9,11,14, donne la médiane et l’étendue.''', solution2:r'''La médiane est 7 et l’étendue est 14−2=12.''',
+      motsCles:'statistique • effectif • fréquence • moyenne • médiane • quartile • étendue', quiz1:'Que mesure l’étendue d’une série ?', quizBonne:'La différence entre la plus grande et la plus petite valeur',
+    ),
+
+
 
     '1ere_A2_math_ch01': _math1ereA2Chapitre(
       code: 'ch01', titre: 'Équations et inéquations dans ℝ',

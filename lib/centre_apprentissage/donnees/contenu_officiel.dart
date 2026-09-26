@@ -860,6 +860,97 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _mathTleA2Chapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : appliquer une propriété sans vérifier ses conditions.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile,
+        enonce: '''$enonce1''',
+        solution: '''$solution1''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice d'application',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: '''$enonce2''',
+        solution: '''$solution2''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: '$titre — quiz',
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'TleA2_' + code + '_q1',
+            type: TypeQuestion.qcm,
+            enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les conditions', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0],
+            explication: 'La première proposition correspond à la notion essentielle du chapitre.',
+          ),
+          QuestionQuiz(
+            id: 'TleA2_' + code + '_q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: 'Une résolution correcte doit respecter les conditions des propriétés utilisées.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication: 'Les hypothèses d’une propriété doivent être vérifiées avant son application.',
+          ),
+          QuestionQuiz(
+            id: 'TleA2_' + code + '_q3',
+            type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier ?',
+            choix: ['Identifier les données, les conditions et la méthode', 'Répondre sans justification', 'Ignorer le domaine', 'Utiliser une formule sans vérifier'],
+            bonnesReponses: [0],
+            explication: 'La rigueur commence par l’identification des données et des conditions.',
+          ),
+        ],
+      ),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
 
     'Tle_A1_math_ch01': _mathTleA1Chapitre(
@@ -9633,6 +9724,71 @@ RÉFLEXE : identifier les données → choisir la propriété → calculer → v
         ],
       ),
     ],
+
+
+    'Tle_A2_math_ch01': _mathTleA2Chapitre(
+      code:'ch01', titre:'Étude de fonctions polynômes et de fonctions rationnelles',
+      cours:r'''Une fonction polynôme est définie sur ℝ par une expression polynomiale. Une fonction rationnelle est un quotient de polynômes et son domaine exclut les zéros du dénominateur. L’étude porte notamment sur le domaine, les limites, le signe, les dérivées et les variations.''',
+      renforcement:r'''Pour une fonction rationnelle, commence par déterminer les valeurs interdites. Pour l’étude d’une fonction, organise les calculs : domaine → limites → dérivée → signe → variations → représentation graphique.''',
+      enonce1:r'''Détermine le domaine de f(x)=(2x+1)/(x−3).''', solution1:r'''D_f=ℝ\{3}, car le dénominateur ne doit pas être nul.''',
+      enonce2:r'''Dérive f(x)=x³−2x²+4x−1.''', solution2:r'''f'(x)=3x²−4x+4.''',
+      motsCles:'polynôme • rationnelle • domaine • limite • dérivée • signe • variation',
+      quiz1:'Que faut-il déterminer en priorité pour une fonction rationnelle ?', quizBonne:'Les valeurs qui annulent le dénominateur',
+    ),
+    'Tle_A2_math_ch02': _mathTleA2Chapitre(
+      code:'ch02', titre:'Probabilité',
+      cours:r'''Une expérience aléatoire possède des issues auxquelles sont associées des probabilités. La somme des probabilités de toutes les issues vaut 1. On utilise les événements, l’union, l’intersection et, selon les situations, les probabilités conditionnelles.''',
+      renforcement:r'''Commence par identifier l’univers et les événements. Vérifie que les probabilités sont comprises entre 0 et 1 et que la somme des probabilités des issues élémentaires vaut 1.''',
+      enonce1:r'''Une urne contient 3 boules rouges et 2 boules bleues. On tire une boule au hasard. Probabilité d’obtenir une rouge ?''', solution1:r'''P(R)=3/5.''',
+      enonce2:r'''Deux événements A et B sont incompatibles avec P(A)=0,4 et P(B)=0,3. Calcule P(A∪B).''', solution2:r'''Comme A et B sont incompatibles, P(A∪B)=P(A)+P(B)=0,7.''',
+      motsCles:'expérience aléatoire • issue • événement • probabilité • union • intersection',
+      quiz1:'Quelle valeur doit avoir la somme des probabilités de toutes les issues ?', quizBonne:'1',
+    ),
+    'Tle_A2_math_ch03': _mathTleA2Chapitre(
+      code:'ch03', titre:'Fonction logarithme népérien',
+      cours:r'''La fonction logarithme népérien, notée ln, est définie sur ]0;+∞[. Elle vérifie notamment ln(ab)=ln(a)+ln(b), ln(a/b)=ln(a)−ln(b) et ln(a^n)=n ln(a) pour a>0. Elle est strictement croissante.''',
+      renforcement:r'''Avant tout calcul avec ln, vérifie que chaque argument est strictement positif. Pour une équation logarithmique, utilise les propriétés de ln puis contrôle les conditions de définition.''',
+      enonce1:r'''Calcule ln(e³).''', solution1:r'''ln(e³)=3.''',
+      enonce2:r'''Résous ln(x)=2.''', solution2:r'''Par définition de l’exponentielle, x=e², avec x>0.''',
+      motsCles:'ln • logarithme népérien • domaine • propriétés • équation',
+      quiz1:'Sur quel ensemble la fonction ln est-elle définie ?', quizBonne:']0;+∞[',
+    ),
+    'Tle_A2_math_ch04': _mathTleA2Chapitre(
+      code:'ch04', titre:'Fonction exponentielle népérienne',
+      cours:r'''La fonction exponentielle, notée exp ou e^x, est définie sur ℝ, strictement positive et strictement croissante. Elle vérifie e^(a+b)=e^a e^b et est la fonction réciproque du logarithme népérien.''',
+      renforcement:r'''Utilise e^(a+b)=e^a e^b et e^(−a)=1/e^a. Pour résoudre une équation exponentielle, cherche à écrire les deux membres avec une même base ou applique ln lorsque les deux membres sont positifs.''',
+      enonce1:r'''Simplifie e²×e⁵.''', solution1:r'''e²×e⁵=e⁷.''',
+      enonce2:r'''Résous e^x=5.''', solution2:r'''x=ln(5).''',
+      motsCles:'exponentielle • e^x • croissance • ln • propriétés',
+      quiz1:'Quelle propriété est correcte ?', quizBonne:'e^(a+b)=e^a×e^b',
+    ),
+    'Tle_A2_math_ch05': _mathTleA2Chapitre(
+      code:'ch05', titre:'Statistique à deux variables',
+      cours:r'''Une série statistique à deux variables étudie deux caractères observés sur une même population. Le nuage de points permet de visualiser une relation. On peut utiliser la covariance, le coefficient de corrélation et une droite d’ajustement pour décrire une tendance.''',
+      renforcement:r'''Commence par organiser les couples de données. Observe le nuage de points puis interprète la tendance. Le coefficient de corrélation mesure la force d’une liaison linéaire, sans prouver à lui seul une causalité.''',
+      enonce1:r'''Une série comporte les couples (1,2), (2,4), (3,6). Quelle relation simple semble relier x et y ?''', solution1:r'''Les points sont alignés sur y=2x.''',
+      enonce2:r'''Que signifie un nuage de points fortement proche d’une droite croissante ?''', solution2:r'''Il indique une liaison linéaire positive forte entre les deux variables.''',
+      motsCles:'deux variables • nuage de points • corrélation • ajustement • droite',
+      quiz1:'Que représente un nuage de points en statistique à deux variables ?', quizBonne:'Les couples de valeurs observés',
+    ),
+    'Tle_A2_math_ch06': _mathTleA2Chapitre(
+      code:'ch06', titre:'Suites numériques',
+      cours:r'''Une suite numérique associe à chaque entier naturel un nombre réel. Une suite peut être définie explicitement ou par récurrence. On étudie notamment ses variations et sa convergence. Les suites arithmétiques et géométriques constituent des modèles fondamentaux.''',
+      renforcement:r'''Identifie d’abord le mode de définition. Pour une suite arithmétique, la différence entre deux termes consécutifs est constante. Pour une suite géométrique, le quotient de deux termes consécutifs est constant lorsque les termes concernés sont non nuls.''',
+      enonce1:r'''Soit u_n=3n+2. Calcule u_5.''', solution1:r'''u_5=3×5+2=17.''',
+      enonce2:r'''Une suite arithmétique vérifie u_1=4 et r=3. Calcule u_6.''', solution2:r'''u_6=u_1+5r=4+15=19.''',
+      motsCles:'suite • terme • récurrence • arithmétique • géométrique • convergence',
+      quiz1:'Dans une suite arithmétique, quelle grandeur reste constante ?', quizBonne:'La différence entre deux termes consécutifs',
+    ),
+    'Tle_A2_math_ch07': _mathTleA2Chapitre(
+      code:'ch07', titre:'Systèmes d’équations linéaires dans ℝ × ℝ',
+      cours:r'''Un système linéaire à deux inconnues cherche les couples (x,y) satisfaisant simultanément deux équations. On peut utiliser la substitution, la combinaison linéaire ou une interprétation graphique par deux droites.''',
+      renforcement:r'''Choisis la méthode qui réduit le plus simplement le système. Après résolution, remplace le couple obtenu dans les deux équations pour vérifier.''',
+      enonce1:r'''Résous x+y=7 et x−y=1.''', solution1:r'''En additionnant les deux équations, 2x=8 donc x=4 et y=3.''',
+      enonce2:r'''Résous 2x+y=8 et x−y=1.''', solution2:r'''De x−y=1, y=x−1. Donc 2x+x−1=8, soit x=3 et y=2.''',
+      motsCles:'système • équation linéaire • substitution • combinaison • solution',
+      quiz1:'Graphiquement, que représente la solution d’un système de deux droites sécantes ?', quizBonne:'Le point d’intersection',
+    ),
 
   };
 }

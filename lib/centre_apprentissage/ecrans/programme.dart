@@ -320,8 +320,8 @@ class ChapitresPage extends StatelessWidget {
       showSnack(
         context,
         r.crees == 0
-            ? 'Programme deja complet : undefined chapitre(s) conserve(s).'
-            : 'undefined chapitre(s) ajoute(s), undefined deja present(s).',
+            ? 'Programme deja complet : ${r.ignores} chapitre(s) conserve(s).'
+            : '${r.crees} chapitre(s) ajoute(s), ${r.ignores} deja present(s).',
       );
     } catch (e) {
       if (context.mounted) {

@@ -951,6 +951,97 @@ RÉFLEXE : écrire les étapes du raisonnement et vérifier le résultat.
     ];
   }
 
+
+  static List<RessourceOfficielle> _mathTleCChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+    required String quiz1,
+    required String quizBonne,
+  }) {
+    return [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → développer le raisonnement → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : utiliser une propriété sans vérifier ses hypothèses et son domaine d'application.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile,
+        enonce: '''$enonce1''',
+        solution: '''$solution1''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice d'application',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: '''$enonce2''',
+        solution: '''$solution2''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : écrire les étapes du raisonnement et contrôler les résultats.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: '$titre — quiz',
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: 'TleC_' + code + '_q1',
+            type: TypeQuestion.qcm,
+            enonce: '''$quiz1''',
+            choix: ['''$quizBonne''', 'Ignorer les hypothèses', 'Choisir une formule au hasard', 'Aucune justification n’est nécessaire'],
+            bonnesReponses: [0],
+            explication: 'La première proposition correspond à la notion essentielle du chapitre.',
+          ),
+          QuestionQuiz(
+            id: 'TleC_' + code + '_q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: 'Une démonstration correcte doit respecter les hypothèses des théorèmes et propriétés utilisés.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication: 'Les conditions d’application doivent être vérifiées avant d’utiliser un résultat.',
+          ),
+          QuestionQuiz(
+            id: 'TleC_' + code + '_q3',
+            type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il privilégier en Terminale C ?',
+            choix: ['Justifier les étapes et vérifier le résultat', 'Répondre sans raisonnement', 'Ignorer le domaine', 'Utiliser une formule sans vérifier'],
+            bonnesReponses: [0],
+            explication: 'La rigueur du raisonnement est essentielle dans les exercices de niveau Terminale C.',
+          ),
+        ],
+      ),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
 
     'Tle_A1_math_ch01': _mathTleA1Chapitre(
@@ -9788,6 +9879,179 @@ RÉFLEXE : identifier les données → choisir la propriété → calculer → v
       enonce2:r'''Résous 2x+y=8 et x−y=1.''', solution2:r'''De x−y=1, y=x−1. Donc 2x+x−1=8, soit x=3 et y=2.''',
       motsCles:'système • équation linéaire • substitution • combinaison • solution',
       quiz1:'Graphiquement, que représente la solution d’un système de deux droites sécantes ?', quizBonne:'Le point d’intersection',
+    ),
+
+
+    'Tle_C_math_ch01': _mathTleCChapitre(
+      code:'ch01', titre:'Barycentre et lignes de niveaux',
+      cours:r'''Le barycentre permet de définir un point associé à des points pondérés. Dans le plan, il généralise le milieu et permet d'étudier des relations vectorielles. Les lignes de niveaux sont des ensembles de points vérifiant une condition donnée, souvent exprimée à l'aide de distances ou de produits scalaires.''',
+      renforcement:r'''Traduis la condition géométrique sous forme vectorielle ou algébrique. Identifie les coefficients du barycentre, puis simplifie l'expression pour caractériser l'ensemble des points recherchés.''',
+      enonce1:r'''Soient A et B et des coefficients 2 et 1. Écris le vecteur position du barycentre G dans un repère.''', solution1:r'''Si les vecteurs sont définis par rapport à O, on a OG=(2OA+OB)/3.''',
+      enonce2:r'''Caractérise l'ensemble des points M tels que MA²−MB²=0.''', solution2:r'''MA=MB, donc M appartient à la médiatrice de [AB].''',
+      motsCles:'barycentre • coefficients • vecteurs • ligne de niveau • distances',
+      quiz1:'Quel point généralise le milieu de deux points pondérés ?', quizBonne:'Le barycentre',
+    ),
+    'Tle_C_math_ch02': _mathTleCChapitre(
+      code:'ch02', titre:'Limites et continuité',
+      cours:r'''La limite décrit le comportement d'une fonction lorsqu'une variable se rapproche d'un nombre ou tend vers l'infini. Une fonction est continue en a lorsque sa limite en a existe et vaut f(a). Les théorèmes de comparaison, les opérations sur les limites et les formes indéterminées permettent de conduire une étude rigoureuse.''',
+      renforcement:r'''Commence par identifier le domaine et le point étudié. En présence d'une forme indéterminée, transforme l'expression : factorisation, mise au même dénominateur ou utilisation d'une expression conjuguée selon le cas.''',
+      enonce1:r'''Calcule lim(x→2)(3x+1).''', solution1:r'''La fonction est continue, donc la limite vaut 7.''',
+      enonce2:r'''Calcule lim(x→+∞)(5x²−1)/x².''', solution2:r'''En divisant par x², la limite vaut 5.''',
+      motsCles:'limite • continuité • voisinage • infini • forme indéterminée',
+      quiz1:'Que signifie qu'une fonction f est continue en a ?', quizBonne:'La limite de f(x) quand x tend vers a est égale à f(a)',
+    ),
+    'Tle_C_math_ch03': _mathTleCChapitre(
+      code:'ch03', titre:'Divisibilité dans ℤ',
+      cours:r'''Dans l'ensemble des entiers relatifs, a divise b s'il existe un entier k tel que b=ak. La divisibilité permet d'étudier les multiples, diviseurs, nombres premiers et congruences. Les propriétés du PGCD et de l'algorithme d'Euclide sont fondamentales.''',
+      renforcement:r'''Pour montrer que a divise b, cherche à écrire b=ak avec k entier. Pour calculer un PGCD, applique l'algorithme d'Euclide en répétant les divisions euclidiennes.''',
+      enonce1:r'''Le nombre 7 divise-t-il 84 ?''', solution1:r'''Oui, car 84=7×12.''',
+      enonce2:r'''Calcule PGCD(84,30).''', solution2:r'''84=2×30+24 ; 30=1×24+6 ; 24=4×6, donc PGCD(84,30)=6.''',
+      motsCles:'divisibilité • diviseur • multiple • entier • PGCD • Euclide',
+      quiz1:'Que signifie a divise b dans ℤ ?', quizBonne:'Il existe un entier k tel que b=ak',
+    ),
+    'Tle_C_math_ch04': _mathTleCChapitre(
+      code:'ch04', titre:'Dérivabilité et étude de fonctions',
+      cours:r'''La dérivée mesure le taux de variation local d'une fonction. Elle permet d'étudier les variations, les extrema et les tangentes. Une étude complète associe domaine de définition, limites, dérivée, signe de la dérivée, tableau de variations et représentation graphique.''',
+      renforcement:r'''Détermine d'abord le domaine. Calcule ensuite la dérivée et étudie son signe. Complète avec les limites pour construire un tableau de variations cohérent.''',
+      enonce1:r'''Dérive f(x)=x³−3x+2.''', solution1:r'''f'(x)=3x²−3.''',
+      enonce2:r'''Étudie le signe de f'(x)=2x−4.''', solution2:r'''f'(x)<0 si x<2, f'(2)=0 et f'(x)>0 si x>2.''',
+      motsCles:'dérivée • taux de variation • tangente • extrema • variations',
+      quiz1:'Que permet principalement le signe de f\'(x) ?', quizBonne:'D'étudier les variations de f',
+    ),
+    'Tle_C_math_ch05': _mathTleCChapitre(
+      code:'ch05', titre:'Géométrie analytique de l’espace',
+      cours:r'''Dans l'espace, un repère permet de représenter les points par trois coordonnées. Les vecteurs sont décrits par leurs composantes. Les équations de droites et de plans s'obtiennent à partir de vecteurs directeurs, de vecteurs normaux et de systèmes de coordonnées.''',
+      renforcement:r'''Écris les coordonnées des vecteurs en soustrayant les coordonnées des points. Pour caractériser un plan, recherche une équation cartésienne ou une représentation paramétrique adaptée.''',
+      enonce1:r'''A(1,2,3) et B(4,0,5). Donne les coordonnées de AB.''', solution1:r'''AB=(3,−2,2).''',
+      enonce2:r'''Donne une équation cartésienne du plan x+2y−z=3 et indique un vecteur normal.''', solution2:r'''L'équation est déjà donnée ; un vecteur normal est n=(1,2,−1).''',
+      motsCles:'espace • coordonnées • vecteur • droite • plan • vecteur normal',
+      quiz1:'Combien de coordonnées faut-il pour repérer un point dans l’espace ?', quizBonne:'Trois',
+    ),
+    'Tle_C_math_ch06': _mathTleCChapitre(
+      code:'ch06', titre:'Primitives',
+      cours:r'''Une primitive F d'une fonction f sur un intervalle vérifie F'=f. Les primitives s'obtiennent à partir des formes usuelles et des règles de calcul. Elles sont utilisées pour calculer des intégrales et résoudre certaines équations différentielles.''',
+      renforcement:r'''Reconnais d'abord la forme de la fonction. Propose une primitive puis vérifie-la systématiquement en dérivant ton résultat.''',
+      enonce1:r'''Donne une primitive de f(x)=4x³.''', solution1:r'''F(x)=x⁴+C.''',
+      enonce2:r'''Donne une primitive de f(x)=1/x sur ]0;+∞[.''', solution2:r'''F(x)=ln(x)+C.''',
+      motsCles:'primitive • dérivée • constante • intégrale • fonction',
+      quiz1:'Quelle relation vérifie une primitive F de f ?', quizBonne:'F\'=f',
+    ),
+    'Tle_C_math_ch07': _mathTleCChapitre(
+      code:'ch07', titre:'Fonctions logarithmes',
+      cours:r'''La fonction logarithme népérien ln est définie sur ]0;+∞[, strictement croissante et dérivable. Elle transforme les produits en sommes et les puissances en multiples. Ses propriétés permettent de résoudre des équations et inéquations.''',
+      renforcement:r'''Vérifie toujours que les arguments des logarithmes sont positifs. Utilise ln(ab)=ln(a)+ln(b) et ln(a/b)=ln(a)−ln(b) pour simplifier les expressions.''',
+      enonce1:r'''Calcule ln(e⁴).''', solution1:r'''ln(e⁴)=4.''',
+      enonce2:r'''Résous ln(x)=3.''', solution2:r'''x=e³, avec x>0.''',
+      motsCles:'ln • logarithme • domaine • croissance • équation • inéquation',
+      quiz1:'Quel est le domaine de définition de ln ?', quizBonne:']0;+∞[',
+    ),
+    'Tle_C_math_ch08': _mathTleCChapitre(
+      code:'ch08', titre:'Coniques',
+      cours:r'''Les coniques regroupent notamment cercle, ellipse, parabole et hyperbole. Elles peuvent être étudiées par leurs équations cartésiennes, leurs foyers, directrices, axes et propriétés géométriques. Un changement de repère peut simplifier certaines équations.''',
+      renforcement:r'''Commence par identifier la forme de l'équation. Compare-la aux formes canoniques connues afin d'identifier la conique et ses paramètres.''',
+      enonce1:r'''Identifie la conique d'équation x²+y²=25.''', solution1:r'''C'est un cercle de centre O(0,0) et de rayon 5.''',
+      enonce2:r'''Identifie la conique d'équation y²=4x.''', solution2:r'''C'est une parabole de sommet O, d'axe (Ox).''',
+      motsCles:'conique • cercle • ellipse • parabole • hyperbole • équation',
+      quiz1:'Quelle conique possède une équation de type y²=2px dans un repère adapté ?', quizBonne:'La parabole',
+    ),
+    'Tle_C_math_ch09': _mathTleCChapitre(
+      code:'ch09', titre:'Fonctions exponentielles et fonctions puissances',
+      cours:r'''La fonction exponentielle est définie sur ℝ, positive, strictement croissante et vérifie e^(a+b)=e^a e^b. Les fonctions puissances prolongent l'étude de x^a sur les domaines où elles sont définies. Ces fonctions interviennent dans les phénomènes de croissance et de décroissance.''',
+      renforcement:r'''Utilise les propriétés de l'exponentielle pour transformer les produits et puissances. Pour une fonction puissance, commence par déterminer son domaine avant d'étudier ses variations.''',
+      enonce1:r'''Simplifie e²×e³.''', solution1:r'''e⁵.''',
+      enonce2:r'''Résous e^x=7.''', solution2:r'''x=ln(7).''',
+      motsCles:'exponentielle • puissance • croissance • ln • domaine',
+      quiz1:'Quelle relation est vraie pour l’exponentielle ?', quizBonne:'e^(a+b)=e^a×e^b',
+    ),
+    'Tle_C_math_ch10': _mathTleCChapitre(
+      code:'ch10', titre:'Nombres complexes',
+      cours:r'''Un nombre complexe s'écrit z=a+ib avec a,b réels et i²=−1. On distingue partie réelle, partie imaginaire, conjugué et module. Les opérations algébriques et la forme trigonométrique permettent de résoudre des problèmes de géométrie et d'équations.''',
+      renforcement:r'''Pour calculer avec les complexes, regroupe séparément les parties réelle et imaginaire. Utilise le conjugué pour simplifier certains quotients et le module pour les interprétations géométriques.''',
+      enonce1:r'''Calcule (2+3i)+(1−5i).''', solution1:r'''3−2i.''',
+      enonce2:r'''Calcule le module de z=3+4i.''', solution2:r'''|z|=√(3²+4²)=5.''',
+      motsCles:'complexe • partie réelle • partie imaginaire • conjugué • module',
+      quiz1:'Que vaut i² ?', quizBonne:'−1',
+    ),
+    'Tle_C_math_ch11': _mathTleCChapitre(
+      code:'ch11', titre:'PPCM et PGCD de deux entiers relatifs',
+      cours:r'''Le PGCD de deux entiers est leur plus grand diviseur commun. Le PPCM est leur plus petit multiple commun strictement positif. L'algorithme d'Euclide permet de calculer efficacement le PGCD et la relation |ab|=PGCD(a,b)×PPCM(a,b) permet d'obtenir le PPCM.''',
+      renforcement:r'''Calcule d'abord le PGCD avec l'algorithme d'Euclide. Si les deux entiers sont non nuls, utilise ensuite PPCM(a,b)=|ab|/PGCD(a,b).''',
+      enonce1:r'''Calcule PGCD(18,30).''', solution1:r'''PGCD(18,30)=6.''',
+      enonce2:r'''Déduis PPCM(18,30).''', solution2:r'''PPCM=18×30/6=90.''',
+      motsCles:'PGCD • PPCM • diviseur • multiple • Euclide',
+      quiz1:'Quelle relation relie PGCD et PPCM de deux entiers non nuls ?', quizBonne:'|ab|=PGCD(a,b)×PPCM(a,b)',
+    ),
+    'Tle_C_math_ch12': _mathTleCChapitre(
+      code:'ch12', titre:'Suites numériques',
+      cours:r'''Une suite est une fonction définie sur les entiers naturels. On étudie ses termes, ses variations et sa convergence. Les suites arithmétiques et géométriques offrent des modèles simples et leurs limites peuvent être déterminées à partir de leurs propriétés.''',
+      renforcement:r'''Identifie la relation entre deux termes consécutifs. Pour une suite arithmétique, étudie la raison ; pour une suite géométrique, étudie le quotient et sa valeur absolue.''',
+      enonce1:r'''Soit u_n=2n+1. Calcule u_5.''', solution1:r'''u_5=11.''',
+      enonce2:r'''Une suite géométrique vérifie u_0=3 et q=2. Calcule u_4.''', solution2:r'''u_4=3×2⁴=48.''',
+      motsCles:'suite • terme • arithmétique • géométrique • variation • convergence',
+      quiz1:'Dans une suite géométrique, quelle grandeur est constante ?', quizBonne:'Le quotient de deux termes consécutifs non nuls',
+    ),
+    'Tle_C_math_ch13': _mathTleCChapitre(
+      code:'ch13', titre:'Isométries du plan',
+      cours:r'''Une isométrie du plan conserve les distances. Les translations, rotations, symétries axiales et symétries centrales sont des isométries. Elles conservent également les angles et la forme des figures.''',
+      renforcement:r'''Identifie la transformation à partir de ses éléments caractéristiques : vecteur pour une translation, centre et angle pour une rotation, axe pour une symétrie axiale.''',
+      enonce1:r'''Quelle transformation envoie chaque point M sur M' avec MM' égal à un même vecteur ?''', solution1:r'''Une translation de vecteur constant.''',
+      enonce2:r'''Quel est le centre d'une symétrie centrale qui échange A et A' ?''', solution2:r'''Le milieu de [AA'].''',
+      motsCles:'isométrie • translation • rotation • symétrie • distance',
+      quiz1:'Quelle propriété fondamentale une isométrie conserve-t-elle ?', quizBonne:'Les distances',
+    ),
+    'Tle_C_math_ch14': _mathTleCChapitre(
+      code:'ch14', titre:'Calcul intégral',
+      cours:r'''L'intégrale définie de f sur [a,b] peut être calculée à l'aide d'une primitive F par ∫a^b f(x)dx=F(b)−F(a). Elle permet notamment de déterminer des aires algébriques et des quantités cumulées.''',
+      renforcement:r'''Cherche une primitive de la fonction puis applique la formule aux bornes. Pour une aire géométrique, vérifie le signe de la fonction sur l'intervalle avant d'interpréter l'intégrale comme une aire positive.''',
+      enonce1:r'''Calcule ∫₀² x dx.''', solution1:r'''Une primitive est x²/2, donc l'intégrale vaut 2.''',
+      enonce2:r'''Calcule ∫₁³ 2x dx.''', solution2:r'''Une primitive est x², donc 9−1=8.''',
+      motsCles:'intégrale • primitive • bornes • aire • fonction',
+      quiz1:'Quelle formule permet de calculer ∫a^b f(x)dx avec une primitive F ?', quizBonne:'F(b)−F(a)',
+    ),
+    'Tle_C_math_ch15': _mathTleCChapitre(
+      code:'ch15', titre:'Similitudes directes du plan',
+      cours:r'''Une similitude directe conserve les angles orientés et multiplie toutes les longueurs par un même rapport positif. Elle peut être décrite par une homothétie suivie d'une rotation et s'exprime efficacement avec les nombres complexes.''',
+      renforcement:r'''Identifie le rapport de similitude et l'angle de rotation. Dans le plan complexe, une transformation de la forme z'=az+b avec a complexe non nul représente une similitude directe.''',
+      enonce1:r'''Une similitude directe multiplie les longueurs par 3. Quel est son rapport ?''', solution1:r'''Le rapport de similitude est 3.''',
+      enonce2:r'''Dans z'=2z+1, quel est le coefficient complexe de la partie linéaire ?''', solution2:r'''Le coefficient est 2 ; le rapport est |2|=2 et l'angle est 0 modulo 2π.''',
+      motsCles:'similitude • rapport • angle • rotation • homothétie • complexe',
+      quiz1:'Que conserve une similitude directe ?', quizBonne:'Les angles orientés',
+    ),
+    'Tle_C_math_ch16': _mathTleCChapitre(
+      code:'ch16', titre:'Probabilité conditionnelle et variable aléatoire',
+      cours:r'''La probabilité conditionnelle de A sachant B est définie par P_B(A)=P(A∩B)/P(B) lorsque P(B) est non nulle. Une variable aléatoire associe une valeur numérique aux issues d'une expérience aléatoire et possède une loi de probabilité.''',
+      renforcement:r'''Identifie clairement l'événement conditionnant. Pour une variable aléatoire, construis la loi puis vérifie que la somme des probabilités vaut 1 avant de calculer espérance ou variance.''',
+      enonce1:r'''P(A∩B)=0,2 et P(B)=0,5. Calcule P_B(A).''', solution1:r'''P_B(A)=0,2/0,5=0,4.''',
+      enonce2:r'''Une variable X vaut 0 avec probabilité 0,3 et 2 avec probabilité 0,7. Calcule E(X).''', solution2:r'''E(X)=0×0,3+2×0,7=1,4.''',
+      motsCles:'conditionnelle • intersection • variable aléatoire • loi • espérance',
+      quiz1:'Quelle formule définit P_B(A) ?', quizBonne:'P(A∩B)/P(B)',
+    ),
+    'Tle_C_math_ch17': _mathTleCChapitre(
+      code:'ch17', titre:'Nombres complexes et géométrie du plan',
+      cours:r'''Les nombres complexes permettent de représenter les points et vecteurs du plan. Le module représente une distance et l'argument décrit une direction. Les formes algébrique, trigonométrique et exponentielle facilitent l'étude des transformations et configurations géométriques.''',
+      renforcement:r'''Associe à un point M d'affixe z son module |z| pour la distance à l'origine et son argument pour une direction. Utilise les quotients de complexes pour comparer des directions et des rapports de longueurs.''',
+      enonce1:r'''Pour z=3+4i, que représente |z| ?''', solution1:r'''|z|=5, c'est la distance du point d'affixe z à l'origine.''',
+      enonce2:r'''Quel nombre complexe représente le vecteur allant du point d'affixe 1+i au point d'affixe 4+3i ?''', solution2:r'''(4+3i)−(1+i)=3+2i.''',
+      motsCles:'affixe • module • argument • vecteur • distance • complexe',
+      quiz1:'Que représente géométriquement le module d'une affixe z ?', quizBonne:'La distance du point à l’origine',
+    ),
+    'Tle_C_math_ch18': _mathTleCChapitre(
+      code:'ch18', titre:'Statistique à deux variables',
+      cours:r'''Une statistique à deux variables étudie des couples de valeurs observés sur une population. Le nuage de points, la covariance, le coefficient de corrélation et les méthodes d'ajustement permettent de décrire une liaison entre les deux variables.''',
+      renforcement:r'''Organise les couples puis représente-les. Observe la tendance et utilise un ajustement linéaire lorsque le nuage s'y prête. Une corrélation décrit une association linéaire mais ne suffit pas à établir une causalité.''',
+      enonce1:r'''Les points (1,2), (2,4), (3,6) sont-ils alignés ?''', solution1:r'''Oui, ils vérifient tous y=2x.''',
+      enonce2:r'''Que suggère une corrélation linéaire proche de 1 ?''', solution2:r'''Une liaison linéaire positive forte entre les deux variables.''',
+      motsCles:'statistique • deux variables • nuage • corrélation • ajustement',
+      quiz1:'Que représente chaque point d'un nuage de points ?', quizBonne:'Un couple de valeurs observées',
+    ),
+    'Tle_C_math_ch19': _mathTleCChapitre(
+      code:'ch19', titre:'Équations différentielles',
+      cours:r'''Une équation différentielle relie une fonction inconnue à ses dérivées. Les équations différentielles linéaires du premier ordre et les équations du type y'=ay se résolvent à partir de formes générales, puis une condition initiale permet de déterminer la constante.''',
+      renforcement:r'''Identifie l'ordre et la forme de l'équation. Pour y'=ay, la solution générale est y=Ce^(ax). Utilise ensuite la condition initiale pour déterminer C.''',
+      enonce1:r'''Résous y'=2y.''', solution1:r'''La solution générale est y=Ce^(2x), où C est une constante réelle.''',
+      enonce2:r'''Résous y'=3y avec y(0)=5.''', solution2:r'''y=Ce^(3x). Comme y(0)=C=5, donc y=5e^(3x).''',
+      motsCles:'équation différentielle • dérivée • solution générale • condition initiale • exponentielle',
+      quiz1:'Quelle est la forme générale d’une solution de y'=ay ?', quizBonne:'y=Ce^(ax)',
     ),
 
   };

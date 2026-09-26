@@ -1,0 +1,82 @@
+name: Sentinel CI - Agent Centre d'Apprentissage
+
+on:
+  push:
+    branches:
+      - refonte/centre-apprentissage-2026-2027
+  workflow_dispatch:
+    inputs:
+      generate:
+        description: "Générer les chapitres manquants avec l'agent IA"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Audit catalogue
+        run: python3 tool/centre_apprentissage_agent.py
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.2
+
+      - name: Validate catalogue
+        run: dart tool/validate_centre_apprentissage.dart
+
+  generate:
+    if: github.event_name == 'workflow_dispatch' && inputs.generate == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.2
+
+      - name: Generate missing chapters
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CENTRE_AGENT_MODEL: ${{ vars.CENTRE_AGENT_MODEL }}
+          CENTRE_AGENT_BATCH_SIZE: 3
+        run: python3 tool/centre_apprentissage_agent.py --generate
+
+      - name: Format generated Dart
+        run: dart format lib/centre_apprentissage/donnees/contenu_officiel.dart tool/validate_centre_apprentissage.dart
+
+      - name: Validate generated catalogue
+        run: dart tool/validate_centre_apprentissage.dart
+
+      - name: Install Flutter dependencies
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Flutter analyze
+        run: flutter analyze
+
+      - name: Commit generated content
+        run: |
+          if git diff --quiet; then
+            echo "Aucune modification à committer."
+            exit 0
+          fi
+          git config user.name "Sentinel CI Agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/centre_apprentissage/donnees/contenu_officiel.dart tool/centre_apprentissage_agent_report.json
+          git commit -m "feat: generate Centre d'Apprentissage batch"
+          git push

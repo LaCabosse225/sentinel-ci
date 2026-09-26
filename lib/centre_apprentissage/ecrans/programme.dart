@@ -298,6 +298,38 @@ class ChapitresPage extends StatelessWidget {
       required this.niveau,
       required this.matiere});
 
+  Future<void> _synchroniserProgramme(BuildContext context) async {
+    final lecons = ProgrammeOfficiel.chapitres(niveau, matiere.id).length;
+    if (lecons == 0) {
+      showSnack(context, 'Aucun programme officiel disponible pour cette classe.',
+          error: true);
+      return;
+    }
+
+    final ok = await confirmerDialog(
+      context,
+      'Synchroniser le programme officiel ?',
+      '$lecons chapitres officiels seront verifies. Les chapitres deja presents '
+      'seront conserves et seuls les chapitres manquants seront crees.',
+    );
+    if (!ok || !context.mounted) return;
+
+    try {
+      final r = await ProgrammeOfficiel.installer(niveau, matiere.id);
+      if (!context.mounted) return;
+      showSnack(
+        context,
+        r.crees == 0
+            ? 'Programme deja complet : undefined chapitre(s) conserve(s).'
+            : 'undefined chapitre(s) ajoute(s), undefined deja present(s).',
+      );
+    } catch (e) {
+      if (context.mounted) {
+        showSnack(context, 'Erreur : $e', error: true);
+      }
+    }
+  }
+
   Future<void> _supprimer(BuildContext context, Chapitre c) async {
     final ok = await confirmerDialog(
         context,
@@ -333,6 +365,15 @@ class ChapitresPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(matiere.nom),
+        actions: user.role == UserRole.admin
+            ? [
+                IconButton(
+                  tooltip: 'Synchroniser le programme officiel',
+                  onPressed: () => _synchroniserProgramme(context),
+                  icon: const Icon(Icons.sync_rounded),
+                ),
+              ]
+            : null,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(26),
           child: Padding(

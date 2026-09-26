@@ -31,7 +31,7 @@ jobs:
           sdk: 3.12.2
 
       - name: Validate catalogue
-        run: dart run tool/validate_centre_apprentissage.dart
+        run: dart tool/validate_centre_apprentissage.dart
 
   generate:
     if: github.event_name == 'workflow_dispatch' && inputs.generate == true
@@ -56,7 +56,7 @@ jobs:
         run: dart format lib/centre_apprentissage/donnees/contenu_officiel.dart tool/validate_centre_apprentissage.dart
 
       - name: Validate generated catalogue
-        run: dart run tool/validate_centre_apprentissage.dart
+        run: dart tool/validate_centre_apprentissage.dart
 
       - name: Install Flutter dependencies
         uses: subosito/flutter-action@v2

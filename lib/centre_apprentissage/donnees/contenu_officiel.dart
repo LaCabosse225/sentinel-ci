@@ -799,7 +799,7 @@ résultat. Si les deux valeurs diffèrent, il y a une erreur.
     // ════════════════════════════════════════════════════════════════════
     //  3e MATHEMATIQUES — CHAPITRE 2 : RACINES CARREES
     // ════════════════════════════════════════════════════════════════════
-    '3e_math_ch09': [
+    '3e_math_ch03': [
       RessourceOfficielle(
         type: TypeRessource.cours,
         titre: 'Les racines carrées',

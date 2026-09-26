@@ -390,7 +390,207 @@ RÉFLEXE : identifier les données → choisir la propriété → calculer → v
     ];
   }
 
+
+  static List<RessourceOfficielle> _math4eChapitre({
+    required String code,
+    required String titre,
+    required String cours,
+    required String renforcement,
+    required String enonce1,
+    required String solution1,
+    required String enonce2,
+    required String solution2,
+    required String motsCles,
+  }) {
+    return [
+      RessourceOfficielle(
+        type: TypeRessource.cours,
+        titre: '$titre — cours',
+        contenu: '''$cours
+
+MÉTHODE : identifier les données → choisir la propriété → calculer → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.renforcement,
+        titre: '$titre — comprendre facilement',
+        contenu: '''$renforcement
+
+PIÈGE À ÉVITER : oublier les signes, les conditions ou les unités.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice guidé',
+        difficulte: Difficulte.facile,
+        enonce: '''$enonce1''',
+        solution: '''$solution1''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: '$titre — exercice d'application',
+        ordre: 2,
+        difficulte: Difficulte.moyen,
+        enonce: '''$enonce2''',
+        solution: '''$solution2''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.fiche,
+        titre: '$titre — fiche de révision',
+        contenu: '''MOTS-CLÉS : $motsCles
+
+À RETENIR :
+$cours
+
+RÉFLEXE : identifier les données → choisir la propriété → calculer → vérifier.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.quiz,
+        titre: '$titre — quiz',
+        dureeMinutes: 5,
+        questions: [
+          QuestionQuiz(
+            id: '4e${code}q1',
+            type: TypeQuestion.qcm,
+            enonce: 'Quelle proposition correspond à une règle essentielle de « $titre » ?',
+            choix: ['Appliquer les propriétés étudiées avec les données de l\'énoncé', 'Ignorer les données', 'Changer les unités au hasard', 'Ne jamais vérifier'],
+            bonnesReponses: [0],
+            explication: 'La première proposition décrit la démarche mathématique attendue.',
+          ),
+          QuestionQuiz(
+            id: '4e${code}q2',
+            type: TypeQuestion.vraiFaux,
+            enonce: 'Une réponse mathématique doit être justifiée par un raisonnement ou une propriété adaptée.',
+            choix: ['Vrai', 'Faux'],
+            bonnesReponses: [0],
+            explication: 'La justification permet de vérifier et de communiquer correctement le raisonnement.',
+          ),
+          QuestionQuiz(
+            id: '4e${code}q3',
+            type: TypeQuestion.qcm,
+            enonce: 'Quel réflexe faut-il garder pour les exercices de ce chapitre ?',
+            choix: ['Identifier les données, choisir une méthode et vérifier', 'Répondre sans calcul', 'Ignorer les unités', 'Copier uniquement le résultat'],
+            bonnesReponses: [0],
+            explication: 'Cette démarche structure une résolution correcte.',
+          ),
+        ],
+      ),
+    ];
+  }
+
   static final Map<String, List<RessourceOfficielle>> _catalogue = {
+
+    '4e_math_ch01': _math4eChapitre(
+      code: 'ch01',
+      titre: 'Nombres décimaux relatifs',
+      cours: r'''Les nombres décimaux relatifs sont des nombres positifs, négatifs ou nuls. On les compare sur une droite graduée : celui qui est le plus à droite est le plus grand. Pour calculer avec eux, on applique les règles des signes et les propriétés des opérations.''',
+      renforcement: r'''Pour une somme de relatifs, deux nombres de même signe donnent une somme de même signe ; des signes différents conduisent à une différence des distances à zéro. Pour un produit ou quotient, même signe donne positif et signes différents donnent négatif.''',
+      enonce1: r'''Calcule -7,5 + 3,2.''', solution1: r'''-4,3.''',
+      enonce2: r'''Calcule (-4) × (-2,5) - 3.''', solution2: r'''10 - 3 = 7.''',
+      motsCles: 'relatif • opposé • distance à zéro • règles de signes',
+    ),
+
+    '4e_math_ch02': _math4eChapitre(
+      code: 'ch02',
+      titre: 'Angles',
+      cours: r'''Les angles peuvent être complémentaires, supplémentaires, opposés par le sommet ou adjacents. Dans un triangle, la somme des angles est 180°. Les angles formés par deux droites parallèles et une sécante présentent aussi des relations utiles.''',
+      renforcement: r'''Avant de calculer, identifie la relation géométrique : angles opposés par le sommet égaux, angles complémentaires de somme 90°, supplémentaires de somme 180°. Avec des parallèles, utilise les angles correspondants ou alternes-internes.''',
+      enonce1: r'''Un angle mesure 128°. Quel est son supplémentaire ?''', solution1: r'''52°.''',
+      enonce2: r'''Deux angles opposés par le sommet : l'un mesure 67°. Combien mesure l'autre ?''', solution2: r'''67°, car les angles opposés par le sommet sont égaux.''',
+      motsCles: 'angle • complémentaire • supplémentaire • parallèle • sécante',
+    ),
+
+    '4e_math_ch03': _math4eChapitre(
+      code: 'ch03',
+      titre: 'Nombres rationnels',
+      cours: r'''Un nombre rationnel est un nombre qui peut s'écrire a/b avec a et b entiers et b non nul. Les fractions, les décimaux finis et leurs opposés appartiennent à l'ensemble des rationnels ℚ.''',
+      renforcement: r'''Pour comparer ou calculer avec des rationnels, on peut utiliser des fractions équivalentes et un dénominateur commun. Pour une division par un rationnel non nul, on multiplie par son inverse.''',
+      enonce1: r'''Compare -3/4 et -2/3.''', solution1: r'''-3/4 = -9/12 et -2/3 = -8/12, donc -3/4 < -2/3.''',
+      enonce2: r'''Calcule 5/6 - 3/4.''', solution2: r'''10/12 - 9/12 = 1/12.''',
+      motsCles: 'rationnel • fraction • ℚ • inverse • dénominateur commun',
+    ),
+
+    '4e_math_ch04': _math4eChapitre(
+      code: 'ch04',
+      titre: 'Distances',
+      cours: r'''La distance entre deux points A et B est la longueur du segment [AB]. Sur une droite graduée, elle correspond à la valeur absolue de la différence de leurs coordonnées. Dans un plan, les propriétés de perpendicularité et de médiatrice permettent de raisonner sur les distances.''',
+      renforcement: r'''La médiatrice d'un segment est la droite perpendiculaire au segment passant par son milieu. Tout point de la médiatrice est équidistant des extrémités du segment. Pour construire une médiatrice, on peut utiliser règle et compas.''',
+      enonce1: r'''A(-2) et B(7) sur une droite graduée. Calcule AB.''', solution1: r'''AB = |7 - (-2)| = 9.''',
+      enonce2: r'''M appartient à la médiatrice de [AB] et MA = 6 cm. Quelle est la longueur MB ?''', solution2: r'''MB = 6 cm.''',
+      motsCles: 'distance • segment • médiatrice • équidistance',
+    ),
+
+    '4e_math_ch05': _math4eChapitre(
+      code: 'ch05',
+      titre: 'Perspective cavalière',
+      cours: r'''La perspective cavalière est une représentation plane d'un solide. Les faces parallèles du solide sont représentées par des figures parallèles ; les arêtes fuyantes sont tracées selon une direction choisie et avec une réduction éventuelle.''',
+      renforcement: r'''Pour lire un dessin en perspective, distingue les arêtes visibles, cachées et fuyantes. Les longueurs sur les arêtes fuyantes peuvent être représentées réduites selon le choix de la construction, mais les relations de parallélisme sont conservées.''',
+      enonce1: r'''Dans un pavé droit, deux arêtes opposées d'une même face sont-elles parallèles ?''', solution1: r'''Oui, les côtés opposés d'une face rectangulaire sont parallèles.''',
+      enonce2: r'''Un solide est représenté avec des arêtes fuyantes dans une même direction. Pourquoi cette convention aide-t-elle à lire le solide ?''', solution2: r'''Elle permet de conserver une représentation cohérente de la profondeur et des faces parallèles.''',
+      motsCles: 'perspective • solide • arête • face • fuyante • parallélisme',
+    ),
+
+    '4e_math_ch06': _math4eChapitre(
+      code: 'ch06',
+      titre: 'Calcul littéral',
+      cours: r'''Le calcul littéral utilise des lettres pour représenter des nombres. En 4e, on développe, réduit et factorise des expressions, puis on utilise des identités remarquables et des propriétés des puissances.''',
+      renforcement: r'''Pour développer, applique la distributivité. Pour factoriser, cherche d'abord un facteur commun puis une identité remarquable. Toujours réduire les termes semblables et respecter les signes.''',
+      enonce1: r'''Développe A = 3(x - 4) + 2x.''', solution1: r'''A = 3x - 12 + 2x = 5x - 12.''',
+      enonce2: r'''Factorise B = 9x² - 25.''', solution2: r'''B = (3x - 5)(3x + 5).''',
+      motsCles: 'développer • réduire • factoriser • identité remarquable',
+    ),
+
+    '4e_math_ch07': _math4eChapitre(
+      code: 'ch07',
+      titre: 'Cercles et triangles',
+      cours: r'''Dans un cercle, le rayon relie le centre à un point du cercle et le diamètre vaut deux rayons. Dans un triangle, la somme des angles est 180°. Les propriétés du cercle et des triangles permettent de démontrer des longueurs ou des angles.''',
+      renforcement: r'''Le triangle inscrit dans un cercle peut être étudié avec le diamètre et les angles. Le cas du triangle rectangle inscrit dans un cercle de diamètre donné est particulièrement important. Pour chaque figure, identifie d'abord les données et la propriété adaptée.''',
+      enonce1: r'''Un cercle a un diamètre de 12 cm. Quel est son rayon ?''', solution1: r'''6 cm.''',
+      enonce2: r'''ABC est un triangle dont deux angles mesurent 35° et 80°. Calcule le troisième angle.''', solution2: r'''180° - 35° - 80° = 65°.''',
+      motsCles: 'cercle • rayon • diamètre • triangle • angle',
+    ),
+
+    '4e_math_ch08': _math4eChapitre(
+      code: 'ch08',
+      titre: 'Équations et inéquations dans ℚ',
+      cours: r'''Une équation est une égalité contenant une inconnue. Résoudre une équation consiste à trouver toutes les valeurs qui rendent l'égalité vraie. Une inéquation utilise les signes <, >, ≤ ou ≥ et décrit un ensemble de solutions.''',
+      renforcement: r'''Pour isoler l'inconnue, on effectue la même opération aux deux membres d'une équation. Dans une inéquation, si on multiplie ou divise par un nombre négatif, le sens du signe change.''',
+      enonce1: r'''Résous 3x - 5 = 10.''', solution1: r'''3x = 15 donc x = 5.''',
+      enonce2: r'''Résous -2x + 4 > 10.''', solution2: r'''-2x > 6 ; en divisant par -2, on inverse le signe : x < -3.''',
+      motsCles: 'équation • inconnue • inéquation • solution • intervalle',
+    ),
+
+    '4e_math_ch09': _math4eChapitre(
+      code: 'ch09',
+      titre: 'Vecteurs',
+      cours: r'''Un vecteur représente un déplacement caractérisé par une direction, un sens et une longueur. Deux vecteurs sont égaux lorsqu'ils ont même direction, même sens et même longueur. La somme de vecteurs peut se construire avec la relation de Chasles.''',
+      renforcement: r'''La relation de Chasles s'écrit AB + BC = AC. Pour additionner des vecteurs, on peut les placer bout à bout. Dans un repère, les coordonnées d'un vecteur se calculent par différence des coordonnées de son extrémité et de son origine.''',
+      enonce1: r'''A(1;2) et B(5;7). Donne les coordonnées du vecteur AB.''', solution1: r'''AB = (5-1 ; 7-2) = (4 ; 5).''',
+      enonce2: r'''A, B, C sont des points et AB + BC = AC. Si AB = (2; -1) et BC = (3; 4), donne AC.''', solution2: r'''AC = (5 ; 3).''',
+      motsCles: 'vecteur • direction • sens • norme • Chasles • coordonnées',
+    ),
+
+    '4e_math_ch10': _math4eChapitre(
+      code: 'ch10',
+      titre: 'Statistique',
+      cours: r'''Une série statistique se décrit avec des effectifs et des fréquences. En 4e, on utilise aussi la moyenne pour résumer une série. La moyenne est la somme des valeurs pondérées par leurs effectifs, divisée par l'effectif total.''',
+      renforcement: r'''Pour calculer une moyenne avec des effectifs : moyenne = somme(valeur × effectif) / effectif total. Une moyenne ne remplace pas l'analyse de la dispersion ou des valeurs extrêmes, mais elle donne un indicateur central.''',
+      enonce1: r'''Les notes 8, 10 et 12 ont chacune le même effectif. Quelle est la moyenne ?''', solution1: r'''(8 + 10 + 12)/3 = 10.''',
+      enonce2: r'''Les valeurs 5, 10 et 15 ont les effectifs 2, 3 et 1. Calcule la moyenne.''', solution2: r'''(5×2 + 10×3 + 15×1)/6 = 65/6 ≈ 10,83.''',
+      motsCles: 'population • caractère • effectif • fréquence • moyenne',
+    ),
+
+    '4e_math_ch11': _math4eChapitre(
+      code: 'ch11',
+      titre: 'Symétries et translations',
+      cours: r'''Une symétrie axiale utilise un axe ; une symétrie centrale utilise un centre ; une translation déplace tous les points selon un même vecteur. Ces transformations conservent les longueurs et les angles, et donc la forme des figures.''',
+      renforcement: r'''Pour une symétrie axiale, l'axe est la médiatrice entre un point et son image. Pour une symétrie centrale, le centre est le milieu du segment reliant un point à son image. Pour une translation, chaque point est déplacé du même vecteur.''',
+      enonce1: r'''Une symétrie centrale de centre O envoie A sur A'. Que représente O pour [AA'] ?''', solution1: r'''O est le milieu de [AA'].''',
+      enonce2: r'''Une translation de vecteur u envoie A sur A'. Que peut-on dire du déplacement de B vers B' ?''', solution2: r'''BB' a le même vecteur que AA' : même direction, même sens et même longueur.''',
+      motsCles: 'symétrie axiale • symétrie centrale • translation • vecteur',
+    ),
+
 
     '5e_math_ch01': _math5eChapitre(
       code: 'ch01',

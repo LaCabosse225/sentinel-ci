@@ -383,32 +383,42 @@ class ChapitresPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const cleBootstrap = '6e_math';
-
     if (user.role == UserRole.admin &&
         niveau == '6e' &&
         matiere.id == 'math' &&
-        !_autoSyncFait.contains(cleBootstrap)) {
-      _autoSyncFait.add(cleBootstrap);
+        !_syncEnCours) {
+      _syncEnCours = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
-          final officiel =
-              ProgrammeOfficiel.chapitres('6e', 'math');
-          final existants =
-              await ContenuService.chapitres('6e', 'math');
+          final officiel = ProgrammeOfficiel.chapitres('6e', 'math');
+          final avant = await ContenuService.chapitres('6e', 'math');
 
-          if (existants.length < officiel.length) {
+          if (avant.length < officiel.length) {
             await ProgrammeOfficiel.installer('6e', 'math');
           }
 
-          final chapitres =
-              await ContenuService.chapitres('6e', 'math');
+          final chapitres = await ContenuService.chapitres('6e', 'math');
+          int ressourcesAjoutees = 0;
           for (final chapitre in chapitres) {
-            await ContenuOfficiel.installer(chapitre, user.uid);
+            ressourcesAjoutees +=
+                await ContenuOfficiel.installer(chapitre, user.uid);
           }
-        } catch (_) {
-          // Le bouton de synchronisation manuelle reste disponible en cas
-          // de problème réseau ou de droits Firestore.
+
+          if (context.mounted) {
+            showSnack(
+              context,
+              'Synchronisation Maths 6e : ${chapitres.length}/${officiel.length} chapitres, '
+              '${ressourcesAjoutees} ressource(s) ajoutee(s) en brouillon.',
+              error: chapitres.length < officiel.length,
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            showSnack(context, 'Synchronisation Maths 6e impossible : $e',
+                error: true);
+          }
+        } finally {
+          _syncEnCours = false;
         }
       });
     }

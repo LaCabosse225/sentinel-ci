@@ -392,13 +392,15 @@ class ChapitresPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (user.role == UserRole.admin &&
-        niveau == '6e' &&
+    if (niveau == '6e' &&
         matiere.id == 'math' &&
         !_syncEnCours) {
       _syncEnCours = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
+          // Vérification fraîche du rôle : on ne dépend pas d'un AppUser potentiellement ancien.
+          if (!await _adminFirestore()) return;
+
           final officiel = ProgrammeOfficiel.chapitres('6e', 'math');
 
           // Toujours verifier le catalogue officiel a l'ouverture.

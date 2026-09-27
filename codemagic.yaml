@@ -24,11 +24,18 @@ workflows:
       groups:
         - firebase
     scripts:
+      - name: Peupler Firestore — programme Math 6e + cours de demonstration
+        script: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$CM_BUILD_DIR/cle_service_firebase.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/cle_service_firebase.json"
+          npm install --prefix functions --no-audit --no-fund
+          node functions/seed_math6e.js
+          rm -f "$CM_BUILD_DIR/cle_service_firebase.json"
       - name: Recuperer les paquets
         script: |
           flutter pub cache repair
           flutter pub get
-        script: flutter build web --release --no-web-resources-cdn
+          flutter build web --release --no-web-resources-cdn
       - name: Rendre le site autonome (anti-blocage operateurs)
         script: python3 web_autonome.py
       - name: Compresser le site

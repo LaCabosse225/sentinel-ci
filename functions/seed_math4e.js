@@ -14,7 +14,8 @@ const lecons = [
   [7, 'Distances', 'Distance d’un point à une droite, distance de deux droites parallèles et bissectrice d’un angle.', 'Que représente la distance d’un point A à une droite d ?', 'C’est la longueur du segment perpendiculaire à d reliant A à son pied sur d.'],
   [8, 'Cercles et triangles', 'Tangente à un cercle, droite des milieux, droites particulières et points remarquables d’un triangle.', 'Dans un triangle, cite trois droites particulières et trois points remarquables.', 'Hauteur, médiane et bissectrice ; centre de gravité, orthocentre et centre du cercle inscrit.'],
   [9, 'Vecteurs', 'Vecteurs, direction, sens, longueur, égalité, opposés et relation de Chasles.', 'Si AB = BC comme vecteurs, quelle relation de Chasles peut-on écrire pour A, B et C ?', 'On peut écrire vecteur AC = vecteur AB + vecteur BC.'],
-  [10, 'Perspective cavalière et symétries', 'Règles de perspective cavalière, pavé, prisme, cylindre, symétrie centrale, symétrie orthogonale et translation.', 'Quelle transformation correspond à un demi-tour de 180° autour d’un point ?', 'La symétrie centrale de centre ce point.'],
+  [10, 'Perspective cavalière', 'Règles de perspective cavalière, représentation du pavé droit, du prisme droit et du cylindre droit.', 'Cite un solide que l’on peut représenter en perspective cavalière et indique une règle importante de cette représentation.', 'Un pavé droit peut être représenté en perspective cavalière ; les arêtes parallèles restent représentées par des segments parallèles.'],
+  [11, 'Symétries et translations', 'Symétrie centrale, symétrie orthogonale et translation : images de points, segments, droites, angles et cercles.', 'Quelle transformation correspond à un demi-tour de 180° autour d’un point ?', 'La symétrie centrale de centre ce point.'],
 ];
 
 async function main() {

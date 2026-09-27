@@ -251,12 +251,25 @@ class ContenuOfficiel {
     String? serie,
   }) async {
     final cleChapitre = chapitre.code.isNotEmpty ? chapitre.code : chapitre.id;
-    final ressourcesChapitre = ressources(
+    var ressourcesChapitre = ressources(
       cleChapitre,
       anneeScolaire: anneeScolaire ?? chapitre.anneeScolaire,
       programmeVersion: programmeVersion ?? chapitre.programmeVersion,
       serie: serie ?? chapitre.serie,
     );
+
+    // Compatibilite avec les chapitres versionnes : le catalogue historique
+    // contient aussi des cles stables du type 6e_math_ch01.
+    if (ressourcesChapitre.isEmpty && chapitre.ordre > 0) {
+      final cleHistorique =
+          chapitre.niveau + '_' + chapitre.matiereId + '_ch' + chapitre.ordre.toString().padLeft(2, '0');
+      ressourcesChapitre = ressources(
+        cleHistorique,
+        anneeScolaire: anneeScolaire ?? chapitre.anneeScolaire,
+        programmeVersion: programmeVersion ?? chapitre.programmeVersion,
+        serie: serie ?? chapitre.serie,
+      );
+    }
 
     int crees = 0;
     for (var i = 0; i < ressourcesChapitre.length; i++) {

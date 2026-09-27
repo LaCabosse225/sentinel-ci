@@ -391,12 +391,13 @@ class ChapitresPage extends StatelessWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
           final officiel = ProgrammeOfficiel.chapitres('6e', 'math');
-          final avant = await ContenuService.chapitres('6e', 'math');
 
-          if (avant.length < officiel.length) {
-            await ProgrammeOfficiel.installer('6e', 'math');
-          }
+          // Toujours verifier le catalogue officiel a l'ouverture.
+          // L'installation est idempotente : les chapitres deja presents
+          // sont conserves et seuls les ordres manquants sont crees.
+          await ProgrammeOfficiel.installer('6e', 'math');
 
+          // Relire Firestore apres l'installation pour afficher l'etat reel.
           final chapitres = await ContenuService.chapitres('6e', 'math');
           int ressourcesAjoutees = 0;
           for (final chapitre in chapitres) {

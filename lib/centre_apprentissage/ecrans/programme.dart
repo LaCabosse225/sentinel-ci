@@ -9,6 +9,8 @@
 // ============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../main.dart';
 import '../modeles/contenu.dart';
@@ -290,6 +292,13 @@ class _NbChapitres extends StatelessWidget {
 // ============================================================================
 
 class ChapitresPage extends StatelessWidget {
+  Future<bool> _adminFirestore() async {
+    final u = FirebaseAuth.instance.currentUser;
+    if (u == null) return false;
+    final d = await FirebaseFirestore.instance.collection('utilisateurs').doc(u.uid).get();
+    return d.exists && d.data()?['role'] == 'admin';
+  }
+
   // Synchronisation automatique du catalogue national Maths 6e.
   // On relance la verification a chaque ouverture de l'ecran : si une
   // tentative precedente a echoue (droits/reseau), elle pourra etre retentee.

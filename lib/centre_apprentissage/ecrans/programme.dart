@@ -290,9 +290,11 @@ class _NbChapitres extends StatelessWidget {
 // ============================================================================
 
 class ChapitresPage extends StatelessWidget {
-  // Bootstrap automatique du catalogue national Maths 6e.
-  // Une seule fois par session, uniquement pour un administrateur.
-  static final Set<String> _autoSyncFait = <String>{};
+  // Synchronisation automatique du catalogue national Maths 6e.
+  // On relance la verification a chaque ouverture de l'ecran : si une
+  // tentative precedente a echoue (droits/reseau), elle pourra etre retentee.
+  static bool _syncEnCours = false;
+
 
   final AppUser user;
   final String niveau;

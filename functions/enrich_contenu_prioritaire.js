@@ -203,25 +203,44 @@ async function enrichir(programme) {
         d = legacy;
       }
       const data = contenus[type];
+      const base = {
+        type,
+        titre: data.titre,
+        ordre: type === 'cours' ? 1 : type === 'renforcement' ? 2 : type === 'fiche' ? 3 : type === 'exercice' ? 4 : 5,
+        chapitreId: ch.id,
+        niveau: programme.niveau,
+        matiereId: programme.matiereId,
+        ecoleId: '',
+        contenu: data.contenu || '',
+        imagesUrls: [],
+        pdfUrl: '',
+        videoYoutubeId: '',
+        enonce: data.enonce || '',
+        solution: data.solution || '',
+        difficulte: type === 'quiz' ? 2 : 1,
+        ressourceLieeId: '',
+        questions: data.questions || [],
+        dureeMinutes: data.dureeMinutes || (type === 'cours' ? 30 : 20),
+        examen: '',
+        annee: 2026,
+        serie: '',
+        actif: true,
+        ressourceNationale: true,
+        auteur: 'Sentinel CI',
+        dateCreation: FieldValue.serverTimestamp(),
+        dateMaj: FieldValue.serverTimestamp()
+      };
+
       if (d) {
-        const updates = {
-          type,
-          titre: data.titre,
-          niveau: programme.niveau,
-          matiereId: programme.matiereId,
-          ecoleId: '',
-          actif: true,
-          ressourceNationale: true,
-          dateMaj: FieldValue.serverTimestamp()
-        };
-        if (data.contenu !== undefined) updates.contenu = data.contenu;
-        if (data.enonce !== undefined) updates.enonce = data.enonce;
-        if (data.solution !== undefined) updates.solution = data.solution;
-        if (data.questions !== undefined) updates.questions = data.questions;
-        if (data.dureeMinutes !== undefined) updates.dureeMinutes = data.dureeMinutes;
-        await d.ref.update(updates);
-        ressources++;
+        await d.ref.update(base);
+      } else {
+        const ref = db.collection('ca_ressources').doc(
+          ch.id + '_prioritaire_' + type
+        );
+        const exists = await ref.get();
+        if (!exists.exists) await ref.set(base);
       }
+      ressources++;
     }
   }
   console.log(programme.matiereId, programme.niveau, {chapitres, ressources});

@@ -5,6 +5,14 @@ initializeApp({ credential: applicationDefault(), projectId: 'sentinel-ci-c7592'
 const db = getFirestore();
 
 const programmes = {
+  arts: {
+    nom: 'Arts plastiques',
+    niveaux: {
+      '2nde': ['Création et intention artistique','Couleur et matière','Espace et composition','Image et représentation','Techniques et supports','Arts et patrimoine','Analyse d’une œuvre','Projet artistique'],
+      '1ere': ['Démarche artistique','Composition et langage plastique','Image et communication','Arts et société','Techniques et expérimentations','Analyse et interprétation','Culture artistique','Projet personnel'],
+      'Tle': ['Projet et démarche artistique','Analyse critique des images','Arts contemporains','Art et société','Création personnelle','Présenter et argumenter un projet','Patrimoines et cultures','Révision et préparation aux épreuves']
+    }
+  },
   math: {
     nom: 'Mathematiques',
     niveaux: {

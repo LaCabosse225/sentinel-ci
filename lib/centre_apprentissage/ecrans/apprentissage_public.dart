@@ -407,6 +407,12 @@ class _ApprentissagePublicPageState extends State<ApprentissagePublicPage> {
         return Icons.fact_check_rounded;
       case TypeRessource.video:
         return Icons.play_circle_outline_rounded;
+      case TypeRessource.sujet:
+        return Icons.description_rounded;
+      case TypeRessource.corrige:
+        return Icons.check_circle_outline_rounded;
+      case TypeRessource.orientation:
+        return Icons.school_outlined;
     }
   }
 
@@ -424,6 +430,12 @@ class _ApprentissagePublicPageState extends State<ApprentissagePublicPage> {
         return AppColors.gold;
       case TypeRessource.video:
         return AppColors.red;
+      case TypeRessource.sujet:
+        return AppColors.blue;
+      case TypeRessource.corrige:
+        return AppColors.green;
+      case TypeRessource.orientation:
+        return AppColors.purple;
     }
   }
 

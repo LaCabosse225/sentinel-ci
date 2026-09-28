@@ -95,19 +95,43 @@ class ContenuService {
   }
 
   /// Matieres actives d'un niveau donne — lecture mise en cache (cote eleve).
+  ///
+  /// Le catalogue national possede une liste de secours locale : ainsi,
+  /// une erreur de peuplement de ca_matieres ne peut pas rendre le Centre
+  /// vide alors que les chapitres nationaux sont bien presents.
   static Future<List<Matiere>> matieres({String? niveau}) async {
     await verifierVersion();
     if (_cacheMatieres == null) {
-      final s = await _db.collection(colMatieres).get();
-      final l = s.docs.map((d) => Matiere.depuisDoc(d)).toList();
-      l.sort((a, b) {
-        final c = a.ordre.compareTo(b.ordre);
-        return c != 0 ? c : a.nom.toLowerCase().compareTo(b.nom.toLowerCase());
-      });
+      List<Matiere> firestoreMatieres = [];
+      try {
+        final s = await _db.collection(colMatieres).get();
+        firestoreMatieres =
+            s.docs.map((d) => Matiere.depuisDoc(d)).toList();
+      } catch (_) {
+        // Le catalogue de secours ci-dessous permet de continuer en lecture.
+      }
+
+      // Firestore reste prioritaire (nom, couleur, ordre, activation).
+      // Les matieres nationales manquantes sont completees localement.
+      final parId = <String, Matiere>{
+        for (final m in matieresCourantes) m.id: m,
+      };
+      for (final m in firestoreMatieres) {
+        parId[m.id] = m;
+      }
+      final l = parId.values.toList()
+        ..sort((a, b) {
+          final c = a.ordre.compareTo(b.ordre);
+          return c != 0
+              ? c
+              : a.nom.toLowerCase().compareTo(b.nom.toLowerCase());
+        });
       _cacheMatieres = l;
     }
+
     final toutes = _cacheMatieres!.where((m) => m.actif).toList();
     if (niveau == null || niveau.isEmpty) return toutes;
+
     // Une matiere sans liste de niveaux est consideree comme enseignee partout.
     return toutes
         .where((m) => m.niveaux.isEmpty || m.niveaux.contains(niveau))
@@ -148,6 +172,27 @@ class ContenuService {
   //  matiere se font cote application — donc aucun index a creer.
   // ==========================================================================
 
+  // Identifiants historiques acceptes pour eviter qu'un ancien import
+  // rende une matiere invisible. Le catalogue actuel utilise les cles de gauche.
+  static List<String> _idsMatiereCompat(String matiereId) {
+    switch (matiereId) {
+      case 'franc':
+        return const ['franc', 'francais'];
+      case 'pc':
+        return const ['pc', 'physique_chimie', 'physique-chimie'];
+      case 'svt':
+        return const ['svt'];
+      case 'angl':
+        return const ['angl', 'anglais'];
+      case 'hg':
+        return const ['hg', 'histoire_geographie', 'histoire-géographie'];
+      case 'math':
+        return const ['math', 'mathematiques'];
+      default:
+        return [matiereId];
+    }
+  }
+
   /// Flux temps reel des chapitres d'un niveau — pour le back-office.
   static Stream<List<Chapitre>> streamChapitres(String niveau, {String? matiereId}) {
     return _db
@@ -157,7 +202,8 @@ class ContenuService {
         .map((s) {
       var l = s.docs.map((d) => Chapitre.depuisDoc(d)).toList();
       if (matiereId != null && matiereId.isNotEmpty) {
-        l = l.where((c) => c.matiereId == matiereId).toList();
+        final ids = _idsMatiereCompat(matiereId);
+        l = l.where((c) => ids.contains(c.matiereId)).toList();
       }
       l.sort((a, b) {
         final c = a.matiereId.compareTo(b.matiereId);
@@ -180,8 +226,9 @@ class ContenuService {
       });
       _cacheChapitres[niveau] = l;
     }
+    final ids = _idsMatiereCompat(matiereId);
     return _cacheChapitres[niveau]!
-        .where((c) => c.actif && c.matiereId == matiereId)
+        .where((c) => c.actif && ids.contains(c.matiereId))
         .toList();
   }
 

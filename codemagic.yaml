@@ -37,6 +37,7 @@ workflows:
           node functions/seed_math4e.js
           node functions/seed_math5e.js
           node functions/seed_math3e.js
+          node functions/enrich_math_3e_4e.js
           node functions/seed_francais4e.js
           node functions/seed_francais3e.js
           node functions/seed_physique6e.js

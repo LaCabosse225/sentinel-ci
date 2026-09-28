@@ -1,6 +1,7 @@
-const admin = require('firebase-admin');
-admin.initializeApp({credential: admin.credential.cert(require('./serviceAccountKey.json'))});
-const db = admin.firestore();
+const { initializeApp, applicationDefault } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+initializeApp({ credential: applicationDefault(), projectId: 'sentinel-ci-c7592' });
+const db = getFirestore();
 const niveau = '4e'; const matiereId='svt'; const anneeScolaire='2026-2027';
 const titres = ["Fonction de nutrition chez l’Homme","Digestion des aliments","Respiration et échanges gazeux","Circulation sanguine","Excrétion et santé","Reproduction humaine","Puberté et fonctionnement des appareils reproducteurs","Fécondation et grossesse","Transmission de la vie et santé","Microorganismes et maladies","Défenses de l’organisme","Prévention et protection de la santé"];
 const types=[['cours','Cours'],['exercices','Exercices d’application'],['renforcement','Renforcement'],['quiz','Quiz'],['revision','Fiche de révision']];

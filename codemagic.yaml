@@ -39,6 +39,8 @@ workflows:
           node functions/seed_francais3e.js
           node functions/seed_physique6e.js
           node functions/seed_physique4e.js
+          node functions/seed_physique5e.js
+          node functions/seed_physique3e.js
           node functions/seed_svt6e.js
           node functions/seed_svt5e.js
           node functions/seed_svt4e.js

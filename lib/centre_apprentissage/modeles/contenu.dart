@@ -545,34 +545,78 @@ class Ressource {
 
   factory Ressource.depuisDoc(DocumentSnapshot doc) {
     final d = (doc.data() as Map<String, dynamic>?) ?? {};
+
+    int lireDifficulte(dynamic valeur) {
+      if (valeur is num) return valeur.toInt().clamp(1, 4);
+      final texte = valeur?.toString().trim().toLowerCase() ?? '';
+      switch (texte) {
+        case 'facile':
+        case 'progressive':
+        case '1':
+          return Difficulte.facile;
+        case 'moyenne':
+        case 'moyen':
+        case '2':
+          return Difficulte.moyen;
+        case 'difficile':
+        case '3':
+          return Difficulte.difficile;
+        case 'examen':
+        case '4':
+          return Difficulte.examen;
+        default:
+          return Difficulte.moyen;
+      }
+    }
+
+    String lireTexte(dynamic valeur) => valeur is String ? valeur : '';
+
+    String normaliserType(dynamic valeur) {
+      final code = valeur?.toString() ?? '';
+      switch (code) {
+        case 'exercices':
+          return 'exercice';
+        case 'revision':
+          return 'fiche';
+        default:
+          return code;
+      }
+    }
+
+    final questionsBrutes = d['questions'] is List ? d['questions'] as List : const [];
+    final questions = questionsBrutes
+        .whereType<Map>()
+        .map((q) => QuestionQuiz.depuisMap(Map<String, dynamic>.from(q)))
+        .toList();
+
     return Ressource(
       id: doc.id,
-      type: TypeRessourceX.depuisCode(d['type'] as String?),
-      titre: d['titre'] as String? ?? '',
-      ordre: (d['ordre'] as num?)?.toInt() ?? 0,
-      chapitreId: d['chapitreId'] as String? ?? '',
-      niveau: d['niveau'] as String? ?? '',
-      matiereId: d['matiereId'] as String? ?? '',
-      ecoleId: d['ecoleId'] as String? ?? '',
-      contenu: d['contenu'] as String? ?? '',
-      imagesUrls: List<String>.from(d['imagesUrls'] as List? ?? const []),
-      pdfUrl: d['pdfUrl'] as String? ?? '',
-      videoYoutubeId: d['videoYoutubeId'] as String? ?? '',
-      enonce: d['enonce'] as String? ?? '',
-      solution: d['solution'] as String? ?? '',
-      difficulte: (d['difficulte'] as num?)?.toInt() ?? Difficulte.moyen,
-      ressourceLieeId: d['ressourceLieeId'] as String? ?? '',
-      questions: (d['questions'] as List? ?? const [])
-          .map((q) => QuestionQuiz.depuisMap(Map<String, dynamic>.from(q)))
-          .toList(),
-      dureeMinutes: (d['dureeMinutes'] as num?)?.toInt() ?? 0,
-      examen: d['examen'] as String? ?? '',
-      annee: (d['annee'] as num?)?.toInt() ?? 0,
-      serie: d['serie'] as String? ?? '',
-      actif: d['actif'] as bool? ?? false,
-      auteur: d['auteur'] as String? ?? '',
-      dateCreation: (d['dateCreation'] as Timestamp?)?.toDate(),
-      dateMaj: (d['dateMaj'] as Timestamp?)?.toDate(),
+      type: TypeRessourceX.depuisCode(normaliserType(d['type'])),
+      titre: lireTexte(d['titre']),
+      ordre: d['ordre'] is num ? (d['ordre'] as num).toInt() : 0,
+      chapitreId: lireTexte(d['chapitreId']),
+      niveau: lireTexte(d['niveau']),
+      matiereId: lireTexte(d['matiereId']),
+      ecoleId: lireTexte(d['ecoleId']),
+      contenu: lireTexte(d['contenu']),
+      imagesUrls: (d['imagesUrls'] is List)
+          ? (d['imagesUrls'] as List).whereType<String>().toList()
+          : const [],
+      pdfUrl: lireTexte(d['pdfUrl']),
+      videoYoutubeId: lireTexte(d['videoYoutubeId']),
+      enonce: lireTexte(d['enonce']),
+      solution: lireTexte(d['solution']),
+      difficulte: lireDifficulte(d['difficulte']),
+      ressourceLieeId: lireTexte(d['ressourceLieeId']),
+      questions: questions,
+      dureeMinutes: d['dureeMinutes'] is num ? (d['dureeMinutes'] as num).toInt() : 0,
+      examen: lireTexte(d['examen']),
+      annee: d['annee'] is num ? (d['annee'] as num).toInt() : 0,
+      serie: lireTexte(d['serie']),
+      actif: d['actif'] is bool ? d['actif'] as bool : true,
+      auteur: lireTexte(d['auteur']),
+      dateCreation: d['dateCreation'] is Timestamp ? (d['dateCreation'] as Timestamp).toDate() : null,
+      dateMaj: d['dateMaj'] is Timestamp ? (d['dateMaj'] as Timestamp).toDate() : null,
     );
   }
 

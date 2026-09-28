@@ -28,6 +28,7 @@ import 'package:gal/gal.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'centre_apprentissage/ecrans/programme.dart';
 import 'centre_apprentissage/ecrans/eleve_accueil.dart';
+import 'centre_apprentissage/ecrans/apprentissage_public.dart';
 import 'insight/ecran_insight.dart';
 import 'insight/insight_parent.dart';
 import 'avis/avis.dart';
@@ -3056,6 +3057,42 @@ class _LoginScreenState extends State<LoginScreen> {
                   Center(child: Text('🔒 Connexion chiffree SSL',
                       style: TextStyle(fontSize:11, color:Colors.grey[400]))),
                   const Divider(height:28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ApprentissagePublicPage(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.menu_book_rounded, size: 20),
+                      label: const Text(
+                        'Apprentissage — accès libre',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.green,
+                        side: const BorderSide(color: AppColors.green),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Center(
+                    child: Text(
+                      'Cours et révisions gratuits, sans compte Sentinel.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Center(child: Column(children: [
                     Text('Vous etes un parent ?',
                         style: TextStyle(fontSize:12, color: Colors.grey[600])),

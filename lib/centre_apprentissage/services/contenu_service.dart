@@ -556,7 +556,7 @@ class ContenuService {
     Matiere(id: 'angl', nom: 'Anglais', couleurHex: 'F57C00', ordre: 5),
     Matiere(id: 'hg', nom: 'Histoire-Geographie', couleurHex: 'F9A825', ordre: 6),
     Matiere(id: 'philo', nom: 'Philosophie', couleurHex: '455A64',
-        ordre: 7, niveaux: ['Tle']),
+        ordre: 7, niveaux: ['2nde', '1ere', 'Tle']),
     Matiere(id: 'eps', nom: 'EPS', couleurHex: '00897B', ordre: 8),
     Matiere(id: 'info', nom: 'Informatique', couleurHex: '5E35B1', ordre: 9),
     Matiere(id: 'ecm', nom: 'Education civique et morale',

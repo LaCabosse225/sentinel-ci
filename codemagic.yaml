@@ -37,6 +37,9 @@ workflows:
           node functions/seed_francais3e.js
           node functions/seed_physique6e.js
           node functions/seed_svt6e.js
+          node functions/seed_svt5e.js
+          node functions/seed_svt4e.js
+          node functions/seed_svt3e.js
           node functions/seed_francais6e.js
           node functions/seed_francais5e.js
           rm -f "$CM_BUILD_DIR/cle_service_firebase.json"

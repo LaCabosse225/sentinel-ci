@@ -48,6 +48,7 @@ workflows:
           node functions/seed_hg6e.js
           node functions/seed_hg5e.js
           node functions/seed_hg4e.js
+          node functions/seed_hg3e.js
           node functions/seed_anglais6e.js
           node functions/seed_anglais5e.js
           node functions/seed_anglais4e.js

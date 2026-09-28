@@ -56,6 +56,7 @@ workflows:
           node functions/seed_anglais5e.js
           node functions/seed_anglais4e.js
           node functions/seed_anglais3e.js
+          node functions/enrich_anglais_cycle1.js
           node functions/seed_francais6e.js
           node functions/seed_francais5e.js
           node functions/seed_complementaires4e.js

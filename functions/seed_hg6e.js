@@ -1,7 +1,8 @@
-const admin=require('firebase-admin');
-admin.initializeApp({credential:admin.credential.cert(require('./serviceAccountKey.json'))});
-const db=admin.firestore();
-const niveau='6e', matiereId='histoire_geographie', anneeScolaire='2026-2027';
+const { initializeApp, applicationDefault } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+initializeApp({ credential: applicationDefault(), projectId: 'sentinel-ci-c7592' });
+const db = getFirestore();
+const niveau='6e', matiereId='hg', anneeScolaire='2026-2027';
 const titres=["Les premières sociétés humaines","La Préhistoire en Afrique","L’Égypte ancienne","Les civilisations de l’Afrique ancienne","La Grèce antique","Rome antique","Les grands repères géographiques","Les milieux naturels de Côte d’Ivoire","Population et peuplement","Les activités économiques","L’agriculture et les ressources","Organisation de l’espace ivoirien"];
 const types=[['cours','Cours'],['exercices','Exercices d’application'],['renforcement','Renforcement'],['quiz','Quiz'],['revision','Fiche de révision']];
 (async()=>{

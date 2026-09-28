@@ -33,6 +33,7 @@ workflows:
           node functions/seed_math4e.js
           node functions/seed_math5e.js
           node functions/seed_math3e.js
+          node functions/seed_francais4e.js
           rm -f "$CM_BUILD_DIR/cle_service_firebase.json"
       - name: Recuperer les paquets
         script: |

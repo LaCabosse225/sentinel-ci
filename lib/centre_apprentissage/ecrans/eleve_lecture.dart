@@ -35,6 +35,12 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
 
   Ressource get r => widget.ressource;
 
+  String _nettoyerBalisageSimple(String texte) {
+    return texte
+        .replaceAll(RegExp(r'^#{1,6}\\s*', multiLine: true), '')
+        .replaceAll(RegExp(r'\\*\\*'), '');
+  }
+
   Future<void> _ouvrir(String url, String secours) async {
     try {
       await ouvrirUrlPlateforme(url);
@@ -137,7 +143,8 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
           // ---- Texte principal ----
           if (r.contenu.isNotEmpty) ...[
             SCCard(
-                child: SelectableText(r.contenu,
+                child: SelectableText(
+                    _nettoyerBalisageSimple(r.contenu),
                     style: const TextStyle(
                         fontSize: 14, height: 1.65, color: AppColors.textMain))),
             const SizedBox(height: 16),

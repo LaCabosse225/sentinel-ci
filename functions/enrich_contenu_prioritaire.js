@@ -79,12 +79,41 @@ const programmes = {
   }
 };
 
-async function trouverChapitre(programme, index) {
-  const code = programme.codePrefix +
-      (programme.codePrefix.startsWith('ESP-') ? String(index + 1).padStart(2, '0') : String(index + 1).padStart(2, '0'));
+async function trouverOuCreerChapitre(programme, index, titre) {
+  const code = programme.codePrefix + String(index + 1).padStart(2, '0');
   const q = await db.collection('ca_chapitres').where('code', '==', code).limit(1).get();
-  if (!q.empty) return q.docs[0];
-  return null;
+  if (!q.empty) {
+    await q.docs[0].ref.update({
+      niveau: programme.niveau,
+      matiereId: programme.matiereId,
+      anneeScolaire: '2026-2027',
+      actif: true,
+      ressourceNationale: true
+    });
+    return q.docs[0];
+  }
+
+  const ref = db.collection('ca_chapitres').doc(
+    programme.niveau + '_' + programme.matiereId + '_prioritaire_ch' +
+    String(index + 1).padStart(2, '0')
+  );
+  await ref.set({
+    code,
+    niveau: programme.niveau,
+    matiereId: programme.matiereId,
+    anneeScolaire: '2026-2027',
+    programmeVersion: 'DPFC 2026-2027',
+    serie: '',
+    theme: titre,
+    titre,
+    description: 'Cours pédagogique national Sentinel CI — chapitre enrichi.',
+    ordre: index + 1,
+    actif: true,
+    ressourceNationale: true,
+    sourceOfficielle: 'Sentinel CI — base pédagogique 2026-2027',
+    dateMaj: FieldValue.serverTimestamp()
+  });
+  return await ref.get();
 }
 
 function normaliserType(value) {
@@ -123,7 +152,7 @@ async function enrichir(programme) {
   let chapitres = 0, ressources = 0;
   for (let i = 0; i < programme.titres.length; i++) {
     const [titre, cours] = programme.titres[i];
-    const ch = await trouverChapitre(programme, i);
+    const ch = await trouverOuCreerChapitre(programme, i, titre);
     if (!ch) {
       console.log('Chapitre introuvable:', programme.matiereId, programme.niveau, i + 1);
       continue;

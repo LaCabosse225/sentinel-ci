@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
@@ -16,6 +17,7 @@ class ApprentissagePublicPage extends StatefulWidget {
 }
 
 class _ApprentissagePublicPageState extends State<ApprentissagePublicPage> {
+  late final Future<void> _sessionPublique;
   String? _niveau;
   Matiere? _matiere;
   Chapitre? _chapitre;
@@ -28,6 +30,18 @@ class _ApprentissagePublicPageState extends State<ApprentissagePublicPage> {
 
   Future<List<Ressource>> _ressources() =>
       ContenuService.ressourcesChapitre(_chapitre!.id, ecoleId: '');
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionPublique = _ouvrirSessionPublique();
+  }
+
+  Future<void> _ouvrirSessionPublique() async {
+    final auth = FirebaseAuth.instance;
+    if (auth.currentUser != null) return;
+    await auth.signInAnonymously();
+  }
 
   void _niveauChoisi(String value) {
     setState(() {
@@ -473,21 +487,42 @@ class _ApprentissagePublicPageState extends State<ApprentissagePublicPage> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-        children: [
-          _bandeau(),
-          const SizedBox(height: 20),
-          _contenu(),
-          const SizedBox(height: 16),
-          const Center(
-            child: Text(
-              'Contenus nationaux · Sentinel CI — Veiller, pas surveiller',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-            ),
-          ),
-        ],
+      body: FutureBuilder<void>(
+        future: _sessionPublique,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 28),
+              children: [
+                _bandeau(),
+                const SizedBox(height: 20),
+                _message(
+                  'Le mode Apprentissage libre ne peut pas ouvrir le contenu pour le moment. '
+                  'Activez la connexion anonyme dans Firebase Authentication puis relancez la page.',
+                ),
+              ],
+            );
+          }
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            children: [
+              _bandeau(),
+              const SizedBox(height: 20),
+              _contenu(),
+              const SizedBox(height: 16),
+              const Center(
+                child: Text(
+                  'Contenus nationaux · Sentinel CI — Veiller, pas surveiller',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

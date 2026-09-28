@@ -35,12 +35,14 @@ const PLACEHOLDER_MARKERS = [
   'Retenir les mots et expressions spécifiques au chapitre.',
 ];
 
-function estCoursReel(data) {
-  if (String(data.type || '') !== 'cours') return false;
+function qualiteCours(data) {
+  if (String(data.type || '') !== 'cours') return {reel:false, profondeur:false};
   const contenu = String(data.contenu || '').trim();
-  if (contenu.length < 450) return false;
-  if (PLACEHOLDER_MARKERS.some(m => contenu.includes(m))) return false;
-  return true;
+  if (contenu.length < 450) return {reel:false, profondeur:false};
+  if (PLACEHOLDER_MARKERS.some(m => contenu.includes(m))) return {reel:false, profondeur:false};
+  const sections = (contenu.match(/^#{1,3}\s+/gm) || []).length;
+  const profondeur = contenu.length >= 700 && sections >= 3;
+  return {reel:true, profondeur};
 }
 
 (async () => {
@@ -70,17 +72,29 @@ function estCoursReel(data) {
         const cours = rs.find(r => String(r.type || '') === 'cours');
         if (!cours) {
           erreurs.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : COURS ABSENT');
-        } else if (!estCoursReel(cours)) {
-          alertes.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : cours à enrichir');
         } else {
-          courses.push(cours.id);
+          const qualite = qualiteCours(cours);
+          if (!qualite.reel) {
+            alertes.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : cours à enrichir');
+          } else {
+            courses.push(cours.id);
+            if (!qualite.profondeur) {
+              alertes.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : cours réel mais encore peu approfondi');
+            }
+          }
         }
       }
+
+      const coursProfonds = chaps.filter(ch => {
+        const c = ressources.find(r => r.chapitreId === ch.id && r.type === 'cours' && r.actif !== false);
+        return c ? qualiteCours(c).profondeur : false;
+      }).length;
 
       stats[niveau][matiereId] = {
         matiere: noms[matiereId],
         chapitres: chaps.length,
         coursReels: courses.length,
+        coursApprofondis: coursProfonds,
       };
 
       if (chaps.length === 0) {

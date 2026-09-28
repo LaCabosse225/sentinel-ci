@@ -1,6 +1,7 @@
-const admin = require('firebase-admin');
-admin.initializeApp({credential: admin.credential.cert(require('./serviceAccountKey.json'))});
-const db = admin.firestore();
+const { initializeApp, applicationDefault } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+initializeApp({ credential: applicationDefault(), projectId: 'sentinel-ci-c7592' });
+const db = getFirestore();
 const niveau = '5e'; const matiereId='svt'; const anneeScolaire='2026-2027';
 const titres = ["Nutrition minérale des plantes","Nutrition carbonée et photosynthèse","Transport de la sève chez les plantes","Reproduction chez les plantes à fleurs","Reproduction chez les animaux","Croissance et développement des êtres vivants","Digestion et absorption des aliments","Respiration chez les êtres vivants","Circulation du sang","Excrétion et équilibre interne","Relations entre les êtres vivants","Écosystèmes et équilibre des milieux"];
 const types=[['cours','Cours'],['exercices','Exercices d’application'],['renforcement','Renforcement'],['quiz','Quiz'],['revision','Fiche de révision']];

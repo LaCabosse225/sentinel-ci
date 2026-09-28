@@ -13,8 +13,8 @@ const matieres=[
  ['eps','EPS','00897B',8],
  ['info','Informatique','5E35B1',9],
  ['ecm','Education civique et morale','795548',10],
- ['arts','Arts plastiques','8E24AA',11],
- ['musique','Education musicale','3949AB',12],
+ ['arts','Arts plastiques','8E24AA',11,['6e','5e','4e','3e','2nde','1ere','Tle']],
+ ['musique','Education musicale','3949AB',12,['6e','5e','4e','3e']],
  ['allemand','Allemand','546E7A',13,['4e','3e']],
  ['espagnol','Espagnol','E53935',14,['4e','3e']],
 ];

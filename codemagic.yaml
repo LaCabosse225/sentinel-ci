@@ -29,9 +29,9 @@ workflows:
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$CM_BUILD_DIR/cle_service_firebase.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/cle_service_firebase.json"
           npm install --prefix functions --no-audit --no-fund
-          node functions/seed_math6e.js
           node functions/ensure_matieres_centre.js
           node functions/fix_catalogue_matieres.js
+          node functions/seed_math6e.js
           node functions/seed_math4e.js
           node functions/seed_math5e.js
           node functions/seed_math3e.js

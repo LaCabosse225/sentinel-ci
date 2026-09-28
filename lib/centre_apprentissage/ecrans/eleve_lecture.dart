@@ -35,15 +35,41 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
 
   Ressource get r => widget.ressource;
 
-  List<TextSpan> _formaterContenu(String texte) {
+  List<TextSpan> _spansInline(
+      String texte, TextStyle style, TextStyle importantStyle) {
     final spans = <TextSpan>[];
+    final parts = texte.split(RegExp(r'(\*\*.*?\*\*)'));
+    for (final part in parts) {
+      if (part.isEmpty) continue;
+      final important = part.startsWith('**') && part.endsWith('**');
+      final visible = important
+          ? part.substring(2, part.length - 2)
+          : part;
+      spans.add(TextSpan(
+        text: visible,
+        style: important ? importantStyle : style,
+      ));
+    }
+    return spans;
+  }
+
+  bool _estFormule(String texte) {
+    final t = texte.trim();
+    if (t.isEmpty || t.length > 120 || !t.contains('=')) return false;
+    final signes = RegExp(r'[0-9π√×÷+\-*/^]');
+    final nombreSignes = signes.allMatches(t).length;
+    return nombreSignes >= 4;
+  }
+
+  List<Widget> _blocsContenu(String texte) {
+    final blocs = <Widget>[];
     final lignes = texte.replaceAll('\r\n', '\n').split('\n');
 
     for (var i = 0; i < lignes.length; i++) {
       final trimmed = lignes[i].trim();
 
       if (trimmed.isEmpty) {
-        spans.add(const TextSpan(text: '\n'));
+        blocs.add(const SizedBox(height: 7));
         continue;
       }
 
@@ -51,43 +77,108 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
       if (heading != null) {
         final level = heading.group(1)!.length;
         final title = heading.group(2)!.replaceAll('**', '');
-        spans.add(TextSpan(
-          text: title + '\n',
-          style: TextStyle(
-            fontSize: level <= 2 ? 18 : 15,
-            height: 1.35,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textMain,
+        final size = level == 1 ? 21.0 : level == 2 ? 17.0 : 15.0;
+        final color = level <= 2 ? AppColors.green : AppColors.blue;
+
+        blocs.add(
+          Padding(
+            padding: EdgeInsets.only(
+              top: level == 1 ? 2 : 8,
+              bottom: level == 1 ? 6 : 3,
+            ),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: size,
+                height: 1.3,
+                fontWeight: FontWeight.w900,
+                color: color,
+              ),
+            ),
           ),
-        ));
-        spans.add(const TextSpan(text: '\n'));
+        );
         continue;
       }
 
       final bullet = RegExp(r'^[-•]\s+(.*)$').firstMatch(trimmed);
       final numbered = RegExp(r'^(\d+)[.)]\s+(.*)$').firstMatch(trimmed);
+      final isImportantLabel = RegExp(
+        r'^(Attention|Important|À retenir|A retenir)\s*[:：]',
+        caseSensitive: false,
+      ).hasMatch(trimmed);
+
       final prefix = bullet != null
           ? '• '
           : numbered != null
               ? numbered.group(1)! + '. '
               : '';
+
       final lineText = bullet != null
           ? bullet.group(1)!
           : numbered != null
               ? numbered.group(2)!
               : trimmed;
 
-      spans.add(TextSpan(
-        text: prefix + lineText.replaceAll('**', '') + '\n',
-        style: const TextStyle(
-          fontSize: 14,
-          height: 1.65,
-          color: AppColors.textMain,
+      if (_estFormule(lineText)) {
+        blocs.add(
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: AppColors.greenBg,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.green.withOpacity(.20)),
+            ),
+            child: SelectableText(
+              lineText.replaceAll('**', ''),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.45,
+                fontWeight: FontWeight.w900,
+                color: AppColors.green,
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      final normalStyle = TextStyle(
+        fontSize: 14,
+        height: 1.68,
+        color: isImportantLabel ? AppColors.textMain : AppColors.textMain,
+        fontWeight: isImportantLabel ? FontWeight.w700 : FontWeight.w400,
+      );
+
+      final importantStyle = const TextStyle(
+        fontSize: 14,
+        height: 1.68,
+        fontWeight: FontWeight.w900,
+        color: AppColors.green,
+      );
+
+      blocs.add(
+        Padding(
+          padding: EdgeInsets.only(
+            left: bullet != null || numbered != null ? 4 : 0,
+            bottom: 2,
+          ),
+          child: SelectableText.rich(
+            TextSpan(
+              children: _spansInline(
+                prefix + lineText,
+                normalStyle,
+                importantStyle,
+              ),
+            ),
+          ),
         ),
-      ));
+      );
     }
 
-    return spans;
+    return blocs;
   }
 
   Future<void> _ouvrir(String url, String secours) async {
@@ -192,11 +283,11 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
           // ---- Texte principal ----
           if (r.contenu.isNotEmpty) ...[
             SCCard(
-                child: SelectableText.rich(
-              TextSpan(
-                children: _formaterContenu(r.contenu),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _blocsContenu(r.contenu),
               ),
-            )),
+            ),
             const SizedBox(height: 16),
           ],
 

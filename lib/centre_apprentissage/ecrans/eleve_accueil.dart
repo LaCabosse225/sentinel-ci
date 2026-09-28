@@ -506,8 +506,46 @@ class ContenuChapitrePage extends StatelessWidget {
         future: ContenuService.ressourcesChapitre(chapitre.id,
             ecoleId: user.school),
         builder: (ctx, snap) {
-          if (!snap.hasData) {
+          if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.cloud_off_rounded,
+                        size: 44, color: AppColors.textMuted),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Impossible de charger le contenu de ce chapitre.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Vérifie la connexion puis réessaie.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Réessayer'),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           final toutes = snap.data!;
           if (toutes.isEmpty) {

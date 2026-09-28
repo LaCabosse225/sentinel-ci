@@ -24,7 +24,7 @@ workflows:
       groups:
         - firebase
     scripts:
-      - name: Peupler Firestore — programme Math 6e + cours de demonstration
+      - name: Peupler Firestore — catalogue national + enrichissement pedagogique
         script: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$CM_BUILD_DIR/cle_service_firebase.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$CM_BUILD_DIR/cle_service_firebase.json"

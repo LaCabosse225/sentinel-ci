@@ -35,10 +35,59 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
 
   Ressource get r => widget.ressource;
 
-  String _nettoyerBalisageSimple(String texte) {
-    return texte
-        .replaceAll(RegExp(r'^#{1,6}\\s*', multiLine: true), '')
-        .replaceAll(RegExp(r'\\*\\*'), '');
+  List<TextSpan> _formaterContenu(String texte) {
+    final spans = <TextSpan>[];
+    final lignes = texte.replaceAll('\r\n', '\n').split('\n');
+
+    for (var i = 0; i < lignes.length; i++) {
+      final trimmed = lignes[i].trim();
+
+      if (trimmed.isEmpty) {
+        spans.add(const TextSpan(text: '\n'));
+        continue;
+      }
+
+      final heading = RegExp(r'^(#{1,6})\s*(.*)$').firstMatch(trimmed);
+      if (heading != null) {
+        final level = heading.group(1)!.length;
+        final title = heading.group(2)!.replaceAll('**', '');
+        spans.add(TextSpan(
+          text: title + '\n',
+          style: TextStyle(
+            fontSize: level <= 2 ? 18 : 15,
+            height: 1.35,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textMain,
+          ),
+        ));
+        spans.add(const TextSpan(text: '\n'));
+        continue;
+      }
+
+      final bullet = RegExp(r'^[-•]\s+(.*)$').firstMatch(trimmed);
+      final numbered = RegExp(r'^(\d+)[.)]\s+(.*)$').firstMatch(trimmed);
+      final prefix = bullet != null
+          ? '• '
+          : numbered != null
+              ? numbered.group(1)! + '. '
+              : '';
+      final lineText = bullet != null
+          ? bullet.group(1)!
+          : numbered != null
+              ? numbered.group(2)!
+              : trimmed;
+
+      spans.add(TextSpan(
+        text: prefix + lineText.replaceAll('**', '') + '\n',
+        style: const TextStyle(
+          fontSize: 14,
+          height: 1.65,
+          color: AppColors.textMain,
+        ),
+      ));
+    }
+
+    return spans;
   }
 
   Future<void> _ouvrir(String url, String secours) async {
@@ -143,10 +192,11 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
           // ---- Texte principal ----
           if (r.contenu.isNotEmpty) ...[
             SCCard(
-                child: SelectableText(
-                    _nettoyerBalisageSimple(r.contenu),
-                    style: const TextStyle(
-                        fontSize: 14, height: 1.65, color: AppColors.textMain))),
+                child: SelectableText.rich(
+              TextSpan(
+                children: _formaterContenu(r.contenu),
+              ),
+            )),
             const SizedBox(height: 16),
           ],
 

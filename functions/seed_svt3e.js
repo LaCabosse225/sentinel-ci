@@ -1,6 +1,7 @@
-const admin = require('firebase-admin');
-admin.initializeApp({credential: admin.credential.cert(require('./serviceAccountKey.json'))});
-const db = admin.firestore();
+const { initializeApp, applicationDefault } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+initializeApp({ credential: applicationDefault(), projectId: 'sentinel-ci-c7592' });
+const db = getFirestore();
 const niveau = '3e'; const matiereId='svt'; const anneeScolaire='2026-2027';
 const titres = ["Organisation et fonctionnement de l’organisme","Communication nerveuse","Réflexes et activité nerveuse","Mouvements et fonctionnement musculaire","Reproduction humaine et maîtrise de la reproduction","Transmission des caractères héréditaires","Génétique et variation","Évolution et diversité du vivant","Équilibres naturels et chaînes alimentaires","Ressources naturelles et développement durable","Pollutions et impacts sur la santé","Protection de l’environnement et biodiversité"];
 const types=[['cours','Cours'],['exercices','Exercices d’application'],['renforcement','Renforcement'],['quiz','Quiz'],['revision','Fiche de révision']];

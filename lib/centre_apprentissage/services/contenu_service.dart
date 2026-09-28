@@ -561,6 +561,10 @@ class ContenuService {
     Matiere(id: 'info', nom: 'Informatique', couleurHex: '5E35B1', ordre: 9),
     Matiere(id: 'ecm', nom: 'Education civique et morale',
         couleurHex: '795548', ordre: 10),
+    Matiere(id: 'arts', nom: 'Arts plastiques', couleurHex: '8E24AA', ordre: 11),
+    Matiere(id: 'musique', nom: 'Education musicale', couleurHex: '3949AB', ordre: 12),
+    Matiere(id: 'allemand', nom: 'Allemand', couleurHex: '546E7A', ordre: 13, niveaux: ['4e','3e']),
+    Matiere(id: 'espagnol', nom: 'Espagnol', couleurHex: 'E53935', ordre: 14, niveaux: ['4e','3e']),
   ];
 
   static Future<int> installerMatieresCourantes() async {

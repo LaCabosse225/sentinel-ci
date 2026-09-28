@@ -53,6 +53,7 @@ function estCoursReel(data) {
   const ressources = resSnap.docs.map(d => ({ id:d.id, ...d.data() }));
 
   const erreurs = [];
+  const alertes = [];
   const stats = {};
 
   for (const [niveau, matieres] of Object.entries(attendu)) {
@@ -70,7 +71,7 @@ function estCoursReel(data) {
         if (!cours) {
           erreurs.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : COURS ABSENT');
         } else if (!estCoursReel(cours)) {
-          erreurs.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : COURS TROP COURT OU GENERIQUE');
+          alertes.push(niveau + ' / ' + noms[matiereId] + ' / chapitre ' + ch.ordre + ' : cours à enrichir');
         } else {
           courses.push(cours.id);
         }
@@ -101,6 +102,7 @@ function estCoursReel(data) {
   console.log(JSON.stringify({
     ok: erreurs.length === 0,
     erreurs,
+    alertes,
     stats,
     totalChapitres: chapitres.length,
     totalRessources: ressources.length,

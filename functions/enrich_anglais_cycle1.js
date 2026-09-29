@@ -12,6 +12,65 @@ function fiche(title,l){
   const vocab=l[1].split(';').map(x => x.trim()).join(' · ');
   return ['# Fiche de révision — '+title,'','## Vocabulary',vocab,'','## Grammar','**'+l[2]+'**','','## Example',l[3],'','## Practice',l[4],'','## Reflexe','Écris trois phrases personnelles et une question en réutilisant la leçon.'].join('\\n');
 }
+
+function practice(title,l,niveau){
+  const vocab=l[1].split(';').map(x=>x.trim());
+  return `# Practice — ${title}
+
+## Exercice 1 — Vocabulary
+Write a sentence with each of these words: **${vocab.slice(0,5).join(', ')}**.
+
+### Correction guidée
+Each sentence must use the word in a meaningful context and have a correct subject, verb and punctuation.
+
+## Exercice 2 — Grammar
+Write five sentences using **${l[2]}**.
+
+### Correction
+Check the subject, verb form, word order and punctuation.
+
+## Exercice 3 — Communication
+${l[4]}
+
+### Correction guidée
+Use at least three key words and the grammar structure studied. Prefer short, correct sentences before adding details.
+
+## Exercice 4 — Questions
+Turn two of your sentences into questions and provide an answer for each.
+
+### Correction
+Check the question word or auxiliary, subject, verb and final punctuation.`;
+}
+function reinforcement(title,l,niveau){
+  return `# Reinforcement — ${title}
+
+## Situation
+${l[4]}
+
+## Mission
+Produce a short oral or written response of 5 to 8 sentences using the vocabulary and **${l[2]}**.
+
+## Method
+1. Choose five key words.
+2. Build short sentences.
+3. Add one question and one answer.
+4. Reread and correct grammar, spelling and punctuation.
+
+## Expected result
+A clear English production adapted to level ${niveau}.`;
+}
+function qcm(title,l){
+  const vocab=l[1].split(';').map(x=>x.trim());
+  return [
+    {id:'q1',type:'qcm',enonce:'Which word belongs to this lesson?',choix:[vocab[0]||'school','banana','yesterday','mountain'],bonnesReponses:[0],reponseAttendue:'',explication:'This word belongs to the key vocabulary of the lesson.',points:1},
+    {id:'q2',type:'qcm',enonce:'What should you check when writing a sentence?',choix:['Subject and verb','Only length','Only handwriting','Nothing'],bonnesReponses:[0],reponseAttendue:'',explication:'A correct sentence needs a clear subject and an appropriate verb form.',points:1},
+    {id:'q3',type:'qcm',enonce:'Which item is the grammar focus of the lesson?',choix:[l[2],'Only a noun','Only a number','A punctuation mark'],bonnesReponses:[0],reponseAttendue:'',explication:'The lesson grammar focus is the structure learners practise.',points:1},
+    {id:'q4',type:'qcm',enonce:'What is a good way to learn vocabulary?',choix:['Reuse words in sentences','Read once and forget','Avoid examples','Never speak'],bonnesReponses:[0],reponseAttendue:'',explication:'Active reuse helps learners remember and use vocabulary.',points:1},
+    {id:'q5',type:'qcm',enonce:'What is the main goal of a communication task?',choix:['Communicate a clear message','Use the longest sentence','Avoid the vocabulary','Ignore the listener'],bonnesReponses:[0],reponseAttendue:'',explication:'The goal is meaningful and understandable communication.',points:1},
+    {id:'q6',type:'qcm',enonce:'What should you do after writing?',choix:['Reread and correct','Delete punctuation','Change every verb','Do nothing'],bonnesReponses:[0],reponseAttendue:'',explication:'Rereading helps correct grammar, spelling and punctuation.',points:1}
+  ];
+}
+
 async function find(chapterId, type){
   const snap=await db.collection('ca_ressources').where('chapitreId','==',chapterId).limit(50).get();
   for(const d of snap.docs){ const t=String(d.data().type||'').toLowerCase(); if(t===type || (type==='exercice'&&t==='exercices') || (type==='fiche'&&t==='revision')) return d; }
@@ -29,6 +88,18 @@ async function main(){
       let r=await find(ch.id,'cours');
       if(r) await r.ref.update(base); else await db.collection('ca_ressources').add({...base,dateCreation:FieldValue.serverTimestamp()});
       courses++;
+      const ex={type:'exercices',titre:'Practice exercises — '+l[0],ordre:2,chapitreId:ch.id,niveau,matiereId:'angl',ecoleId:'',contenu:practice(l[0],l,niveau),imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:1,ressourceLieeId:'',questions:[],dureeMinutes:25,examen:'',annee:2026,serie:'',actif:true,ressourceNationale:true,auteur:'sentinel-pedagogie-anglais-2026',dateMaj:FieldValue.serverTimestamp()};
+      r=await find(ch.id,'exercices');
+      if(r) await r.ref.update(ex); else await db.collection('ca_ressources').add({...ex,dateCreation:FieldValue.serverTimestamp()});
+
+      const ren={type:'renforcement',titre:'Reinforcement — '+l[0],ordre:3,chapitreId:ch.id,niveau,matiereId:'angl',ecoleId:'',contenu:reinforcement(l[0],l,niveau),imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:2,ressourceLieeId:'',questions:[],dureeMinutes:20,examen:'',annee:2026,serie:'',actif:true,ressourceNationale:true,auteur:'sentinel-pedagogie-anglais-2026',dateMaj:FieldValue.serverTimestamp()};
+      r=await find(ch.id,'renforcement');
+      if(r) await r.ref.update(ren); else await db.collection('ca_ressources').add({...ren,dateCreation:FieldValue.serverTimestamp()});
+
+      const quiz={type:'quiz',titre:'Quiz — '+l[0],ordre:4,chapitreId:ch.id,niveau,matiereId:'angl',ecoleId:'',contenu:'# Quiz — '+l[0],imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:2,ressourceLieeId:'',questions:qcm(l[0],l),dureeMinutes:12,examen:'',annee:2026,serie:'',actif:true,ressourceNationale:true,auteur:'sentinel-pedagogie-anglais-2026',dateMaj:FieldValue.serverTimestamp()};
+      r=await find(ch.id,'quiz');
+      if(r) await r.ref.update(quiz); else await db.collection('ca_ressources').add({...quiz,dateCreation:FieldValue.serverTimestamp()});
+
       const f={type:'fiche',titre:'Fiche de révision — '+l[0],ordre:5,chapitreId:ch.id,niveau,matiereId:'angl',ecoleId:'',contenu:fiche(l[0],l),imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:1,ressourceLieeId:'',questions:[],dureeMinutes:15,examen:'',annee:2026,serie:'',actif:true,ressourceNationale:true,auteur:'sentinel-pedagogie-anglais-2026',dateMaj:FieldValue.serverTimestamp()};
       r=await find(ch.id,'fiche');
       if(r) await r.ref.update(f); else await db.collection('ca_ressources').add({...f,dateCreation:FieldValue.serverTimestamp()});

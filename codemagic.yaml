@@ -51,6 +51,7 @@ workflows:
           node functions/enrich_svt4e_all_remaining.js
           node functions/enrich_catalogue_pedagogique_v2.js
           node functions/enrich_complementaires_cycle1_complet.js
+          node functions/enrich_francais_5e_3e_complet.js
           node functions/seed_svt3e.js
           node functions/seed_hg6e.js
           node functions/seed_hg5e.js

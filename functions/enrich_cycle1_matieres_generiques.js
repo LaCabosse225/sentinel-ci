@@ -79,7 +79,7 @@ async function main(){
       const s=await db.collection('ca_chapitres').where('code','==',code).limit(1).get();
       if(s.empty){console.log('CHAPITRE_ABSENT',code);continue;}
       const ch=s.docs[0];
-      const base={chapitreId:ch.id,niveau:cfg.niveau,matiereId:cfg.matiereId,ecoleId:'',imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:1,ressourceLieeId:[],dureeMinutes:25,examen:false,annee:2026,serie:'',actif:true,ressourceNationale:true,auteur:'sentinel-pedagogie-2026',dateMaj:FieldValue.serverTimestamp()};
+      const base={chapitreId:ch.id,niveau:cfg.niveau,matiereId:cfg.matiereId,ecoleId:'',imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:1,ressourceLieeId:'',dureeMinutes:25,examen:false,annee:2026,serie:'',actif:true,ressourceNationale:true,auteur:'sentinel-pedagogie-2026',dateMaj:FieldValue.serverTimestamp()};
       const resources=[
         {type:'cours',titre:'Cours complet — '+title,ordre:1,contenu:course(title,lesson,example,exercise),questions:[]},
         {type:'exercice',titre:'Exercices corrigés — '+title,ordre:2,contenu:'## Série d’exercices\n\n### Exercice 1\n'+exercise+'\n\n### Correction guidée\nCommence par identifier les informations utiles, applique la notion du cours, puis rédige une conclusion complète.\n\n### Exercice 2\nDonne un nouvel exemple lié à ton quotidien et justifie ta réponse en trois phrases.',questions:[]},

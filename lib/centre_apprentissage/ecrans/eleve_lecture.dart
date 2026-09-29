@@ -37,19 +37,36 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
 
   List<TextSpan> _spansInline(
       String texte, TextStyle style, TextStyle importantStyle) {
+    // IMPORTANT : String.split() supprime les groupes captures.
+    // Avec l'ancien code, tout texte entre **...** disparaissait donc
+    // completement a l'affichage. On parcourt maintenant les correspondances
+    // pour conserver le contenu et retirer uniquement les marqueurs Markdown.
     final spans = <TextSpan>[];
-    final parts = texte.split(RegExp(r'(\*\*.*?\*\*)'));
-    for (final part in parts) {
-      if (part.isEmpty) continue;
-      final important = part.startsWith('**') && part.endsWith('**');
-      final visible = important
-          ? part.substring(2, part.length - 2)
-          : part;
+    final regex = RegExp(r'\\*\\*(.+?)\\*\\*');
+    var dernierIndex = 0;
+
+    for (final match in regex.allMatches(texte)) {
+      if (match.start > dernierIndex) {
+        spans.add(TextSpan(
+          text: texte.substring(dernierIndex, match.start),
+          style: style,
+        ));
+      }
+
       spans.add(TextSpan(
-        text: visible,
-        style: important ? importantStyle : style,
+        text: match.group(1) ?? '',
+        style: importantStyle,
+      ));
+      dernierIndex = match.end;
+    }
+
+    if (dernierIndex < texte.length) {
+      spans.add(TextSpan(
+        text: texte.substring(dernierIndex),
+        style: style,
       ));
     }
+
     return spans;
   }
 

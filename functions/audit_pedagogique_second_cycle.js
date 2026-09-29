@@ -10,7 +10,7 @@ const TYPES=['cours','exercices','renforcement','quiz','revision'];
 (async()=>{
   const [chapSnap,resSnap]=await Promise.all([
     db.collection('ca_chapitres').where('anneeScolaire','==','2026-2027').get(),
-    db.collection('ca_ressources').where('annee','==',2026).get()
+    db.collection('ca_ressources').get()
   ]);
   const chapitres=chapSnap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>NIVEAUX.includes(String(c.niveau))&&MATIERES.includes(String(c.matiereId))&&c.actif!==false);
   const ressources=resSnap.docs.map(d=>({id:d.id,...d.data()}));

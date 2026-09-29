@@ -42,7 +42,7 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
     // completement a l'affichage. On parcourt maintenant les correspondances
     // pour conserver le contenu et retirer uniquement les marqueurs Markdown.
     final spans = <TextSpan>[];
-    final regex = RegExp(r'\\*\\*(.+?)\\*\\*');
+    final regex = RegExp(r'\*\*(.+?)\*\*');
     var dernierIndex = 0;
 
     for (final match in regex.allMatches(texte)) {

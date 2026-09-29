@@ -186,7 +186,7 @@ async function seedMatiere(matiereId, config) {
           auteur:'Sentinel CI',dateCreation:snap.exists?(snap.data().dateCreation||FieldValue.serverTimestamp()):FieldValue.serverTimestamp(),
           dateMaj:FieldValue.serverTimestamp()
         };
-        if (snap.exists) await ref.update(data); else await ref.set(data);
+        if (!snap.exists) await ref.set(data);
         ressources++;
       }
     }

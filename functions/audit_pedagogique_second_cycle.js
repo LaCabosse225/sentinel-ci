@@ -5,7 +5,7 @@ const db=getFirestore();
 
 const NIVEAUX=['2nde','1ere','Tle'];
 const MATIERES=['arts','math','pc','svt','franc','angl','hg','philo','eps','info','ecm'];
-const TYPES=['cours','exercices','renforcement','quiz','revision'];
+const TYPES=['cours','exercice','renforcement','quiz','fiche'];
 
 (async()=>{
   const [chapSnap,resSnap]=await Promise.all([
@@ -25,10 +25,10 @@ const TYPES=['cours','exercices','renforcement','quiz','revision'];
       const r=same[0];
       const len=String(r.contenu||'').trim().length;
       if(type==='cours' && len<500) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : cours court ('+len+')');
-      if(type==='exercices' && !/Correction/i.test(String(r.contenu||''))) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : exercices sans correction détectée');
+      if(type==='exercice' && !/Correction/i.test(String(r.contenu||''))) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : exercices sans correction détectée');
       if(type==='renforcement' && len<500) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : renforcement court ('+len+')');
       if(type==='quiz' && (!Array.isArray(r.questions)||r.questions.length<4)) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : quiz faible ('+(Array.isArray(r.questions)?r.questions.length:0)+' questions)');
-      if(type==='revision' && len<400) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : fiche courte ('+len+')');
+      if(type==='fiche' && len<400) alertes.push(c.niveau+' / '+c.matiereId+' / '+c.ordre+' : fiche courte ('+len+')');
     }
     seen.add(c.id);
   }

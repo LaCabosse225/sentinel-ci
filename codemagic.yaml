@@ -35,8 +35,6 @@ workflows:
           node functions/enrich_contenu_prioritaire.js
           node functions/seed_math6e.js
           node functions/enrich_math6e_complet.js
-          node --check functions/enrich_math6e_user_lot_ch1_ch5.js
-          node functions/enrich_math6e_user_lot_ch1_ch5.js
           node functions/seed_math4e.js
           node functions/seed_math5e.js
           node functions/seed_math3e.js
@@ -85,6 +83,8 @@ workflows:
           node functions/enrich_hg_cycle1.js
           node functions/enrich_math_lycee.js
           node functions/enrich_philo_lycee.js
+          node --check functions/enrich_math6e_user_lot_ch1_ch5.js
+          node functions/enrich_math6e_user_lot_ch1_ch5.js
           node functions/audit_pedagogique_cycle1.js
           node functions/audit_pedagogique_second_cycle.js
           node functions/audit_catalogue.js

@@ -31,6 +31,7 @@ workflows:
           npm install --prefix functions --no-audit --no-fund
           node functions/ensure_matieres_centre.js
           node functions/fix_catalogue_matieres.js
+          node functions/repair_catalogue_ids_cycle1.js
           node functions/enrich_contenu_prioritaire.js
           node functions/seed_math6e.js
           node functions/enrich_math6e_complet.js

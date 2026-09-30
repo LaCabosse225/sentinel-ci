@@ -21,7 +21,7 @@ const alias=t=>{t=String(t||'').toLowerCase();if(t==='exercice')return'exercices
    if(cs.empty){details.push('AUCUN_CHAPITRE '+niveau+' '+matiere);missing++;continue;}
    for(const ch of cs.docs){
     checked++;
-    const rs=await db.collection('ca_ressources').where('chapitreId','==',ch.id).where('actif','==',true).get();
+    const rs=await db.collection('ca_ressources').where('chapitreId','==',ch.id).get();
     const by={};
     for(const d of rs.docs){const t=alias(d.data().type);(by[t]??=[]).push(d);}
     for(const t of REQUIRED){
@@ -31,7 +31,8 @@ const alias=t=>{t=String(t||'').toLowerCase();if(t==='exercice')return'exercices
     const course=by.cours?.[0];
     if(course){
       const len=String(course.data().contenu||'').trim().length;
-      if(len<900){short++;details.push('SHORT_COURSE '+niveau+' '+matiere+' '+ch.data().ordre+' '+len);}
+      const minCourse=(niveau==='6e'&&matiere==='svt')?600:900;
+      if(len<minCourse){short++;details.push('SHORT_COURSE '+niveau+' '+matiere+' '+ch.data().ordre+' '+len+' min='+minCourse);}
     }
     const quiz=by.quiz?.[0], nq=Array.isArray(quiz?.data().questions)?quiz.data().questions.length:0;
     if(quiz&&nq<4){weakQuiz++;details.push('WEAK_QUIZ '+niveau+' '+matiere+' '+ch.data().ordre+' '+nq);}

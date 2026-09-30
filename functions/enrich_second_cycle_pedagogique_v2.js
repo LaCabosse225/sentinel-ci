@@ -147,7 +147,7 @@ function fiche(t,core){
     let rich=false;
     if(!old.empty){
       const x=old.docs[0].data(), len=String(x.contenu||'').trim().length, nq=Array.isArray(x.questions)?x.questions.length:0;
-      rich=type==='quiz'?nq>=6:len>=1800;
+      rich=type==='quiz'?nq>=6:(len>=900 && (String(x.contenu||'').match(/^#{1,3}\s+/gm)||[]).length>=3);
     }
     if(rich) continue;
     const ref=old.empty?db.collection('ca_ressources').doc(c.id+'_lycee_v2_'+type):old.docs[0].ref;

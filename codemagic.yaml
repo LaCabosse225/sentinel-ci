@@ -89,6 +89,8 @@ workflows:
           node functions/enrich_math6e_user_lot_ch6_ch10.js
           node --check functions/enrich_math6e_user_lot_ch11_ch13.js
           node functions/enrich_math6e_user_lot_ch11_ch13.js
+          node --check functions/enrich_svt6e_user_12_chapitres.js
+          node functions/enrich_svt6e_user_12_chapitres.js
           node functions/audit_pedagogique_cycle1.js
           node functions/audit_pedagogique_second_cycle.js
           node functions/audit_catalogue.js

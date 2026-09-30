@@ -73,6 +73,7 @@ workflows:
           node functions/seed_premier_cycle_complet.js
           node functions/seed_second_cycle.js
           node --check functions/enrich_cycle1_restants_complet.js
+          node --check functions/repair_catalogue_ids_cycle1.js
           node --check functions/enrich_cycle1_core6e_pedagogique.js
           node --check functions/enrich_second_cycle_pedagogique_v2.js
           node --check functions/audit_pedagogique_second_cycle.js

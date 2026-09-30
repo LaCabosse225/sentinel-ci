@@ -80,7 +80,8 @@ class _LecteurRessourcePageState extends State<LecteurRessourcePage> {
 
   List<Widget> _blocsContenu(String texte) {
     final blocs = <Widget>[];
-    final lignes = texte.replaceAll('\r\n', '\n').split('\n');
+    final texteNormalise = texte.replaceAll(r'\\n', '\n').replaceAll(r'\\r\\n', '\n');
+    final lignes = texteNormalise.replaceAll('\r\n', '\n').split('\n');
 
     for (var i = 0; i < lignes.length; i++) {
       final trimmed = lignes[i].trim();

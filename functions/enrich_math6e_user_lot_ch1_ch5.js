@@ -15,30 +15,78 @@ function parseQcm(text){
  return questions;
 }
 async function main(){
- let updated=0;
+ let chaptersProcessed=0, oldResourcesDeleted=0, resourcesCreated=0;
  for(const c of chapters){
   const chapId='6e_math_ch'+String(c.ordre).padStart(2,'0');
   const snap=await db.collection('ca_chapitres').doc(chapId).get();
   if(!snap.exists){console.warn('Chapitre absent',chapId);continue;}
-  await snap.ref.set({description:c.title+' — contenu pédagogique complet fourni par l’utilisateur.',dateMaj:FieldValue.serverTimestamp()},{merge:true});
+
+  // REMPLACEMENT COMPLET : on supprime toutes les anciennes ressources
+  // rattachées à ce chapitre avant de recréer le lot fourni par l'utilisateur.
+  const oldSnap=await db.collection('ca_ressources').where('chapitreId','==',chapId).get();
+  if(!oldSnap.empty){
+    let batch=db.batch(), ops=0;
+    for(const doc of oldSnap.docs){
+      batch.delete(doc.ref);
+      ops++;
+      if(ops===450){
+        await batch.commit();
+        oldResourcesDeleted+=ops;
+        batch=db.batch();
+        ops=0;
+      }
+    }
+    if(ops>0){
+      await batch.commit();
+      oldResourcesDeleted+=ops;
+    }
+  }
+
+  await snap.ref.set({
+    description:c.title+' — contenu pédagogique complet fourni par l’utilisateur.',
+    dateMaj:FieldValue.serverTimestamp()
+  },{merge:true});
+
   let questions=parseQcm(c.qcm);
   // Le chapitre 3 contient une correction explicite du Q4 indiquant que A est la seule bonne réponse.
   if(c.ordre===3 && questions.length>=4) questions[3].bonnesReponses=[0];
+
   const resources=[
    {type:'cours',titre:'Cours complet — '+c.title,ordre:1,contenu:c.course},
    {type:'exercices',titre:'Exercices et corrections — '+c.title,ordre:2,contenu:c.exercises},
    {type:'renforcement',titre:'Renforcement — '+c.title,ordre:3,contenu:c.reinforcement},
-   {type:'quiz',titre:'Quiz — '+c.title,ordre:4,contenu:c.qcm+'\n\n'+c.quizrapid,questions},
-   {type:'revision',titre:'Fiche de révision — '+c.title,ordre:5,contenu:c.fiche+'\n\n'+c.quizrapid}
+   {type:'quiz',titre:'Quiz — '+c.title,ordre:4,contenu:c.qcm+'\\n\\n'+c.quizrapid,questions},
+   {type:'revision',titre:'Fiche de révision — '+c.title,ordre:5,contenu:c.fiche+'\\n\\n'+c.quizrapid}
   ];
+
+  // Après nettoyage, on recrée uniquement les 5 ressources du lot,
+  // toutes explicitement en brouillon.
   for(const r of resources){
-   const q=await db.collection('ca_ressources').where('chapitreId','==',chapId).where('type','==',r.type).limit(1).get();
-   const data={type:r.type,titre:r.titre,ordre:r.ordre,chapitreId:chapId,niveau:'6e',matiereId:'math',ecoleId:'',contenu:r.contenu||'',imagesUrls:[],pdfUrl:'',videoYoutubeId:'',enonce:'',solution:'',difficulte:r.type==='quiz'?2:1,ressourceLieeId:'',questions:r.questions||[],dureeMinutes:r.type==='quiz'?12:30,examen:false,annee:2026,serie:'',actif:false,ressourceNationale:true,auteur:'Sentinelle CI — contenu fourni par utilisateur',dateMaj:FieldValue.serverTimestamp()};
-   if(q.empty){data.dateCreation=FieldValue.serverTimestamp();await db.collection('ca_ressources').add(data);} else await q.docs[0].ref.set(data,{merge:true});
-   updated++;
+   const data={
+    type:r.type,titre:r.titre,ordre:r.ordre,chapitreId:chapId,niveau:'6e',matiereId:'math',
+    ecoleId:'',contenu:r.contenu||'',imagesUrls:[],pdfUrl:'',videoYoutubeId:'',
+    enonce:'',solution:'',difficulte:r.type==='quiz'?2:1,ressourceLieeId:'',
+    questions:r.questions||[],dureeMinutes:r.type==='quiz'?12:30,examen:false,
+    annee:2026,serie:'',actif:false,ressourceNationale:true,
+    auteur:'Sentinelle CI — contenu fourni par utilisateur',
+    dateMaj:FieldValue.serverTimestamp(),dateCreation:FieldValue.serverTimestamp()
+   };
+   await db.collection('ca_ressources').add(data);
+   resourcesCreated++;
   }
+  chaptersProcessed++;
  }
- await db.collection('ca_parametres').doc('version').set({version:FieldValue.increment(1),dateMaj:FieldValue.serverTimestamp(),derniereRessourceNationale:'MATH_6E_LOT_CH1_CH5'},{merge:true});
- console.log(JSON.stringify({ok:true,chaptersProcessed:chapters.length,resourcesUpdated:updated,publication:'draft_only'},null,2));
+
+ await db.collection('ca_parametres').doc('version').set({
+  version:FieldValue.increment(1),
+  dateMaj:FieldValue.serverTimestamp(),
+  derniereRessourceNationale:'MATH_6E_LOT_CH1_CH5_REPLACEMENT'
+ },{merge:true});
+
+ console.log(JSON.stringify({
+  ok:true,mode:'full_replacement',chaptersProcessed,
+  oldResourcesDeleted,resourcesCreated,expectedResources:chaptersProcessed*5,
+  publication:'draft_only'
+ },null,2));
 }
 main().catch(e=>{console.error('ENRICH_MATH6E_USER_LOT_ERROR',e.stack||e);process.exit(1);});

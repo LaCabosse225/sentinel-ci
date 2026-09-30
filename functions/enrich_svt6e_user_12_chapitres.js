@@ -221,7 +221,18 @@ Exemple de chaîne : **herbe → criquet → grenouille → serpent**.
 Les populations d'un écosystème sont liées ; une modification peut provoquer des changements ailleurs.`}
 ];
 
-function parseQ(q){return q.map((x,i)=>({id:'q'+(i+1),type:'qcm',enonce:x[0],choix:x[1],bonnesReponses:[x[2]],points:1}));}
+const EXTRA={
+3:['Une condition favorable à la germination est :',['une température convenable','l’absence totale d’eau','l’absence de dioxygène','la destruction de l’embryon'],0],
+4:['Le trajet correct des aliments comprend :',['bouche → œsophage → estomac → intestin grêle','poumons → cœur → intestin','rein → estomac → bouche','foie → poumons → anus'],0],
+5:['Lors de la photosynthèse, la plante utilise notamment :',['dioxyde de carbone et eau','uniquement du sable','uniquement des sels minéraux','uniquement du dioxygène'],0],
+6:['Les sels minéraux sont principalement prélevés :',['dans le sol par les racines','dans les fruits par les fleurs','dans la lumière par les feuilles','dans l’air par les graines'],0],
+7:['Une conséquence possible de la déforestation est :',['la destruction d’habitats','la disparition de toute pluie','la germination automatique','l’augmentation garantie des espèces'],0],
+8:['Les eaux usées rejetées dans une rivière peuvent :',['perturber les organismes aquatiques','améliorer toujours la qualité de l’eau','empêcher toute pollution','produire directement des poissons'],0],
+9:['Recycler consiste à :',['transformer certains déchets pour fabriquer de nouveaux produits','jeter tous les objets','gaspiller davantage','laisser les déchets dans la nature'],0],
+10:['La dégradation d’un milieu peut entraîner :',['une diminution de la biodiversité','une augmentation automatique de toutes les espèces','aucun changement','la disparition de toutes les ressources'],0],
+11:['Après avoir identifié un problème environnemental, il faut notamment :',['rechercher ses causes et ses conséquences','ignorer les causes','augmenter les déchets','supprimer toute activité humaine'],0]
+};
+function parseQ(q,n){const all=q.slice();if(all.length<4&&EXTRA[n])all.push(EXTRA[n]);return all.map((x,i)=>({id:'q'+(i+1),type:'qcm',enonce:x[0],choix:x[1],bonnesReponses:[x[2]],points:1}));}
 async function delRefs(refs){let total=0;for(let i=0;i<refs.length;i+=450){const b=db.batch();for(const r of refs.slice(i,i+450))b.delete(r);await b.commit();total+=Math.min(450,refs.length-i);}return total;}
 async function main(){
  let oldResourcesDeleted=0,resourcesCreated=0;
@@ -234,7 +245,7 @@ async function main(){
     {type:'cours',titre:'Cours complet — '+ch.t,contenu:ch.course,ordre:1},
     {type:'exercices',titre:'Exercices et corrections — '+ch.t,contenu:ch.ex,ordre:2},
     {type:'renforcement',titre:'Renforcement et problème — '+ch.t,contenu:ch.renf,ordre:3},
-    {type:'quiz',titre:'QCM, quiz et défi — '+ch.t,contenu:ch.renf,questions:parseQ(ch.q),dureeMinutes:10,ordre:4},
+    {type:'quiz',titre:'QCM, quiz et défi — '+ch.t,contenu:ch.renf,questions:parseQ(ch.q,ch.n),dureeMinutes:10,ordre:4},
     {type:'revision',titre:'Fiche de révision — '+ch.t,contenu:ch.rev,ordre:5}
    ];
    const batch=db.batch();

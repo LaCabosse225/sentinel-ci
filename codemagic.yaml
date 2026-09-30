@@ -74,6 +74,7 @@ workflows:
           node --check functions/enrich_cycle1_restants_complet.js
           node --check functions/enrich_second_cycle_complet.js
           node --check functions/enrich_second_cycle_pedagogique_v2.js
+          node --check functions/audit_pedagogique_cycle1.js
           node --check functions/audit_pedagogique_second_cycle.js
           node functions/enrich_second_cycle_complet.js
           node functions/enrich_cycle1_restants_complet.js

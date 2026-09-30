@@ -72,14 +72,11 @@ workflows:
           node functions/seed_premier_cycle_complet.js
           node functions/seed_second_cycle.js
           node --check functions/enrich_cycle1_restants_complet.js
-          node --check functions/enrich_second_cycle_complet.js
           node --check functions/enrich_second_cycle_pedagogique_v2.js
           node --check functions/audit_pedagogique_cycle1.js
           node --check functions/audit_pedagogique_second_cycle.js
-          node functions/enrich_second_cycle_complet.js
           node functions/enrich_cycle1_restants_complet.js
           node functions/enrich_second_cycle_pedagogique_v2.js
-          node functions/enrich_cycle1_matieres_generiques.js
           node functions/enrich_hg_cycle1.js
           node functions/enrich_math_lycee.js
           node functions/enrich_philo_lycee.js

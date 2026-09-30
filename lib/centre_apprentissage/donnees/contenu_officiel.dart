@@ -279,30 +279,36 @@ class ContenuOfficiel {
       final ressourceId =
           'ca_${chapitre.id}_r${r.type.index}_${r.ordre}_${i + 1}';
 
-      // Si la ressource existe déjà, on la conserve telle quelle.
-      // Cela protège notamment une ressource déjà relue ou publiée.
-      final dejaPresente = await ContenuService.ressource(ressourceId);
-      if (dejaPresente != null) continue;
-
-      final res = await ContenuService.creerRessource(
-        Ressource(
-          id: ressourceId,
-          type: r.type,
-          titre: r.titre,
-          ordre: r.ordre,
-          chapitreId: chapitre.id,
-          niveau: chapitre.niveau,
-          matiereId: chapitre.matiereId,
-          contenu: r.contenu,
-          enonce: r.enonce,
-          solution: r.solution,
-          difficulte: r.difficulte,
-          dureeMinutes: r.dureeMinutes,
-          questions: r.questions,
-          actif: false, // brouillon : relecture obligatoire
-          auteur: auteurUid,
-        ),
+      final ressourcePreparee = Ressource(
+        id: ressourceId,
+        type: r.type,
+        titre: r.titre,
+        ordre: r.ordre,
+        chapitreId: chapitre.id,
+        niveau: chapitre.niveau,
+        matiereId: chapitre.matiereId,
+        contenu: r.contenu,
+        enonce: r.enonce,
+        solution: r.solution,
+        difficulte: r.difficulte,
+        dureeMinutes: r.dureeMinutes,
+        questions: r.questions,
+        actif: false, // le catalogue reste en brouillon
+        auteur: auteurUid,
       );
+
+      // Une ressource publiée est protégée.
+      // Une ressource encore en brouillon est synchronisée avec la nouvelle
+      // version validée du catalogue.
+      final dejaPresente = await ContenuService.ressource(ressourceId);
+      if (dejaPresente != null) {
+        if (!dejaPresente.actif) {
+          await ContenuService.modifierRessource(ressourcePreparee);
+        }
+        continue;
+      }
+
+      final res = await ContenuService.creerRessource(ressourcePreparee);
       if (!res.startsWith('!')) crees++;
     }
     return crees;
@@ -9120,315 +9126,666 @@ CÔNE
     '6e_math_ch01': [
       RessourceOfficielle(
         type: TypeRessource.cours,
-        titre: 'Nombres entiers naturels — cours',
+        titre: 'Nombres entiers naturels — cours complet',
         ordre: 1,
+        dureeMinutes: 45,
         contenu: r'''
-1. L'ENSEMBLE DES NOMBRES ENTIERS NATURELS
+MATHÉMATIQUES — CLASSE DE 6e
+LEÇON : NOMBRES ENTIERS NATURELS
 
-Les nombres entiers naturels sont les nombres utilisés pour compter :
-0, 1, 2, 3, 4, 5, ...
+OBJECTIFS
+À la fin de cette leçon, je dois être capable de :
+• reconnaître et noter l’ensemble des nombres entiers naturels ℕ ;
+• utiliser les symboles ∈ et ∉ ;
+• écrire des nombres entiers naturels et les comparer ;
+• reconnaître et écrire des nombres entiers naturels consécutifs ;
+• déterminer des multiples et des diviseurs ;
+• utiliser les critères de divisibilité par 2, 3, 5, 9, 10, 100 et 1 000 ;
+• justifier qu’un nombre est multiple ou divisible par un autre ;
+• résoudre une situation faisant intervenir les nombres entiers naturels.
 
-On note cet ensemble ℕ.
+1. DÉCOUVRIR LES NOMBRES ENTIERS NATURELS
 
-Exemples : 0, 8, 25, 407 et 2 026 appartiennent à ℕ.
-En revanche, -3, 2,5 et 1/2 n'appartiennent pas à ℕ.
+Dans la vie courante, nous utilisons des nombres pour compter :
+6 élèves, 25 cahiers, 120 personnes, 2 500 francs CFA.
 
+Les nombres utilisés pour compter sont des nombres entiers naturels.
 
-2. VALEUR DE POSITION ET DÉCOMPOSITION
+On note leur ensemble :
 
-Dans un nombre, chaque chiffre a une valeur selon sa position.
+ℕ = {0 ; 1 ; 2 ; 3 ; 4 ; 5 ; 6 ; ...}
 
-Exemple :
-    4 582 = 4 milliers + 5 centaines + 8 dizaines + 2 unités
-
-Donc :
-    4 582 = 4 × 1 000 + 5 × 100 + 8 × 10 + 2.
-
-
-3. COMPARER DES NOMBRES
-
-Pour comparer deux entiers :
-- celui qui possède le plus de chiffres est le plus grand ;
-- s'ils ont le même nombre de chiffres, on compare de gauche à droite.
+L’ensemble ℕ est infini : il n’existe pas de plus grand nombre entier naturel.
 
 Exemples :
-    8 450 > 7 999
-    5 327 < 5 412
+0, 7, 25, 148 et 2 500 sont des entiers naturels.
 
-On peut utiliser les signes :
-    < signifie « inférieur à »
-    > signifie « supérieur à »
-    = signifie « égal à »
+En revanche :
+-3, 2,5 et 1/2 ne sont pas des entiers naturels.
 
+À RETENIR :
+Un entier naturel n’a pas de partie décimale et n’est pas négatif.
 
-4. ORDRE CROISSANT ET ORDRE DÉCROISSANT
+2. APPARTENANCE À ℕ
 
-Ordre croissant : du plus petit au plus grand.
-
-    12 < 35 < 108 < 250
-
-Ordre décroissant : du plus grand au plus petit.
-
-    250 > 108 > 35 > 12
-
-
-5. ADDITION, SOUSTRACTION ET MULTIPLICATION
-
-Pour poser une opération, on aligne correctement unités, dizaines,
-centaines, milliers, etc.
+Le symbole ∈ signifie « appartient à ».
 
 Exemple :
-    2 348 + 1 275 = 3 623
+8 ∈ ℕ
+
+Le symbole ∉ signifie « n’appartient pas à ».
 
 Exemple :
-    5 000 - 1 846 = 3 154
+-4 ∉ ℕ
+2,5 ∉ ℕ
 
-La multiplication est une addition répétée :
-    4 × 6 = 6 + 6 + 6 + 6 = 24
+3. NOMBRES ENTIERS NATURELS CONSÉCUTIFS
 
-Produits par 10, 100 et 1 000 :
-    37 × 10 = 370
-    37 × 100 = 3 700
-    37 × 1 000 = 37 000
-
-
-6. DIVISION EUCLIDIENNE
-
-Dans une division euclidienne, on cherche un quotient et un reste.
-
-La relation fondamentale est :
-
-    dividende = diviseur × quotient + reste
-
-avec :
-
-    reste < diviseur
+Des nombres sont consécutifs lorsqu’ils se suivent immédiatement.
 
 Exemple :
-    47 = 5 × 9 + 2
+12 ; 13 ; 14 ; 15 ; 16
 
-Le quotient de 47 par 5 est 9 et le reste est 2.
+sont cinq nombres entiers naturels consécutifs.
 
+De même :
+98 ; 99 ; 100
 
-7. PRIORITÉS DE CALCUL
+sont consécutifs.
 
-Lorsqu'un calcul contient plusieurs opérations :
-1. calculer les parenthèses ;
-2. effectuer les multiplications et divisions ;
-3. effectuer les additions et soustractions.
+Pour écrire les nombres consécutifs qui suivent 27 :
+27 ; 28 ; 29 ; 30 ; 31.
 
-Exemple :
-    8 + 3 × 4 = 8 + 12 = 20
+Pour compter les entiers naturels compris entre m et n, avec m ≤ n :
 
-Ce n'est pas 44, car la multiplication est prioritaire.
-
-
-8. VÉRIFIER UN CALCUL
-
-Après une opération, on peut utiliser l'opération inverse pour vérifier.
+nombre d’entiers = n − m + 1.
 
 Exemple :
-    2 348 + 1 275 = 3 623
+De 12 à 18, il y a :
+18 − 12 + 1 = 7 nombres.
 
-Vérification :
-    3 623 - 1 275 = 2 348.
+4. COMPARER DES NOMBRES ENTIERS NATURELS
 
-Pour une division :
-    diviseur × quotient + reste = dividende.
+Pour comparer deux nombres :
+• celui qui a le plus de chiffres est le plus grand ;
+• s’ils ont le même nombre de chiffres, on compare de gauche à droite jusqu’au premier chiffre différent.
+
+Les symboles sont :
+< : inférieur à
+> : supérieur à
+= : égal à
+
+Exemple :
+7 405 et 7 450.
+
+Les milliers sont identiques : 7 = 7.
+Les centaines sont identiques : 4 = 4.
+Les dizaines donnent 0 < 5.
+
+Donc :
+7 405 < 7 450.
+
+5. MULTIPLES D’UN ENTIER NATUREL
+
+Les multiples d’un nombre sont obtenus en le multipliant par des entiers naturels.
+
+Les premiers multiples de 5 sont :
+5 × 0 = 0
+5 × 1 = 5
+5 × 2 = 10
+5 × 3 = 15
+5 × 4 = 20
+5 × 5 = 25
+
+Donc :
+0 ; 5 ; 10 ; 15 ; 20 ; 25 ; ... sont des multiples de 5.
+
+Définition :
+Un nombre a est un multiple de b s’il existe un entier naturel k tel que :
+
+a = b × k.
+
+Exemple :
+24 = 6 × 4.
+
+Donc 24 est un multiple de 6.
+
+6. DIVISEURS D’UN ENTIER NATUREL
+
+Un nombre d est un diviseur de n lorsque n peut s’écrire :
+
+n = d × k
+
+avec k entier naturel.
+
+Exemple :
+24 = 6 × 4.
+
+Donc :
+6 est un diviseur de 24.
+4 est aussi un diviseur de 24.
+
+Pour trouver les diviseurs de 12 :
+12 = 1 × 12
+12 = 2 × 6
+12 = 3 × 4
+
+Les diviseurs de 12 sont donc :
+1 ; 2 ; 3 ; 4 ; 6 ; 12.
+
+Pour trouver tous les diviseurs d’un nombre inférieur à 1 000, on recherche systématiquement les multiplications qui donnent ce nombre.
+
+7. NOMBRES PAIRS ET IMPAIRS
+
+Un nombre entier naturel est pair lorsqu’il est divisible par 2.
+
+Les nombres pairs se terminent par :
+0, 2, 4, 6 ou 8.
+
+Exemples :
+18, 240 et 1 326 sont pairs.
+
+Les nombres impairs se terminent par :
+1, 3, 5, 7 ou 9.
+
+Exemples :
+17, 235 et 1 401 sont impairs.
+
+8. CRITÈRE DE DIVISIBILITÉ PAR 2
+
+Un nombre est divisible par 2 lorsque son dernier chiffre est :
+0, 2, 4, 6 ou 8.
+
+Exemple :
+458 est divisible par 2 car il se termine par 8.
+
+9. CRITÈRE DE DIVISIBILITÉ PAR 5
+
+Un nombre est divisible par 5 lorsque son dernier chiffre est :
+0 ou 5.
+
+Exemples :
+125 et 430 sont divisibles par 5.
+
+10. CRITÈRE DE DIVISIBILITÉ PAR 10
+
+Un nombre est divisible par 10 lorsque son dernier chiffre est 0.
+
+Exemples :
+40, 120 et 5 000 sont divisibles par 10.
+
+11. CRITÈRE DE DIVISIBILITÉ PAR 100
+
+Un nombre est divisible par 100 lorsque ses deux derniers chiffres sont 00.
+
+Exemples :
+300, 1 200 et 5 600 sont divisibles par 100.
+
+12. CRITÈRE DE DIVISIBILITÉ PAR 1 000
+
+Un nombre est divisible par 1 000 lorsque ses trois derniers chiffres sont 000.
+
+Exemples :
+3 000, 8 000 et 15 000 sont divisibles par 1 000.
+
+13. CRITÈRE DE DIVISIBILITÉ PAR 3
+
+Pour savoir si un nombre est divisible par 3, on additionne ses chiffres.
+
+Si la somme est divisible par 3, alors le nombre est divisible par 3.
+
+Exemple :
+1 452.
+
+1 + 4 + 5 + 2 = 12.
+
+12 est divisible par 3.
+Donc 1 452 est divisible par 3.
+
+14. CRITÈRE DE DIVISIBILITÉ PAR 9
+
+On additionne les chiffres.
+
+Si la somme est divisible par 9, alors le nombre est divisible par 9.
+
+Exemple :
+729.
+
+7 + 2 + 9 = 18.
+
+18 est divisible par 9.
+Donc 729 est divisible par 9.
+
+15. TABLEAU DES CRITÈRES
+
+Divisible par 2 :
+le dernier chiffre est 0, 2, 4, 6 ou 8.
+
+Divisible par 3 :
+la somme des chiffres est divisible par 3.
+
+Divisible par 5 :
+le dernier chiffre est 0 ou 5.
+
+Divisible par 9 :
+la somme des chiffres est divisible par 9.
+
+Divisible par 10 :
+le dernier chiffre est 0.
+
+Divisible par 100 :
+les deux derniers chiffres sont 00.
+
+Divisible par 1 000 :
+les trois derniers chiffres sont 000.
+
+16. JUSTIFIER UNE DIVISIBILITÉ
+
+Pour montrer que 84 est divisible par 2 :
+84 se termine par 4.
+Or 4 est pair.
+Donc 84 est divisible par 2.
+
+Pour montrer que 123 est divisible par 3 :
+1 + 2 + 3 = 6.
+6 est divisible par 3.
+Donc 123 est divisible par 3.
+
+Pour montrer que 25 est un multiple de 5 :
+25 = 5 × 5.
+Donc 25 est un multiple de 5.
+
+17. SITUATION-PROBLÈME
+
+Un médecin prescrit un traitement de 3 prises par jour pendant 10 jours.
+Chaque prise nécessite 2 cuillerées à café.
+Une cuillerée mesure 3 cm³.
+Le flacon contient 120 cm³ de sirop.
+
+Nombre de prises :
+3 × 10 = 30 prises.
+
+Nombre total de cuillerées :
+30 × 2 = 60 cuillerées.
+
+Volume total :
+60 × 3 = 180 cm³.
+
+Le traitement nécessite donc 180 cm³.
+
+Le flacon contient seulement 120 cm³.
+Il ne suffit donc pas pour toute la durée du traitement.
+
+Cette situation montre comment les nombres entiers naturels permettent de traiter une situation de la vie courante.
+
+18. MÉTHODE À RETENIR
+
+Pour résoudre une situation :
+1. Lire attentivement l’énoncé.
+2. Repérer les données utiles.
+3. Identifier ce que l’on cherche.
+4. Choisir l’opération ou la propriété adaptée.
+5. Effectuer le calcul.
+6. Vérifier le résultat.
+7. Rédiger une réponse complète.
+
+19. ERREURS FRÉQUENTES
+
+• Confondre un multiple et un diviseur.
+Dans 20 = 5 × 4 :
+20 est un multiple de 5 ;
+5 est un diviseur de 20.
+
+• Dire qu’un nombre décimal appartient à ℕ.
+2,5 ∉ ℕ.
+
+• Oublier que 0 appartient à ℕ.
+
+• Pour comparer deux nombres de même longueur, ne pas regarder seulement le dernier chiffre : comparer de gauche à droite.
+
+• Pour les critères 3 et 9, ne pas regarder uniquement le dernier chiffre : additionner tous les chiffres.
+
+BILAN
+
+Je dois savoir :
+• ce qu’est ℕ ;
+• utiliser ∈ et ∉ ;
+• reconnaître des nombres consécutifs ;
+• déterminer des multiples ;
+• déterminer les diviseurs d’un entier naturel ;
+• distinguer pair et impair ;
+• appliquer les critères de divisibilité ;
+• justifier une réponse ;
+• résoudre une situation-problème.
 ''',
       ),
       RessourceOfficielle(
         type: TypeRessource.renforcement,
-        titre: 'Nombres entiers naturels — comprendre facilement',
+        titre: 'Nombres entiers naturels — explication pas à pas',
         ordre: 1,
+        dureeMinutes: 15,
         contenu: r'''
-LE BON RÉFLEXE POUR COMPARER
+COMPRENDRE SANS SE TROMPER
 
-Commence par compter les chiffres.
+1. ℕ, C’EST QUOI ?
 
-    875 < 4 205
+Imagine une file qui commence par 0 et continue sans fin :
 
-car 875 possède 3 chiffres et 4 205 en possède 4.
+0 ; 1 ; 2 ; 3 ; 4 ; 5 ; 6 ; ...
 
-Si les deux nombres ont le même nombre de chiffres, compare de gauche
-à droite.
+Tous ces nombres appartiennent à ℕ.
 
-    6 245 et 6 198
-    6 = 6, puis 2 > 1
-    donc 6 245 > 6 198.
+Si le nombre est négatif ou comporte une partie décimale, il n’appartient pas à ℕ.
 
+Exemples :
+15 ∈ ℕ
+0 ∈ ℕ
+-15 ∉ ℕ
+2,5 ∉ ℕ
 
-BIEN POSER UNE OPÉRATION
+2. MULTIPLE OU DIVISEUR ?
 
-Aligne toujours les unités sous les unités, les dizaines sous les dizaines,
-les centaines sous les centaines, etc.
+Dans :
+24 = 6 × 4
 
-Exemple :
+24 est un multiple de 6.
+6 est un diviseur de 24.
+4 est aussi un diviseur de 24.
 
-      2 348
-    + 1 275
-    --------
-      3 623
+Astuce :
+MULTIPLE = résultat obtenu.
+DIVISEUR = nombre qui permet d’obtenir le résultat.
 
+3. COMMENT TROUVER LES DIVISEURS ?
 
-LA DIVISION EUCLIDIENNE
+Pour 18 :
+1 × 18
+2 × 9
+3 × 6
 
-Retenir :
-    dividende = diviseur × quotient + reste
+Donc :
+1 ; 2 ; 3 ; 6 ; 9 ; 18 sont les diviseurs de 18.
 
-et :
-    reste < diviseur.
+4. COMMENT RECONNAÎTRE RAPIDEMENT UNE DIVISIBILITÉ ?
 
-Exemple :
-    83 = 7 × 11 + 6
+2 → regarde le dernier chiffre.
+5 → regarde le dernier chiffre.
+10 → regarde le dernier chiffre.
+100 → regarde les deux derniers chiffres.
+1 000 → regarde les trois derniers chiffres.
+3 → additionne les chiffres.
+9 → additionne les chiffres.
 
-Donc le quotient est 11 et le reste est 6.
+5. PETIT DÉFI
 
-Pour vérifier, calcule :
-    7 × 11 + 6 = 83.
+Sans poser de division, indique si 4 230 est divisible par :
+2 ? Oui, car il se termine par 0.
+3 ? Oui, car 4 + 2 + 3 + 0 = 9.
+5 ? Oui, car il se termine par 0.
+9 ? Oui, car la somme vaut 9.
+10 ? Oui, car il se termine par 0.
+100 ? Non, car il ne se termine pas par 00.
+1 000 ? Non, car il ne se termine pas par 000.
 
-
-LES PIÈGES À ÉVITER
-
-- confondre 2 305 et 2 350 ;
-- oublier un zéro dans 4 008 ;
-- mal aligner les chiffres ;
-- écrire un reste supérieur ou égal au diviseur ;
-- oublier les priorités de calcul.
+RÉFLEXE :
+Avant de répondre, demande-toi :
+« Quelle règle correspond exactement à la question ? »
 ''',
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: 'Nombres entiers naturels — exercice guidé',
+        titre: 'Nombres entiers naturels — exercices guidés',
         ordre: 1,
         difficulte: Difficulte.facile,
+        dureeMinutes: 15,
         enonce: r'''
-On considère les nombres :
-    4 205 ; 875 ; 4 250 ; 9 018
+EXERCICE 1
+Parmi les nombres suivants, indique ceux qui appartiennent à ℕ :
+0 ; 7 ; -3 ; 12,5 ; 48 ; 1 205.
 
-1) Range-les dans l'ordre croissant.
-2) Range-les dans l'ordre décroissant.
-3) Décompose 4 205 suivant les valeurs de position.
-4) Calcule 2 348 + 1 275.
+EXERCICE 2
+Écris cinq nombres entiers naturels consécutifs à partir de 36.
+
+EXERCICE 3
+Compare :
+a) 4 508 et 4 580
+b) 9 999 et 10 000
+c) 7 205 et 7 205
+
+EXERCICE 4
+Écris les six premiers multiples de 7, en commençant par 0.
+
+EXERCICE 5
+Détermine tous les diviseurs de 20.
 ''',
         solution: r'''
-1) Ordre croissant :
-    875 < 4 205 < 4 250 < 9 018
+CORRECTION
 
-2) Ordre décroissant :
-    9 018 > 4 250 > 4 205 > 875
+Exercice 1 :
+0 ∈ ℕ
+7 ∈ ℕ
+-3 ∉ ℕ
+12,5 ∉ ℕ
+48 ∈ ℕ
+1 205 ∈ ℕ
 
-3) Décomposition :
-    4 205 = 4 × 1 000 + 2 × 100 + 0 × 10 + 5
-           = 4 000 + 200 + 5
+Exercice 2 :
+36 ; 37 ; 38 ; 39 ; 40.
 
-4) Addition :
-    2 348 + 1 275 = 3 623.
+Exercice 3 :
+a) 4 508 < 4 580
+b) 9 999 < 10 000
+c) 7 205 = 7 205
+
+Exercice 4 :
+0 ; 7 ; 14 ; 21 ; 28 ; 35.
+
+Exercice 5 :
+20 = 1 × 20 = 2 × 10 = 4 × 5.
+Les diviseurs de 20 sont :
+1 ; 2 ; 4 ; 5 ; 10 ; 20.
 ''',
       ),
       RessourceOfficielle(
         type: TypeRessource.exercice,
-        titre: 'Nombres entiers naturels — exercice d’application',
+        titre: 'Nombres entiers naturels — exercices d’application',
         ordre: 2,
         difficulte: Difficulte.moyen,
+        dureeMinutes: 20,
         enonce: r'''
-Une école reçoit 2 475 cahiers. Elle distribue 1 386 cahiers aux élèves.
+EXERCICE 1
+Sans effectuer de division, indique si 3 450 est divisible par 2, 3, 5, 9, 10, 100 et 1 000. Justifie chaque réponse.
 
-1) Combien de cahiers restent-ils ?
-2) Les cahiers restants sont répartis entre 7 classes. Effectue la
-   division euclidienne et donne le quotient et le reste.
-3) Combien de cahiers chaque classe reçoit-elle ?
-4) Vérifie la division.
+EXERCICE 2
+Détermine tous les diviseurs de 72.
+
+EXERCICE 3
+Combien y a-t-il de nombres entiers naturels compris entre 125 et 160, bornes comprises ?
+
+EXERCICE 4
+Un club compte 144 élèves. Le responsable veut former des groupes de 6 élèves sans laisser personne de côté.
+a) 144 est-il divisible par 6 ?
+b) Combien de groupes peut-on former ?
+
+EXERCICE 5
+Trouve tous les nombres compris entre 100 et 150 qui sont à la fois divisibles par 2, par 3 et par 5.
 ''',
         solution: r'''
-1) Cahiers restants :
-    2 475 - 1 386 = 1 089.
+CORRECTION
 
-2) Division euclidienne :
-    1 089 = 7 × 155 + 4.
+Exercice 1 :
+3 450 est divisible par 2 : il se termine par 0.
+Il est divisible par 3 : 3 + 4 + 5 + 0 = 12, et 12 est divisible par 3.
+Il est divisible par 5 : il se termine par 0.
+Il n’est pas divisible par 9 : 12 n’est pas divisible par 9.
+Il est divisible par 10 : il se termine par 0.
+Il n’est pas divisible par 100 : ses deux derniers chiffres sont 50.
+Il n’est pas divisible par 1 000 : ses trois derniers chiffres sont 450.
 
-Le quotient est 155 et le reste est 4.
+Exercice 2 :
+72 = 1 × 72 = 2 × 36 = 3 × 24 = 4 × 18 = 6 × 12 = 8 × 9.
+Les diviseurs de 72 sont :
+1 ; 2 ; 3 ; 4 ; 6 ; 8 ; 9 ; 12 ; 18 ; 24 ; 36 ; 72.
 
-3) Chaque classe reçoit 155 cahiers.
+Exercice 3 :
+160 − 125 + 1 = 36.
+Il y a 36 nombres entiers naturels.
 
-4) Vérification :
-    7 × 155 + 4 = 1 089.
+Exercice 4 :
+144 ÷ 6 = 24.
+Donc 144 est divisible par 6 et on peut former 24 groupes.
 
-La division est correcte.
+Exercice 5 :
+Être divisible par 2, 3 et 5 signifie être divisible par 30.
+Entre 100 et 150, les multiples de 30 sont :
+120 et 150.
+Il y a donc deux réponses : 120 et 150.
+''',
+      ),
+      RessourceOfficielle(
+        type: TypeRessource.exercice,
+        titre: 'Nombres entiers naturels — défi de maîtrise',
+        ordre: 3,
+        difficulte: Difficulte.difficile,
+        dureeMinutes: 20,
+        enonce: r'''
+Un établissement possède 840 cahiers.
+
+1. Peut-on répartir exactement les cahiers entre 2 classes ?
+2. Peut-on les répartir exactement entre 3 classes ?
+3. Peut-on les répartir exactement entre 5 classes ?
+4. Peut-on les répartir exactement entre 9 classes ?
+5. Peut-on les répartir exactement entre 10 classes ?
+6. Peut-on les répartir exactement entre 100 classes ?
+7. Détermine le nombre de classes parmi 2, 3, 5, 9, 10 et 100 qui permettent une répartition exacte.
+
+Explique tes réponses en utilisant les critères de divisibilité.
+''',
+        solution: r'''
+CORRECTION
+
+840 est divisible par 2 car il se termine par 0.
+840 est divisible par 3 car 8 + 4 + 0 = 12 et 12 est divisible par 3.
+840 est divisible par 5 car il se termine par 0.
+840 n’est pas divisible par 9 car 12 n’est pas divisible par 9.
+840 est divisible par 10 car il se termine par 0.
+840 n’est pas divisible par 100 car ses deux derniers chiffres sont 40.
+
+La répartition exacte est donc possible pour :
+2, 3, 5 et 10.
+
+Il y a 4 possibilités.
 ''',
       ),
       RessourceOfficielle(
         type: TypeRessource.fiche,
         titre: 'Nombres entiers naturels — fiche de révision',
         ordre: 1,
+        dureeMinutes: 10,
         contenu: r'''
-À RETENIR
+FICHE DE RÉVISION — 6e
+NOMBRES ENTIERS NATURELS
 
-ℕ = {0, 1, 2, 3, ...}
+1. ENSEMBLE ℕ
+ℕ = {0 ; 1 ; 2 ; 3 ; ...}
+∈ signifie « appartient à ».
+∉ signifie « n’appartient pas à ».
 
-VALEURS DE POSITION
-unités → dizaines → centaines → milliers → dizaines de milliers...
+2. NOMBRES CONSÉCUTIFS
+Exemple : 24 ; 25 ; 26 ; 27.
+Nombre d’entiers de m à n :
+n − m + 1.
 
+3. MULTIPLES
+a est un multiple de b s’il existe k ∈ ℕ tel que :
+a = b × k.
 
-COMPARER
-- Plus de chiffres : nombre plus grand.
-- Même nombre de chiffres : comparer de gauche à droite.
+4. DIVISEURS
+d est un diviseur de n si :
+n = d × k.
 
+5. PAIR / IMPAIR
+Pair : dernier chiffre = 0, 2, 4, 6 ou 8.
+Impair : dernier chiffre = 1, 3, 5, 7 ou 9.
 
-ORDRE
-Croissant : du plus petit au plus grand.
-Décroissant : du plus grand au plus petit.
+6. DIVISIBILITÉ
+2 → dernier chiffre pair.
+3 → somme des chiffres divisible par 3.
+5 → dernier chiffre 0 ou 5.
+9 → somme des chiffres divisible par 9.
+10 → dernier chiffre 0.
+100 → deux derniers chiffres 00.
+1 000 → trois derniers chiffres 000.
 
+7. MÉTHODE
+Je lis.
+Je repère les données.
+Je choisis la règle.
+Je calcule.
+Je vérifie.
+Je réponds avec une phrase.
 
-DIVISION EUCLIDIENNE
-    dividende = diviseur × quotient + reste
-    reste < diviseur
+8. QUESTIONS FLASH
+• 17 appartient-il à ℕ ?
+• 20 est-il un multiple de 5 ?
+• 5 est-il un diviseur de 20 ?
+• 438 est-il divisible par 2 ?
+• 438 est-il divisible par 3 ?
+• 438 est-il divisible par 5 ?
+• 900 est-il divisible par 100 ?
+• Combien d’entiers y a-t-il de 25 à 40 ?
 
-
-PRIORITÉS DE CALCUL
-1. Parenthèses
-2. Multiplications et divisions
-3. Additions et soustractions
-
-
-RÉFLEXE DE VÉRIFICATION
-Pour une division :
-    diviseur × quotient + reste = dividende.
-
-Pour une addition :
-    somme - un terme = l'autre terme.
+À MÉMORISER :
+MULTIPLE = résultat obtenu par multiplication.
+DIVISEUR = nombre qui divise exactement.
 ''',
       ),
       RessourceOfficielle(
         type: TypeRessource.quiz,
-        titre: 'Nombres entiers naturels — quiz',
+        titre: 'Nombres entiers naturels — QCM et quiz',
         ordre: 1,
-        dureeMinutes: 5,
+        dureeMinutes: 10,
         questions: [
-          QuestionQuiz(
-            id: '6e_math_ch01_q1',
-            type: TypeQuestion.qcm,
-            enonce: 'Lequel de ces nombres est un entier naturel ?',
-            choix: ['-5', '3,5', '27', '1/2'],
-            bonnesReponses: [2],
-            explication: '27 appartient à ℕ. Les autres propositions ne sont pas des entiers naturels.',
-          ),
-          QuestionQuiz(
-            id: '6e_math_ch01_q2',
-            type: TypeQuestion.vraiFaux,
-            enonce: 'Dans une division euclidienne, le reste est toujours strictement inférieur au diviseur.',
-            choix: ['Vrai', 'Faux'],
-            bonnesReponses: [0],
-            explication: 'C’est une propriété fondamentale de la division euclidienne.',
-          ),
-          QuestionQuiz(
-            id: '6e_math_ch01_q3',
-            type: TypeQuestion.qcm,
-            enonce: 'Que vaut 8 + 3 × 4 ?',
-            choix: ['44', '20', '32', '15'],
-            bonnesReponses: [1],
-            explication: 'La multiplication est prioritaire : 3 × 4 = 12, puis 8 + 12 = 20.',
-          ),
+          QuestionQuiz(id: '6e_math_ch01_q1', type: TypeQuestion.qcm,
+            enonce: 'Lequel de ces nombres appartient à ℕ ?',
+            choix: ['-7', '3,5', '0', '1/2'], bonnesReponses: [2],
+            explication: '0 appartient à ℕ. Les autres nombres sont négatifs ou ne sont pas des entiers naturels.'),
+          QuestionQuiz(id: '6e_math_ch01_q2', type: TypeQuestion.qcm,
+            enonce: 'Quel symbole signifie « appartient à » ?',
+            choix: ['∉', '∈', '>', '<'], bonnesReponses: [1],
+            explication: 'Le symbole ∈ signifie « appartient à ».'),
+          QuestionQuiz(id: '6e_math_ch01_q3', type: TypeQuestion.vraiFaux,
+            enonce: '18 et 19 sont deux nombres entiers naturels consécutifs.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'Ils se suivent immédiatement : 19 = 18 + 1.'),
+          QuestionQuiz(id: '6e_math_ch01_q4', type: TypeQuestion.qcm,
+            enonce: 'Lequel est un multiple de 6 ?',
+            choix: ['25', '30', '31', '35'], bonnesReponses: [1],
+            explication: '30 = 6 × 5. Donc 30 est un multiple de 6.'),
+          QuestionQuiz(id: '6e_math_ch01_q5', type: TypeQuestion.qcm,
+            enonce: 'Lequel est un diviseur de 24 ?',
+            choix: ['5', '7', '8', '10'], bonnesReponses: [2],
+            explication: '24 = 8 × 3. Donc 8 est un diviseur de 24.'),
+          QuestionQuiz(id: '6e_math_ch01_q6', type: TypeQuestion.qcm,
+            enonce: 'Le nombre 4 236 est-il divisible par 2 ?',
+            choix: ['Oui', 'Non'], bonnesReponses: [0],
+            explication: 'Il se termine par 6, qui est un chiffre pair.'),
+          QuestionQuiz(id: '6e_math_ch01_q7', type: TypeQuestion.qcm,
+            enonce: 'Le nombre 735 est-il divisible par 5 ?',
+            choix: ['Oui', 'Non'], bonnesReponses: [0],
+            explication: 'Il se termine par 5.'),
+          QuestionQuiz(id: '6e_math_ch01_q8', type: TypeQuestion.qcm,
+            enonce: 'Le nombre 729 est-il divisible par 9 ?',
+            choix: ['Oui', 'Non'], bonnesReponses: [0],
+            explication: '7 + 2 + 9 = 18 et 18 est divisible par 9.'),
+          QuestionQuiz(id: '6e_math_ch01_q9', type: TypeQuestion.vraiFaux,
+            enonce: 'Un nombre divisible par 100 se termine nécessairement par 00.',
+            choix: ['Vrai', 'Faux'], bonnesReponses: [0],
+            explication: 'C’est le critère de divisibilité par 100.'),
+          QuestionQuiz(id: '6e_math_ch01_q10', type: TypeQuestion.qcm,
+            enonce: 'Combien y a-t-il de nombres entiers naturels de 12 à 18, bornes comprises ?',
+            choix: ['5', '6', '7', '8'], bonnesReponses: [2],
+            explication: '18 − 12 + 1 = 7.'),
         ],
       ),
     ],

@@ -33,6 +33,7 @@ async function main() {
   for (let i = 0; i < snap.docs.length; i += 450) {
     const batch = db.batch();
     const chunk = snap.docs.slice(i, i + 450);
+    let chunkUpdated = 0;
 
     for (const doc of chunk) {
       const data = doc.data();
@@ -47,9 +48,10 @@ async function main() {
         dateMaj: FieldValue.serverTimestamp(),
       });
       updated++;
+      chunkUpdated++;
     }
 
-    if (updated > 0) {
+    if (chunkUpdated > 0) {
       await batch.commit();
     }
   }
